@@ -42,7 +42,14 @@ import {
 /** Tabac, carburant, alcool : ce que la personne déclare, et qui ajoute des accises à la TVA. */
 export type Habitudes = { tabac: string; carburant: string; alcool: string };
 export type PosteHabitude = keyof Habitudes;
-export type ChoixHabitude = { id: string; libelle: string; repere: string; parAn: number };
+export type ChoixHabitude = {
+  id: string;
+  libelle: string;
+  /** La phrase drôle sous le libellé. */
+  pointe: string;
+  repere: string;
+  parAn: number;
+};
 
 /**
  * Le second plateau, chiffré par la personne en paliers. Les identifiants

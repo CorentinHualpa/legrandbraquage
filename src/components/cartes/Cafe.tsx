@@ -1,6 +1,6 @@
 "use client";
 
-import { Carte, Chiffre, Commissaire, Kicker, Reponse, Volet } from "./Carte";
+import { Carte, Chiffre, Commissaire, Kicker, Lien, Reponse, Volet } from "./Carte";
 import type { Pieces } from "@/lib/images";
 import { euros, eurosSigne } from "@/lib/format";
 import {
@@ -19,11 +19,14 @@ const POSTES: PosteHabitude[] = ["tabac", "carburant", "alcool"];
 /**
  * Écran 3 : le café du commissariat.
  *
- * Le commissaire pousse un gobelet, 1,20 € dont onze centimes de TVA, et
- * enchaîne sur trois questions : vous fumez, la voiture, un verre ? Chaque
- * réponse ajoute ses accises à la TVA, et le chiffre du mois bouge sous les
- * yeux. La TVA elle-même vient du taux d'effort moyen de ton niveau de vie ;
- * les accises, personne ne peut les deviner, donc c'est toi qui le dis.
+ * Le commissaire pousse un gobelet, puis pose trois questions. Chaque réponse
+ * ajoute ses taxes au total du mois, et le chiffre bouge sous les yeux.
+ *
+ * ⚠ Le texte de cet écran a été jugé « trop technique, pas assez RP » (Coq,
+ * 08/09/2026). Règle pour la suite : à l'écran, on dit ce qui se passe (« ils
+ * prennent leur part à chaque passage en caisse »), jamais le nom du
+ * mécanisme. « TVA », « accises » et « taux d'effort » vivent dans le volet,
+ * avec leurs sources, et nulle part ailleurs.
  */
 export function Cafe({
   pieces,
@@ -51,7 +54,6 @@ export function Cafe({
   const surLaCarriere = simulation.carriere.totaux.taxesConsommation;
   const detail = detailAccises(habitudes);
   const accisesMois = (detail.tabac + detail.carburant + detail.alcool) / 12;
-  const tvaMois = parMois - accisesMois;
 
   return (
     <Carte
@@ -59,21 +61,24 @@ export function Cafe({
       total={total}
       nature="Le café"
       retour={retour}
-      photo={{ numero: 26, pieces, hauteur: 260, legende: "CLICHÉ 26 · C’EST OFFERT" }}
+      photo={{ numero: 26, pieces, hauteur: 250, legende: "CLICHÉ 26 · C’EST OFFERT" }}
       action={{ libelle: "Suivant", onClick: suivant }}
     >
       <Commissaire>
-        « Café ? C’est offert. Enfin, 1,20 €, dont onze centimes de TVA. Mais ça, vous l’aviez déjà payé.
-        Au fait, trois petites questions. »
+        « Café ? Cadeau. Enfin, 1,20 €, dont onze centimes qui repartent chez eux. Vous les aviez déjà
+        payés, remarquez. Trois questions et je vous laisse boire. »
       </Commissaire>
 
       {POSTES.map((poste) => (
         <div key={poste} className="flex flex-col gap-1.5">
           <Kicker>{HABITUDES[poste].question}</Kicker>
-          <div className="grid grid-cols-3 gap-1.5">
+          <div className="flex flex-col gap-1.5">
             {HABITUDES[poste].choix.map((c) => (
-              <Reponse key={c.id} actif={habitudes[poste] === c.id} onClick={() => choisir(poste, c.id)} centre>
-                <span className="text-[13.5px] leading-tight">{c.libelle}</span>
+              <Reponse key={c.id} actif={habitudes[poste] === c.id} onClick={() => choisir(poste, c.id)}>
+                <span className="block text-[15.5px] leading-tight">{c.libelle}</span>
+                <span className={`block text-[12.5px] leading-snug ${habitudes[poste] === c.id ? "text-encre-3" : "text-ligne"}`}>
+                  {c.pointe}
+                </span>
               </Reponse>
             ))}
           </div>
@@ -81,35 +86,41 @@ export function Cafe({
       ))}
 
       <div className="flex flex-col gap-1 pt-1">
-        <Kicker couleur="rouge">Chaque mois, rien qu’en passant en caisse</Kicker>
+        <Kicker couleur="rouge">Chaque mois, à la caisse, sans rien signer</Kicker>
         <Chiffre taille={48}>{eurosSigne(parMois)}</Chiffre>
-        <p className="text-[14.5px] leading-relaxed text-ligne italic">
-          {euros(tvaMois)} € de TVA sur ce que vous achetez, {euros(accisesMois)} € d’accises sur ce que vous
-          venez de dire. Sur la carrière, {eurosSigne(surLaCarriere)}.
+        <p className="text-[15px] leading-relaxed text-ligne italic">
+          Ils prennent leur part sur tout ce que vous achetez, du pain au plein d’essence, et vous ne
+          voyez jamais passer la note. Sur une carrière, {eurosSigne(surLaCarriere)}.
         </p>
       </div>
 
       <div className="grow" />
 
-      <Volet titre="Comment on sait ça ?">
+      <Volet titre="D’où sortent ces chiffres ?">
         <p className="text-[14px] leading-relaxed text-ligne">
-          La TVA : on ne connaît pas votre caddie, on applique à ce qu’il vous reste après impôt le taux
-          d’effort moyen de votre niveau de vie, tel que le Conseil des prélèvements obligatoires le mesure
-          par décile. Le café, lui, est à 10 % : onze centimes sur 1,20 €.
+          Sur tout ce que vous achetez, la TVA se cache dans le prix affiché. On ne connaît pas votre
+          caddie : on applique à ce qu’il vous reste après impôt le taux d’effort moyen des gens qui
+          vivent comme vous, mesuré par décile de niveau de vie. Ça fait{" "}
+          <span className="font-medium text-papier">{euros(parMois - accisesMois)} €</span> par mois. Le
+          café du commissaire, lui, est à 10 % : onze centimes sur 1,20 €.
         </p>
         <p className="text-[14px] leading-relaxed text-ligne">
-          Les accises, à vos réponses : un paquet à {TABAC.prixPaquet.toFixed(2).replace(".", ",")} € dont{" "}
-          {Math.round(TABAC.partTaxes * 100)} % de taxes, soit{" "}
-          <span className="font-medium text-papier">{detail.taxesParPaquet.toFixed(2).replace(".", ",")} €</span> par paquet ;
-          un plein de {CARBURANT.litres} L à {CARBURANT.prixPlein.toFixed(2).replace(".", ",")} € dont{" "}
-          <span className="font-medium text-papier">{euros(detail.taxesParPlein)} €</span> de TICPE et de TVA ;
-          l’alcool en ordre de grandeur, {ALCOOL.parfoisParAn} € par an pour une bouteille de vin par semaine,{" "}
+          S’y ajoutent les taxes sur ce que vous venez de dire,{" "}
+          <span className="font-medium text-papier">{euros(accisesMois)} €</span> par mois : un paquet à{" "}
+          {TABAC.prixPaquet.toFixed(2).replace(".", ",")} € dont {Math.round(TABAC.partTaxes * 100)} % de
+          taxes, soit <span className="font-medium text-papier">{detail.taxesParPaquet.toFixed(2).replace(".", ",")} €</span>{" "}
+          par paquet ; un plein de {CARBURANT.litres} litres à{" "}
+          {CARBURANT.prixPlein.toFixed(2).replace(".", ",")} € dont{" "}
+          <span className="font-medium text-papier">{euros(detail.taxesParPlein)} €</span> de taxes ;
+          l’alcool en ordre de grandeur, {ALCOOL.parfoisParAn} € par an pour une bouteille par semaine,{" "}
           {ALCOOL.chaqueSoirParAn} € pour un verre chaque soir.
         </p>
         <p className="text-[13px] leading-relaxed text-ligne">
-          {TABAC.source}. {CARBURANT.source}. {ALCOOL.source}.{" "}
-          <a href="/methode" className="underline underline-offset-2">La méthode, ligne par ligne</a>.
+          Ce sont des ESTIMATIONS, et l’alcool est celle qui l’assume le plus : le droit dépend du
+          produit, un verre de vin n’est presque pas taxé, un verre de spiritueux beaucoup. {TABAC.source}.{" "}
+          {CARBURANT.source}. {ALCOOL.source}.
         </p>
+        <Lien href="/methode">La méthode, ligne par ligne</Lien>
       </Volet>
     </Carte>
   );

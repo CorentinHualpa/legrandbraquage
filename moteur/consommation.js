@@ -3,8 +3,8 @@
  *
  * Le taux d'effort TVA par décile (CPO, Boutchenik) ne couvre que la TVA.
  * Les accises dépendent d'habitudes que personne ne peut deviner : un paquet
- * par jour, c'est 3 900 € de taxes par an, et rien pour un non-fumeur. Le
- * site ne fournit donc que le prix unitaire des taxes, sourcé, et la
+ * par jour, c'est près de quatre mille euros de taxes par an, et rien pour
+ * un non-fumeur. Le site ne fournit donc que le PRIX UNITAIRE, sourcé, et la
  * personne dit ce qu'elle consomme. Demande de Coq, 08/09/2026 au soir.
  *
  * ⚠ Sans profil, `simuler` n'ajoute RIEN : c'est le comportement de
@@ -16,7 +16,7 @@
 export const TABAC = {
   prixPaquet: 13.0,
   partTaxes: 0.825,
-  source: 'DGDDI, prix modal du paquet de 20 au 01/09/2026 ; part des taxes CPO',
+  source: 'DGDDI, prix modal du paquet de 20 au 01/09/2026 ; part des taxes, Conseil des prélèvements obligatoires',
 };
 
 /** Un plein de 50 L de SP95-E10 à 98,50 € : TICPE 0,6702 €/L, plus la TVA à 20 % sur le prix TTC. */
@@ -24,52 +24,58 @@ export const CARBURANT = {
   prixPlein: 98.5,
   litres: 50,
   ticpeParLitre: 0.6702,
-  source: 'TICPE 2026 sur le SP95-E10 (LF 2025, majoration régionale abrogée) ; plein relevé à 98,50 €',
+  source: 'TICPE 2026 sur le SP95-E10 (majoration régionale abrogée par la LF 2025) ; plein relevé à 98,50 €',
 };
 
 /**
  * L'alcool : ordres de grandeur ASSUMÉS, parce que l'accise dépend du produit
- * (le vin est presque exempt, les spiritueux paient 1 932,42 € par hectolitre
- * d'alcool pur). Une bouteille de vin par semaine, c'est surtout de la TVA ;
- * un verre chaque soir plus une bouteille de spiritueux par mois, c'est
- * l'accise qui pèse.
+ * (le vin est presque exempt de droits, les spiritueux paient 1 932,42 € par
+ * hectolitre d'alcool pur). Une bouteille de vin par semaine, c'est surtout de
+ * la TVA ; un verre chaque soir plus une bouteille de spiritueux par mois,
+ * c'est l'accise qui pèse.
  */
 export const ALCOOL = {
   parfoisParAn: 60,
   chaqueSoirParAn: 400,
-  source: 'accise spiritueux 2026 (1 932,42 €/hL d’alcool pur), droits sur le vin, TVA à 20 %, ordres de grandeur',
+  source: 'accise spiritueux 2026 (1 932,42 € par hectolitre d’alcool pur), droits sur le vin, TVA à 20 % : ordres de grandeur assumés',
 };
 
 const taxesParPaquet = TABAC.prixPaquet * TABAC.partTaxes;
 const tvaParPlein = CARBURANT.prixPlein - CARBURANT.prixPlein / 1.2;
 const taxesParPlein = CARBURANT.litres * CARBURANT.ticpeParLitre + tvaParPlein;
 
+/**
+ * Les trois questions du café. Chaque choix porte une `pointe` : une phrase
+ * courte sous le libellé, qui fait sourire et qui dit au passage ce qui est
+ * compté. Demande de Coq, 08/09/2026 : « un petit commentaire rigolo sous
+ * chaque choix ».
+ */
 export const HABITUDES = {
   tabac: {
-    question: 'Vous fumez ?',
+    question: 'Vous fumez ? (je juge pas)',
     defaut: 'non',
     choix: [
-      { id: 'non', libelle: 'Non', repere: '0 €', parAn: 0 },
-      { id: 'semaine', libelle: 'Un paquet par semaine', repere: '52 PAQUETS', parAn: 52 * taxesParPaquet },
-      { id: 'jour', libelle: 'Un paquet par jour', repere: '365 PAQUETS', parAn: 365 * taxesParPaquet },
+      { id: 'non', libelle: 'Non', pointe: 'Vos poumons vous remercient, pas le Trésor public.', repere: '0 €', parAn: 0 },
+      { id: 'semaine', libelle: 'Un paquet par semaine', pointe: 'Le vendredi soir, surtout. Ça compte quand même.', repere: '52 PAR AN', parAn: 52 * taxesParPaquet },
+      { id: 'jour', libelle: 'Un paquet par jour', pointe: 'Vous financez un ministère à vous tout seul.', repere: '365 PAR AN', parAn: 365 * taxesParPaquet },
     ],
   },
   carburant: {
     question: 'Et la voiture ?',
     defaut: 'mois',
     choix: [
-      { id: 'non', libelle: 'Pas de voiture', repere: '0 €', parAn: 0 },
-      { id: 'mois', libelle: 'Un plein par mois', repere: '12 PLEINS', parAn: 12 * taxesParPlein },
-      { id: 'semaine', libelle: 'Un plein par semaine', repere: '52 PLEINS', parAn: 52 * taxesParPlein },
+      { id: 'non', libelle: 'Pas de voiture', pointe: 'Et je mets le carton dans la jaune.', repere: '0 €', parAn: 0 },
+      { id: 'mois', libelle: 'Un plein par mois', pointe: 'Les courses, la belle-mère, et c’est tout.', repere: '12 PLEINS', parAn: 12 * taxesParPlein },
+      { id: 'semaine', libelle: 'Un plein par semaine', pointe: 'Je suis plus chaud que le climat.', repere: '52 PLEINS', parAn: 52 * taxesParPlein },
     ],
   },
   alcool: {
     question: 'Un verre ?',
     defaut: 'parfois',
     choix: [
-      { id: 'non', libelle: 'Jamais', repere: '0 €', parAn: 0 },
-      { id: 'parfois', libelle: 'Une bouteille par semaine', repere: '~60 €', parAn: ALCOOL.parfoisParAn },
-      { id: 'soir', libelle: 'Un verre chaque soir', repere: '~400 €', parAn: ALCOOL.chaqueSoirParAn },
+      { id: 'non', libelle: 'Jamais', pointe: 'Sobre, et fier. Le fisc s’en remettra.', repere: '0 €', parAn: 0 },
+      { id: 'parfois', libelle: 'Une bouteille par semaine', pointe: 'Le dimanche midi, ça ne compte pas vraiment.', repere: '~60 €', parAn: ALCOOL.parfoisParAn },
+      { id: 'soir', libelle: 'Un verre chaque soir', pointe: 'C’est culturel, c’est le patrimoine.', repere: '~400 €', parAn: ALCOOL.chaqueSoirParAn },
     ],
   },
 };

@@ -77,7 +77,7 @@ export function Deposition({
       action={{ libelle: "Signer la déposition", onClick: signer, disabled: !pret }}
     >
       <Commissaire>
-        « Asseyez-vous. Nom, prénom… non, laissez tomber. Ce qui m’intéresse, c’est combien vous touchez par mois. »
+        « Asseyez-vous. Nom, prénom… non, laissez tomber. Ce qui m’intéresse, c’est combien vous palpez par mois. »
       </Commissaire>
 
       <Papier rotation={0.6} className="flex flex-col gap-1.5 px-4 py-3">
