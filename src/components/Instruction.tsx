@@ -25,6 +25,7 @@ import {
   type CategorieMicro,
   type FormeTpe,
   type Versant,
+  partsFiscales,
 } from "@/lib/statuts";
 
 export type Pieces = Record<NumeroPiece, string | null>;
@@ -46,6 +47,9 @@ export function Instruction({ pieces }: { pieces: Pieces }) {
   const [activite, setActivite] = useState<Activite>("ssi");
   const [categorieMicro, setCategorieMicro] = useState<CategorieMicro>("liberal");
   const [versementLiberatoire, setVersementLiberatoire] = useState(false);
+  const [couple, setCouple] = useState(false);
+  const [enfants, setEnfants] = useState(0);
+  const parts = partsFiscales(couple, enfants);
   const [perimetre, setPerimetre] = useState<Perimetre>(PERIMETRE_DEFAUT);
 
   const regime = regimeDe(statut, formeTpe, activite);
@@ -113,6 +117,8 @@ export function Instruction({ pieces }: { pieces: Pieces }) {
     setActivite(cas.activite);
     setCategorieMicro(cas.categorieMicro);
     setVersementLiberatoire(cas.versementLiberatoire);
+    setCouple(cas.couple);
+    setEnfants(cas.enfants);
     setPerimetre(cas.perimetre);
     // Un lien de patron de TPE sans forme juridique n'a pas de régime résolu :
     // on laisse le dossier fermé, la question est posée à l'écran.
@@ -144,6 +150,8 @@ export function Instruction({ pieces }: { pieces: Pieces }) {
       activite,
       categorieMicro,
       versementLiberatoire,
+      parts,
+      couple,
       perimetre,
       // ⚠ Un président de SAS ne cotise pas à l'assurance chômage, et le moteur
       // ne porte pas encore ce retrait : il rend le calcul du salarié, à
@@ -151,7 +159,7 @@ export function Instruction({ pieces }: { pieces: Pieces }) {
     });
   }, [
     ouverte, calculable, netMensuel, statut, formeTpe, versant, activite,
-    categorieMicro, versementLiberatoire, perimetre,
+    categorieMicro, versementLiberatoire, parts, couple, perimetre,
   ]);
 
   /**
@@ -165,11 +173,11 @@ export function Instruction({ pieces }: { pieces: Pieces }) {
     if (!ouverte || !calculable) return null;
     return salairePivot({
       statut, formeTpe, versant, activite, categorieMicro,
-      versementLiberatoire, perimetre,
+      versementLiberatoire, parts, couple, perimetre,
     });
   }, [
     ouverte, calculable, statut, formeTpe, versant, activite, categorieMicro,
-    versementLiberatoire, perimetre,
+    versementLiberatoire, parts, couple, perimetre,
   ]);
 
   return (
@@ -206,6 +214,10 @@ export function Instruction({ pieces }: { pieces: Pieces }) {
         setCategorieMicro={setCategorieMicro}
         versementLiberatoire={versementLiberatoire}
         setVersementLiberatoire={setVersementLiberatoire}
+        couple={couple}
+        setCouple={setCouple}
+        enfants={enfants}
+        setEnfants={setEnfants}
         regime={regime}
         calculable={calculable}
         ouverte={ouverte}
@@ -250,7 +262,7 @@ export function Instruction({ pieces }: { pieces: Pieces }) {
             netMensuel={netMensuel}
             cas={{
               netMensuel, statut, formeTpe, versant, activite,
-              categorieMicro, versementLiberatoire, perimetre,
+              categorieMicro, versementLiberatoire, couple, enfants, perimetre,
             }}
           />
         </>

@@ -25,6 +25,8 @@ export type Cas = {
   activite: Activite;
   categorieMicro: CategorieMicro;
   versementLiberatoire: boolean;
+  couple: boolean;
+  enfants: number;
   perimetre: Perimetre;
 };
 
@@ -74,6 +76,9 @@ export function requeteDuCas(cas: Cas): string {
     q.set("c", cas.categorieMicro);
     if (cas.versementLiberatoire) q.set("vl", "1");
   }
+  // Le foyer divise l'impôt : un lien qui l'oublie rouvre un autre dossier.
+  if (cas.couple) q.set("cp", "1");
+  if (cas.enfants > 0) q.set("e", String(cas.enfants));
   return `?${q.toString()}`;
 }
 
@@ -123,6 +128,8 @@ export function casDepuisRequete(recherche: string): Cas | null {
     activite,
     categorieMicro,
     versementLiberatoire: q.get("vl") === "1",
+    couple: q.get("cp") === "1",
+    enfants: Math.min(6, Math.max(0, Number(q.get("e")) || 0)),
     perimetre: litPerimetre(q.get("p")) ?? PERIMETRE_DEFAUT,
   };
 }

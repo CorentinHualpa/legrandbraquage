@@ -108,11 +108,19 @@ export type Palier = {
   pointe: string;
   provenance: Provenance;
   source: string;
+  /**
+   * Le dessin du barreau, dans `public/images/butin/<id>.webp`, quand il
+   * existe. Au trait, encre sur papier, même main que la caricature : l'image
+   * change sous le curseur, elle doit se lire comme une seule série. Absent
+   * sur le barreau le plus bas, que la génération n'a pas pu servir.
+   */
+  image?: string;
 };
 
 export const ECHELLE: Palier[] = [
   {
     id: "grande-maison",
+    image: "grande-maison",
     seuil: 1_128_000,
     nom: "Une maison de plus de cinq cents mètres carrés",
     pointe: "Il restera des pièces où vous n’entrerez jamais.",
@@ -121,6 +129,7 @@ export const ECHELLE: Palier[] = [
   },
   {
     id: "maison-var",
+    image: "maison-var",
     seuil: 570_000,
     nom: "Une maison avec terrain dans le Var",
     pointe: "La piscine, elle, n’est codée dans aucune statistique publique.",
@@ -129,6 +138,7 @@ export const ECHELLE: Palier[] = [
   },
   {
     id: "maison",
+    image: "maison",
     seuil: 205_000,
     nom: "Une maison de quatre-vingt-quatorze mètres carrés",
     pointe: "2 158 € le mètre carré. C’est la France médiane, sans le décor.",
@@ -137,6 +147,7 @@ export const ECHELLE: Palier[] = [
   },
   {
     id: "t3",
+    image: "t3",
     seuil: 188_100,
     nom: "Un trois-pièces de soixante-quatre mètres carrés",
     pointe: "Avec un balcon, si le braquage s’est bien passé.",
@@ -145,6 +156,7 @@ export const ECHELLE: Palier[] = [
   },
   {
     id: "studio",
+    image: "studio",
     seuil: 98_000,
     nom: "Un studio de vingt-six mètres carrés",
     pointe: "Le lit se replie. C’est prévu pour.",
@@ -153,6 +165,7 @@ export const ECHELLE: Palier[] = [
   },
   {
     id: "twingo",
+    image: "twingo",
     seuil: 19_490,
     nom: "Une Twingo neuve",
     pointe: "Électrique. Elle démarre, c’est déjà ça.",
@@ -161,6 +174,7 @@ export const ECHELLE: Palier[] = [
   },
   {
     id: "sandero",
+    image: "sandero",
     seuil: 13_290,
     nom: "Une Dacia Sandero neuve",
     pointe: "Blanche, sans options, et elle vous enterrera.",

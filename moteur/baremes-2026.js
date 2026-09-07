@@ -112,6 +112,11 @@ export const RENDEMENTS = {
   cac40NuNominal: 0.0572, // indice de prix seul
   cac40GrReel: 0.074, // AMF, 1988-2023, avant frais et fiscalité
   msciWorldGrossNominal: 0.0908,
+  // S&P 500 dividendes réinvestis, 1928-2025, géométrique. Damodaran, NYU
+  // Stern, feuille « Returns by year », bloc « Geometric Average », lignes
+  // 1928-2025 : 0,100177 nominal et 0,067763 réel (déflaté CPI-U). En dollars.
+  sp500Nominal1928: 0.1002,
+  sp500Reel1928: 0.0677,
   livretAMoyen15Ans: 0.016,
   fondsEuros2025: 0.026,
   immobilierFranceReel40Ans: 0.0197,

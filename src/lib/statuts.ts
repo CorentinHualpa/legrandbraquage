@@ -360,3 +360,16 @@ export const CATEGORIES_MICRO: Array<{
     precision: "12,3 %, abattement de 71 %",
   },
 ];
+
+
+/**
+ * Les parts fiscales, telles que le quotient familial les compte : une part
+ * par adulte, une demi-part pour chacun des deux premiers enfants, une part
+ * entière à partir du troisième (CGI art. 194). Un célibataire avec enfants
+ * garde ses demi-parts, la majoration du premier enfant isolé n'est pas
+ * modélisée.
+ */
+export function partsFiscales(couple: boolean, enfants: number): number {
+  const e = Math.max(0, Math.floor(enfants));
+  return (couple ? 2 : 1) + Math.min(e, 2) * 0.5 + Math.max(0, e - 2);
+}

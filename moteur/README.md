@@ -31,14 +31,16 @@ jour, c'est le moteur qui a tort, pas l'URSSAF.
 
 ## Les trois résultats
 
-### 1. Le salaire-pivot est le salaire médian
+### 1. Le salaire-pivot est SOUS le salaire médian
 
-**2 337 € net avant impôt par mois**, périmètre complet. Le salaire net médian
-du privé français est de **2 190 €** (INSEE 2024), lui aussi net avant impôt.
+**1 458 € net avant impôt par mois**, périmètre complet, pension seule en face.
+Le salaire net médian du privé français est de **2 190 €** (INSEE 2024), lui
+aussi net avant impôt.
 
-Autrement dit : **plus de la moitié des salariés français reçoivent plus qu'ils
-ne versent.** Le point de bascule tombe 147 € AU-DESSUS du médian, soit 6,7 %.
-Ce n'est pas un cadrage, c'est ce que rendent les barèmes.
+Autrement dit : **la majorité des salariés français versent plus qu'ils ne
+reçoivent**, dès qu'on ne met en face que ce qui se calcule. Le point de bascule
+tombe 732 € SOUS le médian. Il valait 2 337 € (147 € au-dessus) quand santé,
+école et chômage pesaient encore 390 000 € d'ordres de grandeur non sourcés.
 
 ⚠ Ce chiffre valait 2 219 € jusqu'au 07/09/2026, et la page le comparait aux
 2 190 € de l'INSEE en concluant « à trente euros du médian ». Les deux ne se
@@ -74,14 +76,20 @@ comme la ligne de la fiche de paie et comme la médiane de l'INSEE.
 
 | Net/mois | Salariales | Patronales | IR | Conso | **Total prélevé** | Reçu | Verdict |
 |---|---|---|---|---|---|---|---|
-| 1 450 € | 212 k€ | 147 k€ | 11 k€ | 95 k€ | **464 k€** | 858 k€ | relaxe, +393 k€ |
-| 1 800 € | 263 k€ | 310 k€ | 34 k€ | 108 k€ | **714 k€** | 957 k€ | relaxe, +243 k€ |
-| 2 190 € (médian) | 319 k€ | 484 k€ | 68 k€ | 118 k€ | **990 k€** | 1 057 k€ | relaxe, +68 k€ |
-| **2 337 € (pivot)** | 341 k€ | 547 k€ | 85 k€ | 120 k€ | **1 093 k€** | 1 093 k€ | la bascule |
-| 2 500 € | 365 k€ | 615 k€ | 105 k€ | 123 k€ | **1 208 k€** | 1 132 k€ | braquage, 77 k€ |
-| 3 000 € | 437 k€ | 807 k€ | 175 k€ | 126 k€ | **1 545 k€** | 1 252 k€ | braquage, 293 k€ |
-| 4 000 € | 576 k€ | 1 167 k€ | 324 k€ | 119 k€ | **2 186 k€** | 1 492 k€ | braquage, 694 k€ |
-| 6 000 € | 851 k€ | 1 793 k€ | 637 k€ | 132 k€ | **3 413 k€** | 1 958 k€ | braquage, 1 455 k€ |
+| 1 200 € | 175 k€ | 48 k€ | 1 k€ | 83 k€ | **307 k€** | 397 k€ | relaxe, +90 k€ |
+| **1 458 € (pivot)** | 213 k€ | 150 k€ | 11 k€ | 96 k€ | **470 k€** | 470 k€ | la bascule |
+| 1 800 € | 263 k€ | 310 k€ | 34 k€ | 108 k€ | **714 k€** | 567 k€ | braquage, 147 k€ |
+| 2 190 € (médian) | 319 k€ | 484 k€ | 68 k€ | 118 k€ | **990 k€** | 667 k€ | braquage, 322 k€ |
+| 2 500 € | 365 k€ | 615 k€ | 105 k€ | 123 k€ | **1 208 k€** | 742 k€ | braquage, 467 k€ |
+| 3 000 € | 437 k€ | 807 k€ | 175 k€ | 126 k€ | **1 545 k€** | 862 k€ | braquage, 683 k€ |
+| 4 000 € | 576 k€ | 1 167 k€ | 324 k€ | 119 k€ | **2 186 k€** | 1 102 k€ | braquage, 1 084 k€ |
+| 6 000 € | 851 k€ | 1 793 k€ | 637 k€ | 132 k€ | **3 413 k€** | 1 568 k€ | braquage, 1 845 k€ |
+
+⚠ Depuis le 07/09/2026 au soir, la colonne « Reçu » ne contient QUE le capital
+équivalent à la pension. Santé, école et chômage restent nommés à l'écran mais
+sans montant : ils n'avaient aucune source opposable (216 000, 127 000 et
+47 000 €). Un montant inventé pour équilibrer la balance serait exactement ce
+que ce dossier reproche à la partie adverse.
 
 ⚠ Cette table a été recalculée le 07/09/2026, quand l'entrée est passée du net
 APRÈS impôt au net AVANT impôt. Les montants baissent tous, et ce n'est pas le

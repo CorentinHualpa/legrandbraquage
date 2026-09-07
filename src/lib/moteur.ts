@@ -17,6 +17,9 @@ import {
   heureDeLiberation as heureDeLiberationJs,
   placerSaRetraite as placerSaRetraiteJs,
   PLACEMENTS as PLACEMENTS_JS,
+  CRANS_RENDEMENT as CRANS_RENDEMENT_JS,
+  CRANS_FRAIS as CRANS_FRAIS_JS,
+  placerSaRetraiteAuTaux as placerSaRetraiteAuTauxJs,
   PLACEMENT_DEFAUT as PLACEMENT_DEFAUT_JS,
 } from "@moteur/index.js";
 
@@ -51,11 +54,14 @@ export type Entree = {
   cadre?: boolean;
   effectif?: number;
   parts?: number;
+  /** Imposition commune : la décote est celle d'un couple. */
+  couple?: boolean;
   perimetre?: Perimetre;
 };
 
 export type LigneContrepartie = {
-  montant: number;
+  /** null = nommée, mais non chiffrée : elle ne compte pas dans le total. */
+  montant: number | null;
   libelle: string;
   /** true = chiffré au centime, false = ordre de grandeur assumé. */
   calcule: boolean;
@@ -295,4 +301,42 @@ export function placerSaRetraite(
     simulation as unknown as Parameters<typeof placerSaRetraiteJs>[0],
     placementId,
   ) as PlacementResultat;
+}
+
+
+export type CranRendement = {
+  id: string;
+  nom: string;
+  reel: number;
+  nominal: number | null;
+  source: string;
+};
+
+export type CranFrais = {
+  id: string;
+  nom: string;
+  annuels: number;
+  versement: number;
+  source: string;
+};
+
+export const CRANS_RENDEMENT = CRANS_RENDEMENT_JS as CranRendement[];
+export const CRANS_FRAIS = CRANS_FRAIS_JS as CranFrais[];
+
+export type PlacementAuTaux = {
+  reglage: { rendementReel: number; fraisAnnuels: number; fraisVersement: number };
+  verse: number;
+  capital: number;
+  sansFrais: number;
+  fraisPayes: number;
+  equivalentPension: number;
+  ecart: number;
+  gagnant: boolean;
+};
+
+export function placerSaRetraiteAuTaux(
+  simulation: Simulation,
+  reglage: { rendementReel: number; fraisAnnuels: number; fraisVersement: number },
+): PlacementAuTaux {
+  return placerSaRetraiteAuTauxJs(simulation, reglage) as PlacementAuTaux;
 }

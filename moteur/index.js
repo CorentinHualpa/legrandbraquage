@@ -11,6 +11,7 @@
 
 import { deroulerCarriere, totalPreleve } from './carriere.js';
 import {
+  capitaliser,
   capitalPourRente,
   fourchetteCapitalPourRente,
   PALIERS_ALIBI,
@@ -58,6 +59,8 @@ export function regimeDuStatut(statut = 'salarie', forme, activite) {
 }
 
 export {
+  CRANS_FRAIS,
+  CRANS_RENDEMENT,
   PALIERS_ALIBI,
   ALIBI_INDICE_NU,
   capitalApresRetraits,
@@ -84,19 +87,30 @@ function espacer(n) {
   return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 }
 
+/**
+ * Le second plateau : ce que les prélèvements achètent.
+ *
+ * ⚠ UNE SEULE ligne est chiffrée, et c'est voulu depuis le 07/09/2026. La
+ * pension se calcule au centime, par les règles, et c'est le capital qu'il
+ * faudrait pour servir la même rente. Santé, école et chômage restaient des
+ * ordres de grandeur sans source opposable (216 000, 127 000 et 47 000 €), et
+ * un lecteur hostile n'avait qu'à demander d'où ils sortaient. Ils restent
+ * NOMMÉS, parce que leur absence se remarquerait et donnerait prise à « vous
+ * avez oublié », mais ils ne comptent plus : « non chiffré, et on ne l'invente
+ * pas » est une réponse qui tient, un montant inventé n'en est pas une.
+ *
+ * Conséquence assumée : le pivot d'un salarié tombe de 2 337 à 1 458 €, et un
+ * fonctionnaire territorial est braqué dès 900 €.
+ */
 function contreparties(pensionMensuelle, regime = 'salarie') {
   const retraite = capitalPourRente(pensionMensuelle);
-  // Un employeur public est en auto-assurance : ni l'agent ni l'employeur ne
-  // cotisent au chômage. La ligne disparaît donc des DEUX plateaux, sinon on
-  // porterait au crédit du fonctionnaire une contrepartie qu'il n'a pas payée.
-  const chomage = regime === 'fonctionnaire'
-    ? null
-    : {
-      montant: 47000,
-      libelle: 'Un filet, le jour où tu es tombé',
-      calcule: false,
-      note: '91 % des carrières connaissent au moins un épisode indemnisé',
-    };
+  const nonChiffre = (libelle, pourquoi) => ({
+    montant: null,
+    libelle,
+    calcule: false,
+    note: 'non chiffré, et on ne l’invente pas',
+    pourquoi,
+  });
   const sortie = {
     retraite: {
       montant: retraite,
@@ -104,20 +118,24 @@ function contreparties(pensionMensuelle, regime = 'salarie') {
       calcule: true,
       note: `capital nécessaire pour servir ${espacer(Math.round(pensionMensuelle))} €/mois à 65 ans`,
     },
-    sante: {
-      montant: 216000,
-      libelle: 'Le droit de tomber malade sans payer',
-      calcule: false,
-      note: 'reste à charge des ménages le plus bas de l’Union européenne',
-    },
-    education: {
-      montant: 127000,
-      libelle: 'Douze ans d’école, sans facture',
-      calcule: false,
-      note: 'coût public reconstitué du CP au baccalauréat',
-    },
+    sante: nonChiffre(
+      'Le droit de tomber malade sans payer',
+      'aucune source publique ne rend ce qu’une carrière consomme de soins',
+    ),
+    education: nonChiffre(
+      'Douze ans d’école, sans facture',
+      'le coût public par élève existe, sa valeur pour une vie ne se déduit pas',
+    ),
   };
-  if (chomage) sortie.chomage = chomage;
+  // Un employeur public est en auto-assurance : ni l'agent ni l'employeur ne
+  // cotisent au chômage. La ligne disparaît des DEUX plateaux, sinon on
+  // porterait au crédit du fonctionnaire une contrepartie qu'il n'a pas payée.
+  if (regime !== 'fonctionnaire') {
+    sortie.chomage = nonChiffre(
+      'Un filet, le jour où tu es tombé',
+      '91 % des carrières connaissent un épisode indemnisé, aucune n’est la tienne',
+    );
+  }
   return sortie;
 }
 
@@ -146,6 +164,7 @@ export function simuler(entree) {
     cadre = false,
     effectif = 10,
     parts = 1,
+    couple = false,
     perimetre = { salariales: true, patronales: true, impotRevenu: false, consommation: false },
   } = entree;
 
@@ -160,7 +179,7 @@ export function simuler(entree) {
   }
 
   const opts = {
-    cadre, effectif, parts, ageActuel, regime, versant,
+    cadre, effectif, parts, couple, ageActuel, regime, versant,
     categorieMicro, versementLiberatoire,
   };
   const carriere = deroulerCarriere(netMensuel, opts);
@@ -256,7 +275,8 @@ export function simuler(entree) {
     : null;
 
   const recu = contreparties(pensionMensuelle, regime);
-  const totalRecu = Object.values(recu).reduce((t, c) => t + c.montant, 0);
+  // Une ligne non chiffrée ne pèse rien : c'est tout le sens du tiret.
+  const totalRecu = Object.values(recu).reduce((t, c) => t + (c.montant ?? 0), 0);
 
   const ecart = preleve - totalRecu;
 
@@ -265,7 +285,7 @@ export function simuler(entree) {
       /** ⚠ Net AVANT impôt sur le revenu. L'impôt s'ajoute, il n'est pas déjà retranché. */
       netMensuel,
       statut, regime, versant, activite, categorieMicro, versementLiberatoire,
-      ageActuel, cadre, effectif, parts, perimetre,
+      ageActuel, cadre, effectif, parts, couple, perimetre,
     },
     /** Ce qui arrive réellement sur le compte cette année, impôt déduit. */
     netApresImpotActuel: anneeCourante.netApresImpot,
@@ -335,6 +355,36 @@ export function salairePivot(opts = {}) {
  * @param {ReturnType<typeof simuler>} simulation
  * @param {string} [placementId]
  */
+/**
+ * Le même geste, mais au taux et aux frais que l'utilisateur règle lui-même.
+ *
+ * Les quatre produits nommés cachaient le chiffre qui compte : le rendement.
+ * Ici il est en clair, avec des crans de référence sourcés à côté du curseur,
+ * et pas un mot sur le risque. Le capital bouge, c'est tout ce qu'on montre.
+ */
+export function placerSaRetraiteAuTaux(simulation, reglage = {}) {
+  const {
+    rendementReel = 0,
+    fraisAnnuels = 0,
+    fraisVersement = 0,
+  } = reglage;
+  const versements = simulation.carriere.annees.map((a) => a.cotisationVieillesse);
+  const verse = versements.reduce((t, v) => t + v, 0);
+  const capital = capitaliser(versements, { rendementReel, fraisAnnuels, fraisVersement });
+  const sansFrais = capitaliser(versements, { rendementReel, fraisAnnuels: 0, fraisVersement: 0 });
+  const equivalentPension = simulation.plateauDroit.lignes.retraite.montant;
+  return {
+    reglage: { rendementReel, fraisAnnuels, fraisVersement },
+    verse,
+    capital,
+    sansFrais,
+    fraisPayes: sansFrais - capital,
+    equivalentPension,
+    ecart: capital - equivalentPension,
+    gagnant: capital > equivalentPension,
+  };
+}
+
 export function placerSaRetraite(simulation, placementId = PLACEMENT_DEFAUT) {
   const versements = simulation.carriere.annees.map((a) => a.cotisationVieillesse);
   const place = placerSoiMeme(versements, placementId);

@@ -167,11 +167,12 @@ export function Jugement({
               <span className="font-semibold">2 190 €</span> (INSEE 2024, net
               avant impôt, comme le chiffre que tu as saisi), et le point de
               bascule tombe{" "}
-              <span className="font-semibold">au-dessus</span> :{" "}
+              <span className="font-semibold">en dessous</span> :{" "}
               <span className="font-semibold">
-                plus de la moitié des salariés français reçoivent plus qu’ils ne
-                versent.
-              </span>{" "}
+                la majorité des salariés français versent plus qu’ils ne
+                reçoivent
+              </span>
+              , dès qu’on ne met en face que ce qui se calcule, la pension.
               Personne ne publie ce chiffre.
             </p>
           )}
@@ -199,6 +200,7 @@ export function Jugement({
             <span className="font-semibold">aucun niveau de revenu</span>. Ce
             n’est pas un verdict sur toi, c’est un verdict sur le calcul.
           </p>
+          {simulation.entree.versant === "fpe" ? (
           <p className="border-l-[3px] border-bleu bg-papier-3 px-3 py-3 text-[14px] leading-relaxed">
             La contribution de l’État à son propre régime de pension pèse{" "}
             <span className="font-semibold">82,28 % du traitement indiciaire</span>.
@@ -210,6 +212,17 @@ export function Jugement({
             . Décoche les cotisations patronales pour voir le procès sans elle :
             c’est le même dossier, sans le chiffre qui décide de tout.
           </p>
+          ) : (
+          <p className="border-l-[3px] border-bleu bg-papier-3 px-3 py-3 text-[14px] leading-relaxed">
+            En face, une seule ligne compte : la pension. Santé, école et chômage
+            sont nommés mais laissés sans montant, parce qu’aucune source ne les
+            chiffre. Dès lors, ce que l’employeur verse au régime de retraite (
+            <span className="font-semibold">37,65 % du traitement</span> à la
+            CNRACL, 82,28 % pour l’État) l’emporte à tout niveau de revenu.
+            Décoche les cotisations patronales : c’est le même dossier, sans le
+            chiffre qui décide de tout.
+          </p>
+          )}
         </section>
       )}
 

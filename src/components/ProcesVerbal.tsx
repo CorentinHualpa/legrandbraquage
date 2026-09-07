@@ -325,6 +325,16 @@ export function ProcesVerbal({
             viennent qu'après, quand le montant est devenu trop gros pour qu'un
             objet veuille encore dire quelque chose.
           */}
+          {objet.image ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={`/images/butin/${objet.image}.webp`}
+              alt={objet.nom}
+              className="mb-2 w-full border border-cadre-bord"
+              loading="lazy"
+              decoding="async"
+            />
+          ) : null}
           <p className="mt-0.5 text-[17px] leading-tight font-semibold">
             {objet.nom}
           </p>
@@ -418,13 +428,17 @@ export function ProcesVerbal({
               className="flex items-baseline gap-3 border-b border-ligne py-2.5"
             >
               <span className="flex grow flex-col">
-                <span className="text-[14px]">{ligne.libelle}</span>
-                <span className="text-[12px] text-encre-3">
-                  {ligne.calcule ? ligne.note : `ordre de grandeur · ${ligne.note}`}
+                <span className={`text-[14px] ${ligne.montant === null ? "text-encre-2" : ""}`}>
+                  {ligne.libelle}
                 </span>
+                <span className="text-[12px] text-encre-3">{ligne.note}</span>
               </span>
-              <span className="chiffres shrink-0 font-mono text-[13px]">
-                {euros(ligne.montant)}
+              {/*
+                Une ligne non chiffrée porte un tiret, pas un zéro : zéro dirait
+                que ça ne vaut rien, le tiret dit qu'on refuse d'inventer.
+              */}
+              <span className="chiffres shrink-0 font-mono text-[13px] text-encre-3">
+                {ligne.montant === null ? "—" : euros(ligne.montant)}
               </span>
             </li>
           ))}
@@ -496,12 +510,13 @@ export function ProcesVerbal({
         ) : null}
 
         <Renvoi>
-          Seule la première ligne est calculée au centime : c’est le capital qu’il
-          faudrait avoir devant soi pour s’acheter la même rente à vie, indexée,
-          avec réversion. Les trois autres sont des{" "}
-          <span className="font-semibold">ordres de grandeur assumés</span>, à
-          remplacer par un chiffrage par décile. On préfère l’écrire que le
-          cacher.
+          Une seule ligne compte, et elle est calculée au centime : le capital
+          qu’il faudrait avoir devant soi pour s’acheter la même rente à vie,
+          indexée, avec réversion. Les autres sont nommées et{" "}
+          <span className="font-semibold">volontairement laissées sans montant</span>
+          : aucune source publique ne dit ce qu’une carrière consomme de soins
+          ou d’école, et un chiffre inventé pour équilibrer la balance serait
+          exactement ce qu’on reproche à la partie adverse.
         </Renvoi>
       </section>
 

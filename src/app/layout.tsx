@@ -33,7 +33,7 @@ const PARTAGE = {
   url: "/og.png",
   width: 1200,
   height: 630,
-  alt: "Dépôt de plainte : Le Grand Braquage. Sur une carrière à 2 500 € net avant impôt par mois, 1 208 297 € prélevés contre 1 131 748 € restitués. Le verdict bascule à 2 337 € net.",
+  alt: "Dépôt de plainte : Le Grand Braquage. Sur une carrière à 2 500 € net avant impôt par mois, 1 208 297 € prélevés contre 741 748 € restitués en pension. Le verdict bascule à 1 458 € net.",
 } as const;
 
 export const metadata: Metadata = {

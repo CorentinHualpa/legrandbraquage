@@ -7,10 +7,10 @@ import type { Pieces } from "./Instruction";
 import { euros, eurosSigne, pourcent } from "@/lib/format";
 import {
   ALIBI_INDICE_NU,
+  CRANS_FRAIS,
+  CRANS_RENDEMENT,
   PALIERS_ALIBI,
-  PLACEMENTS,
-  PLACEMENT_DEFAUT,
-  placerSaRetraite,
+  placerSaRetraiteAuTaux,
   type Simulation,
 } from "@/lib/moteur";
 
@@ -29,14 +29,30 @@ export function Alibi({
   simulation: Simulation;
 }) {
   const [retires, setRetires] = useState(0);
-  const [placementId, setPlacementId] = useState(PLACEMENT_DEFAUT);
+
+  /*
+   * Le rendement est un nombre que l'on règle, pas un produit que l'on choisit.
+   * Le curseur part du fonds en euros, ce que la moitié des Français détient,
+   * et les crans à côté disent où se situent les autres placements réels. Les
+   * frais ont leur propre curseur, parce qu'ils pèsent autant que le taux.
+   */
+  const cranDefaut = CRANS_RENDEMENT.find((c) => c.id === "fonds-euros") ?? CRANS_RENDEMENT[0];
+  const [rendementReel, setRendementReel] = useState(Math.round(cranDefaut.reel * 1000) / 1000);
+  const [fraisId, setFraisId] = useState("per-actions");
+  const frais = CRANS_FRAIS.find((f) => f.id === fraisId) ?? CRANS_FRAIS[0];
 
   const montant = PALIERS_ALIBI[retires].montant;
   const part = montant / PALIERS_ALIBI[0].montant;
 
-  const rang = PLACEMENTS.findIndex((p) => p.id === placementId);
-  const place = placerSaRetraite(simulation, placementId);
+  const place = placerSaRetraiteAuTaux(simulation, {
+    rendementReel,
+    fraisAnnuels: frais.annuels,
+    fraisVersement: frais.versement,
+  });
   const fourchette = simulation.plateauDroit.fourchetteRetraite;
+  const cranProche = CRANS_RENDEMENT.reduce((meilleur, c) =>
+    Math.abs(c.reel - rendementReel) < Math.abs(meilleur.reel - rendementReel) ? c : meilleur,
+  );
 
   return (
     <Feuille id="alibi" className="mt-10 border-t-2 border-dashed border-ligne pt-2">
@@ -173,31 +189,90 @@ export function Alibi({
         </h3>
         <p className="text-[14.5px] leading-relaxed">
           On reprend TA cotisation vieillesse, année par année, telle que ta
-          carrière la produit, et on la place. Le curseur part au plus prudent :
-          le gros chiffre existe, c’est à toi d’aller le chercher.
+          carrière la produit, et on la place. Règle le rendement et les frais,
+          le capital suit. Les crans disent où se situent les placements réels.
         </p>
 
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-baseline justify-between">
+            <label
+              htmlFor="curseur-placement"
+              className="font-mono text-[10px] tracking-[0.13em] text-encre-3"
+            >
+              RENDEMENT RÉEL, NET D’INFLATION
+            </label>
+            <span className="chiffres font-mono text-[20px] font-semibold">
+              {pourcent(rendementReel, 1)} <span className="text-[12px] font-normal text-encre-3">par an</span>
+            </span>
+          </div>
           <input
             id="curseur-placement"
             type="range"
-            min={0}
-            max={PLACEMENTS.length - 1}
-            step={1}
-            value={rang < 0 ? 0 : rang}
-            onChange={(e) => setPlacementId(PLACEMENTS[Number(e.target.value)].id)}
+            min={-1}
+            max={10}
+            step={0.1}
+            value={Math.round(rendementReel * 1000) / 10}
+            onChange={(e) => setRendementReel(Number(e.target.value) / 100)}
             className="h-1.5 w-full cursor-pointer appearance-none bg-ligne accent-rouge"
-            aria-label="Choix du placement"
+            aria-label="Rendement réel annuel"
           />
-          <div className="flex justify-between font-mono text-[9.5px] text-encre-3">
-            <span>PRUDENT</span>
-            <span>RISQUÉ</span>
+          <div className="flex flex-wrap gap-1.5">
+            {CRANS_RENDEMENT.map((c) => {
+              const actif = c.id === cranProche.id;
+              return (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => setRendementReel(Math.round(c.reel * 1000) / 1000)}
+                  title={c.source}
+                  className={`px-2 py-1 font-mono text-[10px] tracking-[0.04em] transition-colors ${
+                    actif
+                      ? "bg-encre text-papier"
+                      : "border border-cadre-bord text-encre hover:border-encre"
+                  }`}
+                >
+                  {c.nom} · {pourcent(c.reel, 1)}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <span className="font-mono text-[10px] tracking-[0.13em] text-encre-3">
+            FRAIS DE L’INTERMÉDIAIRE
+          </span>
+          <div className="flex flex-wrap gap-1.5">
+            {CRANS_FRAIS.map((f) => {
+              const actif = f.id === fraisId;
+              return (
+                <button
+                  key={f.id}
+                  type="button"
+                  onClick={() => setFraisId(f.id)}
+                  aria-pressed={actif}
+                  title={f.source}
+                  className={`px-2 py-1 font-mono text-[10px] tracking-[0.04em] transition-colors ${
+                    actif
+                      ? "bg-encre text-papier"
+                      : "border border-cadre-bord text-encre hover:border-encre"
+                  }`}
+                >
+                  {f.nom} · {pourcent(f.annuels, 2)}
+                  {f.versement > 0 ? ` + ${pourcent(f.versement, 2)} par versement` : ""}
+                </button>
+              );
+            })}
           </div>
         </div>
 
         <div className="flex flex-col gap-2 border-2 border-encre bg-papier-2 p-4">
-          <p className="text-[16px] font-semibold">{place.placement.nom}</p>
-          <p className="text-[13px] text-encre-2">{place.placement.detail}</p>
+          <p className="text-[16px] font-semibold">
+            {pourcent(rendementReel, 1)} par an, {frais.nom.toLowerCase()}
+          </p>
+          <p className="text-[13px] text-encre-2">
+            Le cran le plus proche est {cranProche.nom} ({cranProche.source}).
+          </p>
 
           <dl className="mt-1 flex flex-col divide-y divide-ligne border-y border-ligne">
             <div className="flex items-baseline justify-between gap-3 py-2">
@@ -250,19 +325,18 @@ export function Alibi({
                 <span className="font-semibold text-bleu">
                   La pension gagne, de {eurosSigne(Math.abs(place.ecart))}.
                 </span>{" "}
-                Au barreau prudent, celui que la moitié des Français utilise
-                vraiment, se débrouiller seul rapporte moins que le système
-                qu’on accuse.
+                À ce rendement et à ces frais, se débrouiller seul rapporte
+                moins que le système qu’on accuse. Monte le curseur, et regarde
+                à partir d’où ça bascule.
               </>
             )}
           </p>
 
           <p className="border-t border-ligne pt-2 font-mono text-[9.5px] leading-relaxed tracking-[0.05em] text-encre-3">
-            {place.placement.source.toUpperCase()} · RENDEMENT RÉEL{" "}
-            {pourcent(place.placement.rendementReel, 2).toUpperCase()} PAR AN
-          </p>
-          <p className="text-[13px] leading-snug text-encre-2 italic">
-            {place.placement.note}
+            RENDEMENT RÉEL {pourcent(rendementReel, 1).toUpperCase()} PAR AN · FRAIS{" "}
+            {pourcent(frais.annuels, 2).toUpperCase()} PAR AN
+            {frais.versement > 0 ? ` ET ${pourcent(frais.versement, 2).toUpperCase()} PAR VERSEMENT` : ""}
+            {" "}· {frais.source.toUpperCase()}
           </p>
         </div>
       </section>

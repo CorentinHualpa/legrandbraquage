@@ -35,6 +35,10 @@ export function Plainte({
   setCategorieMicro,
   versementLiberatoire,
   setVersementLiberatoire,
+  couple,
+  setCouple,
+  enfants,
+  setEnfants,
   regime,
   calculable,
   ouverte,
@@ -55,6 +59,10 @@ export function Plainte({
   setCategorieMicro: (c: CategorieMicro) => void;
   versementLiberatoire: boolean;
   setVersementLiberatoire: (v: boolean) => void;
+  couple: boolean;
+  setCouple: (c: boolean) => void;
+  enfants: number;
+  setEnfants: (n: number) => void;
   regime: Regime | null;
   calculable: boolean;
   ouverte: boolean;
@@ -340,6 +348,59 @@ export function Plainte({
             </p>
           </fieldset>
         ) : null}
+
+        <fieldset className="flex flex-col gap-2">
+          <legend className="mb-2 font-mono text-[10px] tracking-[0.13em] text-encre-3">
+            TON FOYER
+          </legend>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { id: false, libelle: "Seul" },
+              { id: true, libelle: "En couple" },
+            ].map((f) => {
+              const actif = couple === f.id;
+              return (
+                <button
+                  key={String(f.id)}
+                  type="button"
+                  onClick={() => setCouple(f.id)}
+                  aria-pressed={actif}
+                  className={`px-3 py-2 text-[14px] transition-colors ${
+                    actif
+                      ? "bg-encre font-medium text-papier"
+                      : "border border-cadre-bord text-encre hover:border-encre"
+                  }`}
+                >
+                  {f.libelle}
+                </button>
+              );
+            })}
+            <span className="mx-1 self-center font-mono text-[10px] text-encre-3">ENFANTS</span>
+            {[0, 1, 2, 3].map((n) => {
+              const actif = enfants === n;
+              return (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() => setEnfants(n)}
+                  aria-pressed={actif}
+                  className={`min-w-[40px] px-3 py-2 text-[14px] transition-colors ${
+                    actif
+                      ? "bg-encre font-medium text-papier"
+                      : "border border-cadre-bord text-encre hover:border-encre"
+                  }`}
+                >
+                  {n === 3 ? "3+" : n}
+                </button>
+              );
+            })}
+          </div>
+          <p className="text-[12.5px] leading-snug text-encre-3">
+            Le quotient familial divise l’impôt, pas les cotisations. Une part
+            par adulte, une demi-part par enfant jusqu’au deuxième, une part
+            entière ensuite.
+          </p>
+        </fieldset>
 
         {regime && !calculable ? (
           <p className="border-l-[3px] border-rouge bg-papier-3 py-3 pr-3 pl-3 text-[13.5px] leading-relaxed">

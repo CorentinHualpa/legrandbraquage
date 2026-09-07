@@ -495,7 +495,23 @@ test('fonctionnaire : le chômage disparaît des DEUX plateaux', () => {
   const f = M.simuler({ netMensuel: 2400, statut: 'fonctionnaire', versant: 'fpt' });
   const s = M.simuler({ netMensuel: 2400, statut: 'salarie' });
   assert.equal(f.plateauDroit.lignes.chomage, undefined);
-  assert.ok(s.plateauDroit.lignes.chomage.montant > 0);
+  // Chez le salarié la ligne EXISTE, nommée, mais elle ne porte plus de
+  // montant : depuis le 07/09/2026 seule la pension est chiffrée en face.
+  assert.ok('chomage' in s.plateauDroit.lignes);
+  assert.equal(s.plateauDroit.lignes.chomage.montant, null);
+});
+
+test('le second plateau ne compte QUE ce qui est calculé', () => {
+  // Santé, école et chômage restent nommés, sans montant, et ne pèsent rien.
+  // Un montant inventé pour équilibrer la balance serait exactement ce que ce
+  // dossier reproche à la partie adverse. Conséquence assumée : à 2 500 €, le
+  // reçu d'un salarié est le seul capital équivalent à sa pension.
+  const s = M.simuler({ netMensuel: 2500 });
+  const lignes = s.plateauDroit.lignes;
+  assert.ok(lignes.retraite.montant > 0);
+  assert.equal(lignes.sante.montant, null);
+  assert.equal(lignes.education.montant, null);
+  assert.ok(Math.abs(s.plateauDroit.total - lignes.retraite.montant) < 0.01);
 });
 
 test('fonctionnaire : la formule de pension reste exposée, marquée BRUTE', () => {
@@ -508,10 +524,17 @@ test('fonctionnaire : la formule de pension reste exposée, marquée BRUTE', () 
 test('LE SECOND CHIFFRE DU PROJET : le pivot du fonctionnaire n’est pas celui du privé', () => {
   const p = { salariales: true, patronales: true, impotRevenu: true, consommation: true };
 
-  // Territoriale : la bascule existe, très en dessous de celle du privé.
+  // ⚠ Depuis que seule la pension est comptée en face, AUCUN versant n'a de
+  // pivot : la contribution employeur publique (37,65 % à la CNRACL, 82,28 %
+  // pour l'État) l'emporte à tout niveau. La territoriale en avait un
+  // (1 383 €) quand santé, école et chômage pesaient encore 390 000 €.
   const fpt = M.salairePivot({ statut: 'fonctionnaire', versant: 'fpt', perimetre: p });
-  assert.ok(fpt !== null, 'la territoriale doit avoir un pivot');
-  assert.ok(fpt < M.salairePivot({ perimetre: p }), 'il doit être sous celui du privé');
+  assert.equal(fpt, null, 'la territoriale ne bascule plus nulle part');
+  assert.ok(
+    M.simuler({ netMensuel: 1000, statut: 'fonctionnaire', versant: 'fpt', perimetre: p })
+      .verdict.braquage,
+    'braquée dès le plancher',
+  );
 
   // ⚠ État : il n'y en a AUCUN. À aucun niveau de traitement la balance ne
   // penche en faveur de l'agent, parce que la contribution de l'État à son
@@ -848,11 +871,13 @@ test('le point de bascule et la médiane INSEE se comparent enfin', () => {
   // Le pivot était exprimé en net APRÈS impôt et la page le comparait aux
   // 2 190 € de l'INSEE, qui sont un net AVANT impôt. C'était une erreur de
   // dénominateur, celle-là même que ce dossier reproche à la partie adverse.
-  // Les deux sont désormais sur la même base, et le pivot passe AU-DESSUS du
-  // médian : plus de la moitié des salariés reçoivent plus qu'ils ne versent.
+  // Les deux sont désormais sur la même base. Et depuis que seule la pension
+  // est comptée en face, le pivot tombe SOUS le médian : la majorité des
+  // salariés du privé versent plus qu'ils ne reçoivent. Il valait 2 337 €
+  // quand santé, école et chômage pesaient encore 390 000 €.
   const pivot = salairePivot();
-  assert.ok(pivot > 2190, `pivot ${pivot} €, attendu au-dessus du médian INSEE`);
-  assert.ok(pivot < 2600, `pivot ${pivot} €, anormalement haut`);
+  assert.ok(pivot < 2190, `pivot ${pivot} €, attendu sous le médian INSEE`);
+  assert.ok(pivot > 1200, `pivot ${pivot} €, anormalement bas`);
 });
 
 test('le micro-entrepreneur a son régime, et ne retombe JAMAIS sur le réel', () => {

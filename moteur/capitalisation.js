@@ -79,6 +79,75 @@ export const PLACEMENTS = [
 
 export const PLACEMENT_DEFAUT = 'fonds-euros';
 
+/**
+ * Les crans de RENDEMENT posés à côté du curseur, chacun avec sa source.
+ *
+ * Le curseur est continu, en rendement RÉEL (net d'inflation, comme tout le
+ * dossier, qui compte en euros d'aujourd'hui). Les crans ne sont que des
+ * repères que l'on peut cliquer : ils disent où se situe tel ou tel placement
+ * réel, et le lecteur règle ce qu'il veut entre deux. Aucun n'est étiqueté
+ * « prudent » ni « risqué » : un taux et une source, rien d'autre.
+ */
+export const CRANS_RENDEMENT = [
+  {
+    id: 'livret-a',
+    nom: 'Livret A',
+    reel: reel(RENDEMENTS.livretAMoyen15Ans),
+    nominal: RENDEMENTS.livretAMoyen15Ans,
+    source: 'taux moyen sur quinze ans',
+  },
+  {
+    id: 'immobilier',
+    nom: 'Immobilier en France',
+    reel: RENDEMENTS.immobilierFranceReel40Ans,
+    nominal: null,
+    source: 'prix réels sur quarante ans, hors loyers',
+  },
+  {
+    id: 'fonds-euros',
+    nom: 'Fonds en euros',
+    reel: reel(RENDEMENTS.fondsEuros2025),
+    nominal: RENDEMENTS.fondsEuros2025,
+    source: 'taux moyen servi en 2025',
+  },
+  {
+    id: 'msci-world',
+    nom: 'MSCI World',
+    reel: reel(RENDEMENTS.msciWorldGrossNominal),
+    nominal: RENDEMENTS.msciWorldGrossNominal,
+    source: 'gross return 1987-2026',
+  },
+  {
+    id: 'sp500',
+    nom: 'S&P 500 dividendes réinvestis',
+    reel: RENDEMENTS.sp500Reel1928,
+    nominal: RENDEMENTS.sp500Nominal1928,
+    // ⚠ En dollars : un Français porte le change en plus. Et la fenêtre de
+    // 98 ans est la bonne, pas celle de 30 ans (7,5 % réel), qui démarre en
+    // 1996 et embarque deux décennies exceptionnelles.
+    source: 'Damodaran, NYU Stern, 1928-2025, en dollars',
+  },
+  {
+    id: 'cac40',
+    nom: 'CAC 40 dividendes réinvestis',
+    reel: RENDEMENTS.cac40GrReel,
+    nominal: RENDEMENTS.cac40GrNominal,
+    source: 'AMF, 1988-2023',
+  },
+];
+
+/**
+ * Les crans de FRAIS. C'est le second curseur, et il pèse autant que le
+ * premier : entre un ETF en PEA et un fonds actions en PER, sur 43 ans, la
+ * différence de frais vaut plus que la différence de performance.
+ */
+export const CRANS_FRAIS = [
+  { id: 'aucun', nom: 'Sans frais', annuels: 0, versement: 0, source: 'hypothèse de la partie adverse' },
+  { id: 'pea-etf', nom: 'ETF dans un PEA', annuels: FRAIS.etfPea, versement: 0, source: 'frais constatés' },
+  { id: 'per-etf', nom: 'ETF dans un PER', annuels: FRAIS.perEtf, versement: FRAIS.perVersement, source: 'Banque de France' },
+  { id: 'per-actions', nom: 'Fonds actions dans un PER', annuels: FRAIS.perUcActions, versement: FRAIS.perVersement, source: 'Banque de France, OPEF 2026' },
+];
+
 export function placement(id) {
   return PLACEMENTS.find((p) => p.id === id) ?? PLACEMENTS.find((p) => p.defaut);
 }
