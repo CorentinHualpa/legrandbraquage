@@ -66,7 +66,7 @@ export const VERSANTS: Array<{ id: Versant; libelle: string; precision: string }
  * dossier reproche à la partie adverse. Le moteur lève d'ailleurs plutôt que
  * de deviner ; cette liste existe pour que l'écran le dise AVANT le calcul.
  */
-export const REGIMES_DISPONIBLES: Regime[] = ["salarie", "fonctionnaire"];
+export const REGIMES_DISPONIBLES: Regime[] = ["salarie", "fonctionnaire", "tns"];
 
 export function regimeDe(statut: Statut, forme?: FormeTpe): Regime | null {
   return (regimeDuStatut(statut, forme) as Regime | null) ?? null;

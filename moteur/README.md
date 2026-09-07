@@ -5,7 +5,7 @@ c'est la seule façon de rendre le résultat opposable : n'importe qui peut le
 lire, le rejouer et le contredire.
 
 ```bash
-pnpm test               # 52 tests
+pnpm test               # 59 tests
 ```
 
 Aucune dépendance, aucune étape de build. Modules ES natifs, exécutables tels
@@ -107,13 +107,13 @@ ouvrir. À corriger dès qu'on l'a, et à dire dans la page méthodologie.
    `mon-entreprise.urssaf.fr` avant mise en ligne. L'application reste sur
    l'effectif < 50 en attendant.
 
-2. **Le travailleur non salarié.** C'est le seul régime qui reste. Le
-   fonctionnaire est instruit depuis le 06/09/2026, dans ses trois versants.
-   Le patron de TPE n'a jamais été un régime de plus : un gérant majoritaire de
-   SARL cotise comme un travailleur non salarié, un président de SAS comme un
-   assimilé salarié, et le moteur aiguille sur la forme juridique.
+2. **Le professionnel libéral réglementé.** Il relève de la CIPAV et pas de la
+   Sécurité sociale des indépendants, et l'écart n'est pas négligeable : il
+   change de signe, de −13 % à 25 000 € de revenu à +24 % à 250 000 €. Un
+   quatrième régime se justifie. La valeur de service du point CIPAV 2026 est
+   par ailleurs **NON TROUVÉE**.
 
-   ⚠ Un régime non instruit **lève** au lieu de retomber sur le salarié. Servir
+   ⚠ Un régime non instruit **lève** au lieu de retomber sur un autre. Servir
    les barèmes du privé à un indépendant produirait un chiffre faux et
    parfaitement crédible, c'est-à-dire exactement ce que ce dossier reproche à
    la partie adverse.
@@ -141,14 +141,57 @@ ouvrir. À corriger dès qu'on l'a, et à dire dans la page méthodologie.
 | `fonction-publique.js` | Retenues, cotisations, pension d'un titulaire |
 | `liberation.js` | L'heure de libération, avec ses DEUX dénominateurs |
 | `index.js` | `simuler()`, `salairePivot()`, `placerSaRetraite()` |
-| `test.mjs` | 52 tests, dont l'étalon URSSAF |
+| `baremes-tns.js` | Les barèmes de l'indépendant, et pourquoi l'étalon change |
+| `tns.js` | Assiette unique, cotisations, pension par les règles |
+| `test.mjs` | 59 tests, dont deux étalons |
 
 Toute modification d'un barème doit citer un texte officiel. C'est cette règle,
 et pas le ton de la page, qui rend le simulateur inattaquable.
 
 ---
 
-## 4. Le fonctionnaire, et le chiffre à ne pas lire de travers
+## 4. L'indépendant, et le jour où l'étalon a changé
+
+⚠⚠ **L'API publique de mon-entreprise.urssaf.fr sert encore l'ancien barème**
+pour ce régime : 17,75 % de retraite de base, un plafond de complémentaire à
+43 891 €, une CSG assise sur l'assiette PLUS les cotisations. La réforme de
+l'assiette unique s'applique depuis avril 2026 et les pages de barème de
+l'URSSAF publient les nouveaux taux.
+
+L'étalon qui valide le salarié ne peut donc pas valider l'indépendant. La table
+de référence est reconstruite depuis le **barème opposable**, ligne par ligne,
+et chaque taux renvoie à son article du code de la sécurité sociale. C'est moins
+confortable et c'est plus honnête : on vérifie contre le droit, pas contre un
+simulateur en retard.
+
+Quinze points de revenu tombent au centime, plus six points de contrôle qui se
+recalculent à la main. Le plus discriminant : **le taux de maladie n'est pas un
+barème marginal**, c'est un taux unique interpolé puis appliqué à toute
+l'assiette. À 22 200 € d'assiette, un barème marginal donne environ 74 €, le bon
+calcul en donne 505. Un facteur sept, sur toute la plage.
+
+Deux résultats à connaître :
+
+**Le taux effectif dessine une cloche**, pas une droite. Il culmine à 31,98 % au
+voisinage d'un plafond de sécurité sociale d'assiette, puis redescend.
+
+**Il n'y a aucune part employeur**, et ce zéro n'est pas un trou : un
+indépendant voit cent pour cent de ce qu'il verse. C'est ce qui place son
+salaire pivot à **5 669 €**, très au-dessus des 2 219 € du salarié.
+
+⚠ Sa pension se **calcule** par les règles, faute de taux de remplacement
+publié : la DREES exclut explicitement les non-salariés de son champ, parce que
+son panel ne contient aucun revenu non salarié, et le COR n'a jamais eu de cas
+type artisan ni commerçant. Le montant obtenu dépasse largement la pension
+moyenne observée (1 230 €), et le moteur le dit dans son résultat : on simule
+une carrière ENTIÈRE en indépendant, ce qui est le cas de 12 % d'entre eux.
+97 % des anciens artisans sont polypensionnés et la moitié de leur pension vient
+d'un travail salarié. La moyenne basse mesure des carrières courtes dans le
+régime, pas des règles avares.
+
+---
+
+## 5. Le fonctionnaire, et le chiffre à ne pas lire de travers
 
 Ce qui change du privé n'est pas un taux, c'est l'**assiette** : les primes,
 environ un quart du brut, sont hors de l'assiette de pension. Tout en découle,

@@ -285,15 +285,24 @@ export default function Methode() {
             </li>
             <li className="border-l-[3px] border-cadre-bord pl-3">
               <span className="font-semibold">
-                Le travailleur non salarié.
+                Le professionnel libéral réglementé.
               </span>{" "}
-              C’est le seul régime qui reste à instruire. Tant qu’il ne l’est
-              pas, le moteur REFUSE de le calculer plutôt que de lui servir les
-              barèmes du salarié : un chiffre emprunté à un autre régime est
-              faux, et il est d’autant plus dangereux qu’il est crédible. Le
-              patron de TPE, lui, n’est pas un régime de plus : un gérant
-              majoritaire de SARL cotise comme un travailleur non salarié, un
-              président de SAS comme un assimilé salarié.
+              Il relève de la CIPAV et pas de la Sécurité sociale des
+              indépendants, et l’écart n’est pas négligeable : il change de
+              signe selon le revenu. Le moteur REFUSE de le calculer plutôt que
+              de lui servir le barème voisin. Un chiffre emprunté à un autre
+              régime est faux, et il est d’autant plus dangereux qu’il est
+              crédible.
+            </li>
+            <li className="border-l-[3px] border-cadre-bord pl-3">
+              <span className="font-semibold">
+                L’étalon de l’indépendant n’est pas celui du salarié.
+              </span>{" "}
+              Le simulateur officiel de l’URSSAF sert encore l’ancien barème pour
+              ce régime, alors que la réforme de l’assiette unique s’applique
+              depuis avril 2026. Sa table de référence est donc reconstruite
+              depuis le barème opposable, article par article, et vérifiée sur
+              quinze points de revenu.
             </li>
             <li className="border-l-[3px] border-cadre-bord pl-3">
               <span className="font-semibold">

@@ -19,6 +19,7 @@ import {
 } from './capitalisation.js';
 import { RETRAITE, SALAIRES_REFERENCE } from './baremes-2026.js';
 import * as fp from './fonction-publique.js';
+import * as tns from './tns.js';
 import { TAUX_REMPLACEMENT, VERSANTS } from './baremes-fonction-publique.js';
 
 /**
@@ -156,13 +157,41 @@ export function simuler(entree) {
   //
   // La formule reste calculée, dans `detailPension` : elle a sa place à
   // l'écran, à condition d'être présentée pour ce qu'elle est.
-  const tauxRemplacement = regime === 'fonctionnaire'
-    ? TAUX_REMPLACEMENT.projeteCatBGeneration2000
-    : (cadre ? RETRAITE.tauxRemplacementCadre : RETRAITE.tauxRemplacementNonCadre);
+  //
+  // ⚠ L'indépendant fait exception, et c'est une contrainte, pas un choix : il
+  // n'existe AUCUN taux de remplacement publié pour ce régime. La DREES l'exclut
+  // de son champ et écrit pourquoi, son panel ne contenant aucun revenu non
+  // salarié ; le COR n'a jamais eu de cas type artisan ni commerçant. Sa
+  // pension se calcule donc par les règles, et le taux de remplacement en est
+  // DÉDUIT au lieu d'être posé.
+  let pensionMensuelle;
+  let tauxRemplacement;
+  let pensionTns = null;
 
-  const pensionMensuelle = dernier.netApresImpot * tauxRemplacement;
+  if (regime === 'tns') {
+    pensionTns = tns.pension(
+      carriere.annees.map((a) => a.assiette),
+      carriere.annees.map((a) => a.retraiteComplementaire),
+    );
+    pensionMensuelle = pensionTns.totale;
+    tauxRemplacement = dernier.netApresImpot > 0
+      ? pensionMensuelle / dernier.netApresImpot
+      : 0;
+  } else {
+    tauxRemplacement = regime === 'fonctionnaire'
+      ? TAUX_REMPLACEMENT.projeteCatBGeneration2000
+      : (cadre ? RETRAITE.tauxRemplacementCadre : RETRAITE.tauxRemplacementNonCadre);
+    pensionMensuelle = dernier.netApresImpot * tauxRemplacement;
+  }
 
-  const detailPension = regime === 'fonctionnaire'
+  const detailPension = pensionTns
+    ? {
+      ...pensionTns,
+      brut: false,
+      note: 'pension calculée par les règles : base du régime général sur les '
+        + '25 meilleures années, plus les points du régime complémentaire',
+    }
+    : regime === 'fonctionnaire'
     ? {
       ...fp.pension(dernier.tib, {
         tauxLiquidation: 1,

@@ -11,6 +11,7 @@
 import { COURBE_AGE, CARRIERE } from './baremes-2026.js';
 import { brutDepuisNet, cotisationsSalariales, cotisationsPatronales } from './salaire.js';
 import * as fp from './fonction-publique.js';
+import * as tns from './tns.js';
 import { impotSurLeRevenu, taxesConsommationAnnuelles } from './impot.js';
 
 /**
@@ -38,6 +39,14 @@ const REGIMES = {
       + pat.lignes.vieillessePlafonnee + pat.lignes.vieillesseDeplafonnee
       + pat.lignes.retraiteCompT1 + pat.lignes.retraiteCompT2
       + pat.lignes.cegT1 + pat.lignes.cegT2,
+  },
+  tns: {
+    brutDepuisNet: tns.brutDepuisNet,
+    salariales: tns.retenuesSalariales,
+    patronales: tns.cotisationsPatronales,
+    // Un indépendant n'a pas d'employeur : tout ce qui finance sa vieillesse
+    // sort de sa poche, et il le voit.
+    vieillesse: (sal) => sal.lignes.retraiteBase + sal.lignes.retraiteComplementaire,
   },
   fonctionnaire: {
     brutDepuisNet: fp.brutDepuisNet,
@@ -137,6 +146,10 @@ export function deroulerCarriere(netMensuelActuel, opts = {}) {
       // et lui seul qui porte la pension d'un fonctionnaire.
       tib: sal.tib ?? brut,
       primes: sal.primes ?? 0,
+      // L'assiette sociale et la ligne de retraite complémentaire, en ANNUEL,
+      // pour que la pension d'un indépendant se calcule par les règles.
+      assiette: (sal.assiette ?? brut) * 12,
+      retraiteComplementaire: (sal.lignes.retraiteComplementaire ?? 0) * 12,
     });
   }
 

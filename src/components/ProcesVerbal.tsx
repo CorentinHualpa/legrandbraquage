@@ -43,6 +43,7 @@ export function ProcesVerbal({
   const annees = anneesSansTravailler(plateauGauche.total, netMensuel);
   const enAnnees = plateauGauche.total >= SEUIL_ANNEES;
   const nomStatut = STATUTS.find((s) => s.id === statut)?.libelle ?? "salarié";
+  const detail = plateauDroit.detailPension;
 
   return (
     <Feuille className="mt-10 border-t-2 border-dashed border-ligne pt-2">
@@ -161,6 +162,25 @@ export function ProcesVerbal({
           cette phrase, la ligne « cotisations patronales » du fonctionnaire se
           lit comme un privilège alors qu'elle mesure une démographie.
         */}
+        {simulation.entree.regime === "tns" && perimetre.patronales ? (
+          <div className="border-l-[3px] border-bleu bg-papier-3 px-3 py-3">
+            <p className="font-mono text-[9.5px] tracking-[0.12em] text-bleu">
+              LA LIGNE À ZÉRO N’EST PAS UN TROU
+            </p>
+            <p className="mt-1 text-[13.5px] leading-relaxed">
+              Tu n’as pas d’employeur, donc il n’y a rien à prendre avant ta
+              paie. Tu vois{" "}
+              <span className="font-semibold">cent pour cent de ce que tu verses</span>
+              , ce qui fait de ta fiche la plus honnête des trois, et de ton
+              total le plus bas à revenu net égal.
+            </p>
+            <p className="mt-2 text-[13.5px] leading-relaxed">
+              Cette clarté a un prix, et le second plateau le porte : ton régime
+              rend moins de droits que celui d’un salarié pour un même net.
+            </p>
+          </div>
+        ) : null}
+
         {simulation.entree.regime === "fonctionnaire" && perimetre.patronales ? (
           <div className="border-l-[3px] border-bleu bg-papier-3 px-3 py-3">
             <p className="font-mono text-[9.5px] tracking-[0.12em] text-bleu">
@@ -302,6 +322,30 @@ export function ProcesVerbal({
             </li>
           ))}
         </ul>
+
+        {detail && detail.brut === false ? (
+          <div className="border-l-[3px] border-rouge bg-papier-3 px-3 py-3">
+            <p className="font-mono text-[9.5px] tracking-[0.12em] text-rouge-texte">
+              POURQUOI CETTE PENSION EST BIEN AU-DESSUS DE CE QU’ON LIT PARTOUT
+            </p>
+            <p className="mt-1 text-[13.5px] leading-relaxed">
+              La pension moyenne d’un ancien artisan ou commerçant est de{" "}
+              <span className="font-semibold">
+                {euros(detail.ecartAvecLObserve.pensionMoyenneObservee)} €
+              </span>
+              , et le calcul ci-dessus en donne{" "}
+              <span className="font-semibold">{euros(detail.totale)} €</span>. Les
+              deux sont vrais, et ils ne portent pas sur la même population.
+            </p>
+            <p className="mt-2 text-[13.5px] leading-relaxed">
+              Ici on simule une carrière ENTIÈRE passée en indépendant. C’est le
+              cas de <span className="font-semibold">12 % d’entre eux</span> :
+              97 % des anciens artisans touchent aussi d’un autre régime, et la
+              moitié de leur pension vient d’un travail salarié. La moyenne basse
+              mesure des carrières courtes dans le régime, pas des règles avares.
+            </p>
+          </div>
+        ) : null}
 
         <Renvoi>
           Seule la première ligne est calculée au centime : c’est le capital qu’il

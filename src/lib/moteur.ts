@@ -117,16 +117,33 @@ export type Simulation = {
      * BRUTE, contrairement à la pension du plateau : ne jamais l'utiliser pour
      * la balance, seulement pour la montrer.
      */
-    detailPension: {
-      base: number;
-      renteRafp: number;
-      points: number;
-      totale: number;
-      minimumGaranti: boolean;
-      brut: true;
-      note: string;
-      versant?: string;
-    } | null;
+    detailPension:
+      | {
+          brut: true;
+          base: number;
+          renteRafp: number;
+          points: number;
+          totale: number;
+          minimumGaranti: boolean;
+          note: string;
+          versant?: string;
+        }
+      | {
+          brut: false;
+          base: number;
+          complementaire: number;
+          points: number;
+          revenuAnnuelMoyen: number;
+          totale: number;
+          anneesRetenues: number;
+          note: string;
+          ecartAvecLObserve: {
+            pensionMoyenneObservee: number;
+            source: string;
+            pourquoi: string;
+          };
+        }
+      | null;
   };
   verdict: {
     braquage: boolean;

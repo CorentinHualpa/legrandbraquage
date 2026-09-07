@@ -463,10 +463,11 @@ test('fonction publique : le minimum garanti prend le relais en bas de grille', 
 });
 
 test('un régime non instruit LÈVE, il ne retombe pas sur le salarié', () => {
-  // C'est la garde qui protège le dossier : servir le calcul du salarié à un
-  // indépendant produirait un chiffre faux et parfaitement crédible.
-  assert.throws(() => deroulerCarriere(2500, { regime: 'tns' }), /non instruit/);
-  assert.throws(() => M.simuler({ netMensuel: 2500, statut: 'independant' }), /non instruit/);
+  // La garde qui protège le dossier : servir le calcul d'un régime à un autre
+  // produirait un chiffre faux et parfaitement crédible. Les trois régimes du
+  // moteur sont instruits ; tout ce qui n'est pas dans la table doit lever.
+  assert.throws(() => deroulerCarriere(2500, { regime: 'micro-entrepreneur' }), /non instruit/);
+  assert.throws(() => M.simuler({ netMensuel: 2500, regime: 'agriculteur' }), /non instruit/);
 });
 
 test('un patron de TPE doit dire sa forme juridique, sinon on refuse', () => {
@@ -526,5 +527,106 @@ test('LE SECOND CHIFFRE DU PROJET : le pivot du fonctionnaire n’est pas celui 
   assert.equal(
     M.salairePivot({ statut: 'fonctionnaire', versant: 'fpe', perimetre: p }),
     null,
+  );
+});
+
+// ─── Le régime du travailleur non salarié ────────────────────────────────────
+// ⚠ L'étalon N'EST PAS l'API de mon-entreprise.urssaf.fr : elle sert encore
+// l'ancien barème (17,75 %, plafond PRCI à 43 891 €, CSG assise sur l'assiette
+// PLUS les cotisations). La table ci-dessous est reconstruite depuis le barème
+// opposable, et chacune de ses lignes se recalcule à la main.
+
+import * as TNS from './tns.js';
+
+test('TNS : les six points de contrôle du barème opposable', () => {
+  // 1. Le plafond porte sur l'ABATTEMENT, et il mord à 5 PASS PILE.
+  assert.equal(Math.round(TNS.assietteUnique(240300).abattement), 62478);
+  assert.equal(
+    Math.round(TNS.assietteUnique(400000).abattement),
+    Math.round(TNS.assietteUnique(240300).abattement),
+    'au-delà de 5 PASS l’abattement ne bouge plus',
+  );
+  // 2. Le plancher d'abattement, souvent oublié.
+  assert.ok(Math.abs(TNS.assietteUnique(3000).abattement - 845.86) < 0.01);
+  // 3. Entre les deux, l'assiette vaut 74 % pile.
+  assert.equal(Math.round(TNS.assietteUnique(100000).assiette), 74000);
+  // 4. Le plancher de retraite de base, au SMIC du 1er JANVIER.
+  assert.equal(Math.round(TNS.cotisationsAnnuelles(1).lignes.retraiteBase), 967);
+  // 5. La valeur du texte, pas celle de la page de l'URSSAF qui dit 17 494 €.
+  assert.equal(
+    Math.round(TNS.cotisationsAnnuelles(400000).lignes.retraiteComplementaire),
+    17013,
+  );
+  // 6. LE PLUS DISCRIMINANT : taux progressif et non barème marginal. Un
+  // barème marginal donnerait environ 74 € au lieu de 505 € brut. Facteur 7.
+  const c = TNS.cotisationsAnnuelles(30000);
+  assert.equal(Math.round(c.assiette), 22200);
+  assert.equal(Math.round(c.lignes.ij), 111);
+  assert.equal(Math.round(c.lignes.maladie), 394);
+});
+
+test('TNS : la table de référence complète, au centime', () => {
+  const table = [
+    [5000, 1914], [10000, 2951], [15000, 4320], [20000, 5711], [30000, 8833],
+    [40000, 12272], [50000, 15593], [64946, 20772], [80000, 24822],
+    [100000, 30489], [150000, 42436], [200000, 54488], [240300, 63172],
+    [300000, 76435], [400000, 96455],
+  ];
+  for (const [rbs, attendu] of table) {
+    const total = Math.round(TNS.cotisationsAnnuelles(rbs).total);
+    assert.ok(
+      Math.abs(total - attendu) <= 3,
+      `revenu ${rbs} : ${total} € attendu ${attendu} €`,
+    );
+  }
+});
+
+test('TNS : le taux effectif est une CLOCHE, pas une droite', () => {
+  // C'est le résultat le plus utile de ce régime pour la page méthode, et il
+  // contredit l'intuition : le taux monte, culmine au voisinage d'un plafond
+  // d'assiette, puis REDESCEND. Un moteur qui rend une droite est faux.
+  const t = (rbs) => TNS.cotisationsAnnuelles(rbs).taux;
+  assert.ok(t(64946) > t(20000), 'il monte jusqu’au sommet');
+  assert.ok(t(64946) > t(200000), 'puis il redescend');
+  assert.ok(Math.abs(t(64946) * 100 - 31.98) < 0.02, `sommet à ${(t(64946) * 100).toFixed(2)} %`);
+});
+
+test('TNS : aucune part employeur, et c’est le régime qui le dit', () => {
+  // Un indépendant voit cent pour cent de ce qu'il verse. Zéro n'est pas un
+  // trou dans le calcul, c'est le résultat.
+  const s = M.simuler({ netMensuel: 3000, statut: 'independant' });
+  assert.equal(s.plateauGauche.lignes.patronales, 0);
+  assert.ok(s.plateauGauche.lignes.salariales > 0);
+});
+
+test('TNS : la pension se CALCULE, faute de taux de remplacement publié', () => {
+  const s = M.simuler({ netMensuel: 3000, statut: 'independant' });
+  const d = s.plateauDroit.detailPension;
+  assert.equal(d.brut, false);
+  assert.ok(d.base > 0 && d.complementaire > 0);
+  // Vingt-cinq meilleures années, chacune plafonnée au plafond de sécurité
+  // sociale : la base ne peut pas dépasser la moitié de ce plafond mensuel.
+  assert.ok(d.base <= (48060 / 2) / 12 + 0.01, `base = ${d.base.toFixed(0)} €/mois`);
+  assert.equal(d.anneesRetenues, 25);
+  assert.equal(s.plateauDroit.pensionMensuelle, d.totale);
+});
+
+test('TNS : inversion du disponible vers le revenu brut social', () => {
+  for (const rbs of [2000, 4000, 8000]) {
+    const { netAvantImpot } = TNS.netsDepuisBrut(rbs);
+    assert.ok(
+      Math.abs(TNS.brutDepuisNet(netAvantImpot) - rbs) < 0.5,
+      `revenu ${rbs} retrouvé à ${TNS.brutDepuisNet(netAvantImpot).toFixed(2)}`,
+    );
+  }
+});
+
+test('un patron de TPE en SARL passe bien par le régime des indépendants', () => {
+  const sarl = M.simuler({ netMensuel: 4000, statut: 'tpe', formeTpe: 'sarl-majoritaire' });
+  const independant = M.simuler({ netMensuel: 4000, statut: 'independant' });
+  assert.equal(sarl.entree.regime, 'tns');
+  assert.equal(
+    Math.round(sarl.plateauGauche.total),
+    Math.round(independant.plateauGauche.total),
   );
 });
