@@ -22,7 +22,7 @@ const PIECE: Record<PosteDuPlateau, { numero: NumeroPiece; legende: string }> = 
 
 const QUESTION: Record<PosteDuPlateau, string> = {
   ecole: "« L’école. Ça vous a servi, ou vous avez séché ? »",
-  sante: "« Et la santé ? Vous m’avez l’air solide. Ou pas. »",
+  sante: "« Et la santé ? Vous m’avez l’air solide. En quelque sorte. »",
   chomage: "« Le chômage. Vous y êtes passé ? Combien de temps ? »",
 };
 
@@ -135,7 +135,7 @@ export function PalierEcran({
             <p className="text-[13px] leading-relaxed text-ligne">
               De la naissance à {PRIX_SANTE.dernierAge + 1} ans, ça fait{" "}
               <span className="font-medium text-papier">{eurosSigne(santeSurUneVie())}</span>. Ce cumul est un
-              calcul à nous, la DREES publie les tranches. Et c’est la part remboursée, pas ce que tu as payé.
+              calcul à nous, la DREES publie les tranches. Et c’est la part remboursée, pas ce que vous avez payé.
             </p>
             <p className="text-[13px] leading-relaxed text-ligne">{PRIX_SANTE.source}.</p>
             <Lien href={PRIX_SANTE.url}>Le jeu de données de la DREES</Lien>

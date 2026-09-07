@@ -101,7 +101,7 @@ export function CarteAvis({
               </div>
               <div className="flex items-baseline justify-between gap-3">
                 <span className="text-[13.5px] font-bold">
-                  {braquage ? "Manque à gagner" : "En ta faveur"}
+                  {braquage ? "Manque à gagner" : "En votre faveur"}
                 </span>
                 <span
                   className={`chiffres font-mono text-[20px] font-semibold tracking-[-0.02em] ${braquage ? "text-rouge-texte" : "text-bleu"}`}
@@ -128,7 +128,7 @@ export function CarteAvis({
               {SITE_HOTE}
             </span>
             <span className="text-[11.5px] text-encre-2 italic">
-              Combien t’ont-ils braqué ? La déposition prend dix secondes.
+              Combien vous ont-ils braqué ? La déposition prend dix secondes.
             </span>
           </div>
           <span className="shrink-0 font-mono text-[8.5px] text-encre-3">

@@ -87,7 +87,7 @@ export function Bourse({
     >
       <Commissaire>
         « Alors, entre nous. Ces {eurosSigne(simulation.plateauGauche.total)} sur 43 ans. Si vous aviez
-        eu le choix, vous l’auriez mis où, le pognon ? »
+        eu le choix, vous l’auriez mis où, ce pognon ? »
       </Commissaire>
 
       {/* La table. Les enveloppes sont des boutons posés sur la photo. */}

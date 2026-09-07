@@ -80,7 +80,7 @@ export function Butin({
           <span className="chiffres font-mono font-medium text-papier">{deputes.toFixed(1).replace(".", ",")}</span> années de salaire net d’un député.
           {montant >= SEUIL_ANNEES ? (
             <>
-              {" "}<span className="chiffres font-mono font-medium text-papier">{annees.toFixed(1).replace(".", ",")}</span> années de ta vie sans travailler, à ton niveau de vie.
+              {" "}<span className="chiffres font-mono font-medium text-papier">{annees.toFixed(1).replace(".", ",")}</span> années de votre vie sans travailler, à votre niveau de vie.
             </>
           ) : null}
         </p>

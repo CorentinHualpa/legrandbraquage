@@ -91,7 +91,7 @@ const ECOLE_JUSQU_AU_BAC =
  */
 export const PALIERS = {
   ecole: {
-    question: 'L’école, ça t’aura servi ?',
+    question: 'L’école, ça vous aura servi ?',
     defaut: 'bac',
     choix: [
       { id: 'rien', libelle: 'J’ai séché, ça ne m’a servi à rien', repere: '0 %', montant: 0,
@@ -108,27 +108,27 @@ export const PALIERS = {
       // financé que jusqu'au bac. ⚠ Une école privée SOUS CONTRAT avant le bac,
       // elle, coûte à l'État presque autant que le public (il paie les
       // professeurs) : on ne la distingue pas, et l'écran le dit.
-      { id: 'prive', libelle: 'Bac +5, mais dans le privé, payé par mes parents', repere: 'BAC +5 PRIVÉ',
+      { id: 'prive', libelle: 'Bac +5, mais dans le privé, payé par mon papa', repere: 'BAC +5 PRIVÉ',
         montant: ECOLE_JUSQU_AU_BAC,
         regle: 'jusqu’au bac seulement : les études supérieures privées, c’est vous qui les avez payées' },
     ],
   },
   sante: {
-    question: 'Ta santé, sur toute ta vie ?',
+    question: 'Votre santé, sur toute votre vie ?',
     defaut: 'normal',
     choix: [
       { id: 'fer', libelle: 'Santé de fer, jamais vu un médecin', repere: '¼', facteur: 0.25,
         regle: 'un quart de ce que la Sécu rembourse à chaque âge' },
       { id: 'normal', libelle: 'Comme tout le monde, un rhume et une jambe cassée', repere: '×1', facteur: 1,
         regle: 'ce que la Sécu rembourse à chaque âge, de la naissance à 85 ans' },
-      { id: 'tuile', libelle: 'Une grosse tuile, une fois : un cancer soigné, une opération lourde', repere: '×1,5', facteur: 1.5,
+      { id: 'tuile', libelle: 'Une grosse tuile, une fois : un cancer mis au tapis, une opération lourde', repere: '×1,5', facteur: 1.5,
         regle: 'une fois et demie ce que la Sécu rembourse à chaque âge' },
-      { id: 'fragile', libelle: 'Une maladie chronique, l’hôpital tous les mois', repere: '×2,5', facteur: 2.5,
+      { id: 'fragile', libelle: 'Une maladie chronique, l’hôpital tous les mois, mais j’ai la positive attitude', repere: '×2,5', facteur: 2.5,
         regle: 'deux fois et demie ce que la Sécu rembourse à chaque âge' },
     ],
   },
   chomage: {
-    question: 'Le chômage, dans ta vie ?',
+    question: 'Le chômage, dans votre vie ?',
     defaut: 'trou',
     choix: [
       { id: 'jamais', libelle: 'Jamais', repere: '0 MOIS', mois: 0, regle: 'rien n’est compté' },
@@ -136,7 +136,7 @@ export const PALIERS = {
         regle: 'six mois d’allocation moyenne' },
       { id: 'deuxAns', libelle: 'Deux ans, le temps de me retourner', repere: '24 MOIS', mois: 24,
         regle: 'vingt-quatre mois d’allocation moyenne' },
-      { id: 'longue', libelle: 'Quatre ans et plus, c’est ma vraie carrière', repere: '48 MOIS', mois: 48,
+      { id: 'longue', libelle: 'Quatre ans et plus, c’est ma carrière de cœur', repere: '48 MOIS', mois: 48,
         regle: 'quarante-huit mois d’allocation moyenne, sur plusieurs épisodes' },
     ],
   },
@@ -183,7 +183,7 @@ export function lignesChoisies(paliers, regime) {
   const sortie = {
     education: {
       montant: montantEcole(ecole.id),
-      libelle: 'L’école, payée pour toi',
+      libelle: 'L’école, payée pour vous',
       calcule: true,
       note: ecole.regle,
       palier: ecole.id,
@@ -191,7 +191,7 @@ export function lignesChoisies(paliers, regime) {
     },
     sante: {
       montant: montantSante(sante.id),
-      libelle: 'Les soins, remboursés pour toi',
+      libelle: 'Les soins, remboursés pour vous',
       calcule: true,
       note: sante.regle,
       palier: sante.id,
@@ -202,7 +202,7 @@ export function lignesChoisies(paliers, regime) {
     const chomage = choix('chomage', paliers.chomage);
     sortie.chomage = {
       montant: montantChomage(chomage.id),
-      libelle: 'Le chômage, versé le jour où tu es tombé',
+      libelle: 'Le chômage, versé le jour où vous êtes tombé',
       calcule: true,
       note: chomage.regle,
       palier: chomage.id,

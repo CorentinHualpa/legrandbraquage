@@ -38,7 +38,7 @@ export function Liberation({
       photo={{ numero: 21, pieces, hauteur: 300, legende: "CLICHÉ 21 · IL REGARDE SA MONTRE" }}
       action={{ libelle: "Suivant", onClick: suivant }}
     >
-      <Kicker couleur="rouge">Sur une année, tu travailles pour eux du 1er janvier au</Kicker>
+      <Kicker couleur="rouge">Sur une année, vous travaillez pour eux du 1er janvier au</Kicker>
       <span className="text-[52px] leading-none font-bold tracking-[-0.02em]">{liberation.jour.texte}</span>
       <span className="chiffres -mt-1 font-mono text-[30px] leading-tight font-semibold tracking-[-0.03em] text-ligne">
         {liberation.heureTexte}
@@ -50,13 +50,13 @@ export function Liberation({
         </div>
         <div className="flex justify-between">
           <Kicker couleur="rouge">{String(partEux).replace(".", ",")} % pour eux</Kicker>
-          <Kicker>{String(partToi).replace(".", ",")} % pour toi</Kicker>
+          <Kicker>{String(partToi).replace(".", ",")} % pour vous</Kicker>
         </div>
       </div>
 
       <p className="text-[16px] leading-relaxed text-papier-2 italic">
-        Tout ce que ton travail rapporte jusqu’à cette date part chez eux. À partir de là seulement, tu
-        travailles pour toi. {liberation.part >= 0.5 ? "Plus de la moitié" : "Presque la moitié"} de l’année, chaque année.
+        Tout ce que votre travail rapporte jusqu’à cette date part chez eux. À partir de là seulement, vous
+        travaillez pour vous. {liberation.part >= 0.5 ? "Plus de la moitié" : "Presque la moitié"} de l’année, chaque année.
       </p>
       <Commissaire>
         « Regardez votre montre. Vous, vous bossez depuis janvier. Eux, ils encaissent depuis janvier. Et
@@ -67,8 +67,8 @@ export function Liberation({
 
       <Volet titre="Comment on calcule ça ?">
         <p className="text-[14px] leading-relaxed text-ligne">
-          C’est {pourcent(liberation.part, 1)} de ce que ton travail coûte en tout, part employeur comprise.
-          Rapporté à ce qui arrive vraiment sur ton compte, la même somme vaut{" "}
+          C’est {pourcent(liberation.part, 1)} de ce que votre travail coûte en tout, part employeur comprise.
+          Rapporté à ce qui arrive vraiment sur votre compte, la même somme vaut{" "}
           <span className="font-semibold text-papier">{liberation.partDuNet.toFixed(2).replace(".", ",")} € prélevés pour 1 € reçu</span>.
           Les deux chiffres sont exacts et ne racontent pas la même histoire :{" "}
           <a href="/methode" className="underline underline-offset-2">la méthode dit quel dénominateur on a pris, et pourquoi</a>.

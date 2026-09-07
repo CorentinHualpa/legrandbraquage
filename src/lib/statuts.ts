@@ -69,15 +69,15 @@ export const ACTIVITES: Array<{ id: Activite; libelle: string; precision: string
     id: "micro",
     libelle: "Micro-entrepreneur",
     precision:
-      "ex auto-entrepreneur : tu cotises sur ton chiffre d’affaires, à taux fixe, "
-      + "et tu ne déduis aucune charge",
+      "ex auto-entrepreneur : vous cotisez sur votre chiffre d’affaires, à taux fixe, "
+      + "et vous ne déduisez aucune charge",
   },
   {
     id: "ssi",
     libelle: "Entreprise au réel",
     precision:
-      "artisan, commerçant ou libéral non réglementé : tu cotises sur ton revenu, "
-      + "une fois tes charges déduites",
+      "artisan, commerçant ou libéral non réglementé : vous cotisez sur votre revenu, "
+      + "une fois vos charges déduites",
   },
   {
     id: "cipav",
@@ -180,34 +180,34 @@ export const LIGNES_PERIMETRE: Record<Regime, LignePerimetre[]> = {
    * clair ». Un ado doit pouvoir lire chaque ligne sans rien savoir.
    */
   salarie: [
-    { cle: "salariales", geste: "Les cotisations sur ta paie", nom: "la ligne que tu vois sur ta fiche, entre le brut et le net" },
-    { cle: "patronales", geste: "Ce que ton employeur verse en plus", nom: "pour toi, avant même ta paie : tu ne le vois jamais" },
+    { cle: "salariales", geste: "Les cotisations sur votre paie", nom: "la ligne que vous voyez sur votre fiche, entre le brut et le net" },
+    { cle: "patronales", geste: "Ce que votre employeur verse en plus", nom: "pour vous, avant même votre paie : vous ne le voyez jamais" },
     { cle: "impotRevenu", geste: "L’impôt sur le revenu", nom: "prélevé à la source sur chaque virement" },
-    { cle: "consommation", geste: "La TVA sur tout ce que tu achètes", nom: "et les taxes sur l’essence, l’alcool, le tabac" },
+    { cle: "consommation", geste: "La TVA sur tout ce que vous achetez", nom: "et les taxes sur l’essence, l’alcool, le tabac" },
   ],
   fonctionnaire: [
-    { cle: "salariales", geste: "Les retenues sur ton traitement", nom: "pension, CSG-CRDS et régime additionnel, chaque mois" },
-    { cle: "patronales", geste: "Ce que ton employeur public verse en plus", nom: "à ton propre régime de retraite : tu ne le vois jamais" },
+    { cle: "salariales", geste: "Les retenues sur votre traitement", nom: "pension, CSG-CRDS et régime additionnel, chaque mois" },
+    { cle: "patronales", geste: "Ce que votre employeur public verse en plus", nom: "à votre propre régime de retraite : vous ne le voyez jamais" },
     { cle: "impotRevenu", geste: "L’impôt sur le revenu", nom: "prélevé à la source sur chaque virement" },
-    { cle: "consommation", geste: "La TVA sur tout ce que tu achètes", nom: "et les taxes sur l’essence, l’alcool, le tabac" },
+    { cle: "consommation", geste: "La TVA sur tout ce que vous achetez", nom: "et les taxes sur l’essence, l’alcool, le tabac" },
   ],
   tns: [
-    { cle: "salariales", geste: "Les cotisations URSSAF", nom: "sur ton revenu, une fois tes charges déduites" },
-    { cle: "patronales", geste: "Part employeur", nom: "aucune : tu es ton propre employeur", sansObjet: true },
+    { cle: "salariales", geste: "Les cotisations URSSAF", nom: "sur votre revenu, une fois vos charges déduites" },
+    { cle: "patronales", geste: "Part employeur", nom: "aucune : vous êtes votre propre employeur", sansObjet: true },
     { cle: "impotRevenu", geste: "L’impôt sur le revenu", nom: "payé par acomptes, tous les mois ou tous les trimestres" },
-    { cle: "consommation", geste: "La TVA sur tout ce que tu achètes", nom: "et les taxes sur l’essence, l’alcool, le tabac" },
+    { cle: "consommation", geste: "La TVA sur tout ce que vous achetez", nom: "et les taxes sur l’essence, l’alcool, le tabac" },
   ],
   micro: [
-    { cle: "salariales", geste: "Les cotisations URSSAF", nom: "en pourcentage de tout ce que tu encaisses, charges comprises" },
-    { cle: "patronales", geste: "Part employeur", nom: "aucune : tu es ton propre employeur", sansObjet: true },
-    { cle: "impotRevenu", geste: "L’impôt sur le revenu", nom: "au barème, ou en versement libératoire avec tes cotisations" },
-    { cle: "consommation", geste: "La TVA sur tout ce que tu achètes", nom: "et les taxes sur l’essence, l’alcool, le tabac" },
+    { cle: "salariales", geste: "Les cotisations URSSAF", nom: "en pourcentage de tout ce que vous encaissez, charges comprises" },
+    { cle: "patronales", geste: "Part employeur", nom: "aucune : vous êtes votre propre employeur", sansObjet: true },
+    { cle: "impotRevenu", geste: "L’impôt sur le revenu", nom: "au barème, ou en versement libératoire avec vos cotisations" },
+    { cle: "consommation", geste: "La TVA sur tout ce que vous achetez", nom: "et les taxes sur l’essence, l’alcool, le tabac" },
   ],
   cipav: [
-    { cle: "salariales", geste: "Les cotisations URSSAF et CIPAV", nom: "sur ton revenu, une fois tes charges déduites" },
-    { cle: "patronales", geste: "Part employeur", nom: "aucune : tu es ton propre employeur", sansObjet: true },
+    { cle: "salariales", geste: "Les cotisations URSSAF et CIPAV", nom: "sur votre revenu, une fois vos charges déduites" },
+    { cle: "patronales", geste: "Part employeur", nom: "aucune : vous êtes votre propre employeur", sansObjet: true },
     { cle: "impotRevenu", geste: "L’impôt sur le revenu", nom: "payé par acomptes, tous les mois ou tous les trimestres" },
-    { cle: "consommation", geste: "La TVA sur tout ce que tu achètes", nom: "et les taxes sur l’essence, l’alcool, le tabac" },
+    { cle: "consommation", geste: "La TVA sur tout ce que vous achetez", nom: "et les taxes sur l’essence, l’alcool, le tabac" },
   ],
 };
 
@@ -230,34 +230,34 @@ export const LIGNES_PERIMETRE: Record<Regime, LignePerimetre[]> = {
  */
 export const OU_LIRE_SON_NET: Record<Regime, { label: string; aide: string }> = {
   salarie: {
-    label: "TON NET MENSUEL, AVANT IMPÔT SUR LE REVENU",
+    label: "VOTRE NET MENSUEL, AVANT IMPÔT SUR LE REVENU",
     aide:
-      "La ligne « net à payer avant impôt sur le revenu » de ta fiche de paie, "
+      "La ligne « net à payer avant impôt sur le revenu » de votre fiche de paie, "
       + "en gros caractères. Pas le virement reçu : l’impôt, on le compte ici.",
   },
   fonctionnaire: {
-    label: "TON NET MENSUEL, AVANT IMPÔT SUR LE REVENU",
+    label: "VOTRE NET MENSUEL, AVANT IMPÔT SUR LE REVENU",
     aide:
-      "La ligne « net à payer avant impôt sur le revenu » de ton bulletin de paie. "
+      "La ligne « net à payer avant impôt sur le revenu » de votre bulletin de paie. "
       + "Pas le virement reçu : l’impôt, on le compte ici.",
   },
   tns: {
-    label: "CE QU’IL TE RESTE PAR MOIS, AVANT IMPÔT SUR LE REVENU",
+    label: "CE QU’IL VOUS RESTE PAR MOIS, AVANT IMPÔT SUR LE REVENU",
     aide:
       "Ton revenu professionnel une fois les cotisations payées, avant l’impôt. "
-      + "Ni ton chiffre d’affaires, ni ce qui reste après les acomptes.",
+      + "Ni votre chiffre d’affaires, ni ce qui reste après les acomptes.",
   },
   cipav: {
-    label: "CE QU’IL TE RESTE PAR MOIS, AVANT IMPÔT SUR LE REVENU",
+    label: "CE QU’IL VOUS RESTE PAR MOIS, AVANT IMPÔT SUR LE REVENU",
     aide:
       "Ton revenu professionnel une fois les cotisations payées, avant l’impôt. "
-      + "Ni ton chiffre d’affaires, ni ce qui reste après les acomptes.",
+      + "Ni votre chiffre d’affaires, ni ce qui reste après les acomptes.",
   },
   micro: {
-    label: "TON CHIFFRE D’AFFAIRES ENCAISSÉ, PAR MOIS",
+    label: "VOTRE CHIFFRE D’AFFAIRES ENCAISSÉ, PAR MOIS",
     aide:
-      "Ce que tu déclares à l’URSSAF, hors TVA. Les cotisations et l’impôt, "
-      + "on les compte ici : tu vas les voir partir.",
+      "Ce que vous déclarez à l’URSSAF, hors TVA. Les cotisations et l’impôt, "
+      + "on les compte ici : vous allez les voir partir.",
   },
 };
 

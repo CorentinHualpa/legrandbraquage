@@ -53,7 +53,7 @@ export function Couverture({ pieces, porterPlainte }: { pieces: Pieces; porterPl
           Porter plainte
         </button>
         <p className="text-center text-[12.5px] text-ligne">
-          Rien n’est enregistré. Tout se calcule dans ton téléphone.{" "}
+          Rien n’est enregistré. Tout se calcule dans votre téléphone.{" "}
           <a href="/methode" className="underline underline-offset-2">La méthode.</a>
         </p>
       </div>

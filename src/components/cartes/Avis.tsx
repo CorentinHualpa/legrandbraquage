@@ -111,7 +111,7 @@ export function Avis({
       actionSecondaire={{ libelle: "Refaire la déposition", onClick: recommencer }}
       pied={
         <p className="text-center text-[12.5px] text-ligne">
-          Le lien porte ton salaire, ton statut, tes réponses et ton enveloppe, rien d’autre.{" "}
+          Le lien porte votre salaire, votre statut, vos réponses et votre enveloppe, rien d’autre.{" "}
           <a href="/methode" className="underline underline-offset-2">Comment c’est calculé.</a>
         </p>
       }

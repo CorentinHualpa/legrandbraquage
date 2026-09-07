@@ -101,7 +101,7 @@ export function Deposition({
           </span>
         </div>
         <p id="net-aide" className="text-[13px] leading-snug text-encre-2">
-          {ouLire.aide} On rejoue toute ta carrière avec :{" "}
+          {ouLire.aide} On rejoue toute votre carrière avec :{" "}
           <strong className="text-encre">43 ans, de 22 à 64 ans</strong>, sur la courbe moyenne des salaires.
         </p>
       </Papier>

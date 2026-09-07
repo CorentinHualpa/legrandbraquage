@@ -57,14 +57,14 @@ export function Verdict({
           <p className="text-[38px] leading-[1.05] font-extrabold">{verdict.braquage ? "COUPABLE" : "RELAXE"}</p>
         </div>
         <p className="text-[15.5px] leading-snug text-encre-2">
-          Placé en {cran.nom} à {taux(cran.reel)}, ton argent aurait fait {eurosSigne(capital)}.
-          Ils t’auront rendu {eurosSigne(plateauDroit.total)}.
+          Placé en {cran.nom} à {taux(cran.reel)}, votre argent aurait fait {eurosSigne(capital)}.
+          Ils vous auront rendu {eurosSigne(plateauDroit.total)}.
         </p>
         <span className={`chiffres font-mono text-[40px] leading-none font-semibold tracking-[-0.03em] ${verdict.braquage ? "text-rouge" : "text-bleu"}`}>
           {eurosSigne(verdict.ecart)}
         </span>
         <p className="text-[16px] leading-snug text-encre-2">
-          {verdict.braquage ? "de manque à gagner, pour toi." : "de mieux, grâce à eux."}
+          {verdict.braquage ? "de manque à gagner, pour vous." : "de mieux, grâce à eux."}
         </p>
         <div className="flex w-full justify-between border-t border-ligne pt-2">
           <span className="font-mono text-[10px] tracking-[0.1em] text-rouge-texte">PLACÉ {euros(capital)} €</span>
@@ -86,24 +86,24 @@ export function Verdict({
 
       <Volet titre="Pourquoi ce verdict ?">
         <p className="text-[14px] leading-relaxed text-ligne">
-          Chaque année de ta carrière, ce qui t’a été pris (au périmètre coché à la pièce à conviction)
+          Chaque année de votre carrière, ce qui vous a été pris (au périmètre coché à la pièce à conviction)
           est placé à {taux(cran.reel)} par an, en réel, frais compris, jusqu’à 64 ans. Le capital
-          obtenu est comparé à ce qu’ils t’auront rendu : ta retraite jusqu’à 85 ans, l’école, les soins
-          et le chômage tels que tu les as déclarés. Change l’enveloppe, le verdict change.
+          obtenu est comparé à ce qu’ils vous auront rendu : votre retraite jusqu’à 85 ans, l’école, les soins
+          et le chômage tels que vous les avez déclarés. Changez d’enveloppe, le verdict change.
         </p>
         {fonctionnaire ? (
           <p className="text-[14px] leading-relaxed text-ligne">
             Chez un fonctionnaire, c’est la part employeur qui pèse : la contribution au régime de pension
             vaut <span className="font-semibold text-papier">37,65 % du traitement</span> à la CNRACL,
             82,28 % pour l’État, et le Conseil d’orientation des retraites écrit lui-même que ces taux ne
-            se comparent pas à ceux d’un employeur privé. Décoche cette ligne à la pièce à conviction pour
+            se comparent pas à ceux d’un employeur privé. Décochez cette ligne à la pièce à conviction pour
             voir le procès sans elle.
           </p>
         ) : null}
         <p className="text-[13px] leading-relaxed text-ligne">
-          Le seuil dépend de ce que tu as coché, de tes réponses au commissaire et de l’enveloppe :
+          Le seuil dépend de ce que vous avez coché, de vos réponses au commissaire et de l’enveloppe :
           {complet ? " ici, tout est compté." : " ici, une ligne au moins est décochée."} Le salaire net
-          médian du privé est de 2 190 € (INSEE 2024, net avant impôt). Ce n’est pas un verdict sur toi,
+          médian du privé est de 2 190 € (INSEE 2024, net avant impôt). Ce n’est pas un verdict sur vous,
           c’est un verdict sur le calcul.
         </p>
       </Volet>

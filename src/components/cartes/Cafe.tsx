@@ -84,8 +84,8 @@ export function Cafe({
         <Kicker couleur="rouge">Chaque mois, rien qu’en passant en caisse</Kicker>
         <Chiffre taille={48}>{eurosSigne(parMois)}</Chiffre>
         <p className="text-[14.5px] leading-relaxed text-ligne italic">
-          {euros(tvaMois)} € de TVA sur ce que tu achètes, {euros(accisesMois)} € d’accises sur ce que tu
-          viens de dire. Sur la carrière, {eurosSigne(surLaCarriere)}.
+          {euros(tvaMois)} € de TVA sur ce que vous achetez, {euros(accisesMois)} € d’accises sur ce que vous
+          venez de dire. Sur la carrière, {eurosSigne(surLaCarriere)}.
         </p>
       </div>
 
@@ -93,12 +93,12 @@ export function Cafe({
 
       <Volet titre="Comment on sait ça ?">
         <p className="text-[14px] leading-relaxed text-ligne">
-          La TVA : on ne connaît pas ton caddie, on applique à ce qu’il te reste après impôt le taux
-          d’effort moyen de ton niveau de vie, tel que le Conseil des prélèvements obligatoires le mesure
+          La TVA : on ne connaît pas votre caddie, on applique à ce qu’il vous reste après impôt le taux
+          d’effort moyen de votre niveau de vie, tel que le Conseil des prélèvements obligatoires le mesure
           par décile. Le café, lui, est à 10 % : onze centimes sur 1,20 €.
         </p>
         <p className="text-[14px] leading-relaxed text-ligne">
-          Les accises, à tes réponses : un paquet à {TABAC.prixPaquet.toFixed(2).replace(".", ",")} € dont{" "}
+          Les accises, à vos réponses : un paquet à {TABAC.prixPaquet.toFixed(2).replace(".", ",")} € dont{" "}
           {Math.round(TABAC.partTaxes * 100)} % de taxes, soit{" "}
           <span className="font-medium text-papier">{detail.taxesParPaquet.toFixed(2).replace(".", ",")} €</span> par paquet ;
           un plein de {CARBURANT.litres} L à {CARBURANT.prixPlein.toFixed(2).replace(".", ",")} € dont{" "}

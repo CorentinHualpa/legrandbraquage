@@ -37,14 +37,14 @@ export function Aparte({
         « Entre nous… ils étaient de bonne foi. »
       </p>
       <p className="text-[22px] leading-[1.3] text-papier-2 italic">
-        « Ils vous ont laissé un petit quelque chose dans le coffre. Ou pas. Ça dépend de vous. »
+        « Ils vous ont laissé un petit quelque chose dans le coffre. Ou pas. Ça dépend, en fait. »
       </p>
 
       <div className="grow" />
 
       <p className="border-t border-papier/25 pt-3 text-[13.5px] leading-relaxed text-ligne italic">
-        C’est la fameuse « redistribution » : une partie de ce qu’ils t’auront pris revient, en école, en
-        soins, en allocations, en retraite. Le commissaire va te poser trois questions, et le verdict
+        C’est la fameuse « redistribution » : une partie de ce qu’ils vous auront pris revient, en école, en
+        soins, en allocations, en retraite. Le commissaire va vous poser trois questions, et le verdict
         change avec.
       </p>
     </Carte>

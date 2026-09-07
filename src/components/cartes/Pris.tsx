@@ -45,7 +45,7 @@ export function Pris({
       photo={{ numero: 19, pieces, hauteur: 330, legende: "CLICHÉ 19 · LA PIÈCE À CONVICTION", position: "50% 35%" }}
       action={{ libelle: "Suivant", onClick: suivant }}
     >
-      <Kicker couleur="rouge">D’ici la fin de ta carrière, ils t’auront pris</Kicker>
+      <Kicker couleur="rouge">D’ici la fin de votre carrière, ils vous auront pris</Kicker>
       <Chiffre>{eurosSigne(plateauGauche.total)}</Chiffre>
       <Commissaire>
         {micro
@@ -91,7 +91,7 @@ export function Pris({
           })}
         </ul>
         <p className="text-[13px] leading-relaxed text-ligne">
-          Tape une ligne pour la sortir du total. Tout est en euros d’aujourd’hui, aux barèmes 2026 :{" "}
+          Tapez une ligne pour la sortir du total. Tout est en euros d’aujourd’hui, aux barèmes 2026 :{" "}
           <a href="/methode" className="underline underline-offset-2">la méthode, ligne par ligne</a>.
         </p>
       </Volet>

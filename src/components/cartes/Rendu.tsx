@@ -47,7 +47,7 @@ export function Rendu({
       photo={{ numero: 14, pieces, hauteur: 300, legende: "CLICHÉ 14 · LE MOT DU BRAQUEUR" }}
       action={{ libelle: "Une dernière question", onClick: suivant }}
     >
-      <Kicker couleur="bleu">Et sur toute ta vie, ils t’auront rendu</Kicker>
+      <Kicker couleur="bleu">Et sur toute votre vie, ils vous auront rendu</Kicker>
       <Chiffre>{eurosSigne(plateauDroit.total)}</Chiffre>
       <Commissaire>
         « Retraite comprise, jusqu’à 85 ans. {euros(plateauDroit.pensionMensuelle)} € par mois, pension seule.
@@ -60,7 +60,7 @@ export function Rendu({
         <ul className="flex flex-col">
           <li>
             <Ligne
-              libelle="Ta retraite, de 64 à 85 ans"
+              libelle="Votre retraite, de 64 à 85 ans"
               sous={`${euros(plateauDroit.pensionMensuelle)} € par mois, pension seule`}
               montant={eurosSigne(retraite.montant ?? 0)}
             />
@@ -82,11 +82,11 @@ export function Rendu({
           )}
         </ul>
         <p className="text-[13px] leading-relaxed text-ligne">
-          Tape une ligne pour changer ta réponse. La retraite, elle, se calcule :{" "}
+          Tapez une ligne pour changer votre réponse. La retraite, elle, se calcule :{" "}
           {regime === "tns" || regime === "cipav" || regime === "micro"
             ? "par les règles du régime, faute de tout taux de remplacement publié pour les indépendants."
-            : "avec le taux de remplacement que le COR projette pour ta génération."}{" "}
-          Le montant est le capital qu’il faudrait pour te servir cette pension jusqu’à 85 ans.
+            : "avec le taux de remplacement que le COR projette pour votre génération."}{" "}
+          Le montant est le capital qu’il faudrait pour vous servir cette pension jusqu’à 85 ans.
         </p>
         {detail && detail.brut ? (
           <p className="border-l-2 border-papier/40 pl-3 text-[13px] leading-relaxed text-ligne">
