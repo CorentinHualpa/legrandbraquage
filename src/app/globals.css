@@ -106,6 +106,29 @@ body {
 }
 
 /*
+ * Le flash du photographe, à l'arrivée du verdict, et seulement là.
+ *
+ * Un voile clair qui s'efface en un tiers de seconde, comme le déclenchement
+ * d'un appareil sur une scène de crime. Il ne prend jamais le clic (il est
+ * en pointer-events: none dans le composant) et la règle de mouvement réduit
+ * plus bas le ramène à un affichage instantané.
+ */
+@keyframes flash-verdict {
+  0% {
+    opacity: 0.92;
+  }
+  55% {
+    opacity: 0.2;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.flash-verdict {
+  animation: flash-verdict 340ms ease-out forwards;
+}
+
+/*
  * Tourner la page du dossier.
  *
  * La feuille qu'on quitte se soulève et part vers le haut en pivotant

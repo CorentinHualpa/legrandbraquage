@@ -119,6 +119,35 @@ export type Palier = {
 
 export const ECHELLE: Palier[] = [
   {
+    id: "france-tv",
+    image: "france-tv",
+    seuil: 6_645_416,
+    nom: "Une journée d’antenne de France Télévisions",
+    pointe: "Toutes chaînes confondues, du réveil à la nuit. Vous l’avez payée avant même de l’allumer.",
+    provenance: "reconstitue",
+    source:
+      "dotation publique de 2 425 577 000 € en loi de finances initiale pour 2026, divisée par 365 : "
+      + "aucun coût journalier n’est publié",
+  },
+  {
+    id: "film-moyen",
+    image: "film",
+    seuil: 5_090_000,
+    nom: "Un film français, budget moyen",
+    pointe: "Le devis moyen d’un long métrage. Le public, lui, ne figure pas au devis.",
+    provenance: "mediane",
+    source: "devis moyen d’un film d’initiative française, CNC, bilan 2024",
+  },
+  {
+    id: "film-median",
+    image: "film",
+    seuil: 3_190_000,
+    nom: "Un film français, budget médian",
+    pointe: "Un film sur deux coûte moins que ça. L’autre moitié coûte davantage.",
+    provenance: "mediane",
+    source: "devis médian d’un film d’initiative française, CNC, bilan 2024",
+  },
+  {
     id: "commune",
     image: "commune",
     seuil: 1_229_000,
@@ -168,6 +197,26 @@ export const ECHELLE: Palier[] = [
     source: "médiane des ventes de maisons avec terrain dans le Var, DVF 2025",
   },
   {
+    id: "cnc",
+    image: "cnc",
+    seuil: 425_000,
+    nom: "Une avance sur recettes du CNC",
+    pointe: "Versée avant le tournage. Remboursable sur les entrées, quand il y en a.",
+    provenance: "reconstitue",
+    source:
+      "22,1 M€ répartis entre 52 conventions d’avance avant réalisation, CNC : "
+      + "montant moyen calculé, le CNC ne publiant pas de moyenne",
+  },
+  {
+    id: "presidente",
+    image: "presidente",
+    seuil: 400_000,
+    nom: "Un an de salaire à la tête de France Télévisions",
+    pointe: "322 000 € fixes, 78 000 € de variable. Sur objectifs.",
+    provenance: "releve",
+    source: "rémunération de la présidence de France Télévisions, jaune budgétaire « État actionnaire », PLF 2026",
+  },
+  {
     id: "maison",
     image: "maison",
     seuil: 205_000,
@@ -195,6 +244,17 @@ export const ECHELLE: Palier[] = [
     pointe: "Avec un balcon, si le braquage s’est bien passé.",
     provenance: "mediane",
     source: "médiane des ventes de trois-pièces, DVF 2025",
+  },
+  {
+    id: "tour",
+    image: "tour",
+    seuil: 140_000,
+    nom: "Une arrivée d’étape du Tour de France",
+    pointe: "Ce qu’une ville paie pour voir arriver la caravane. Un simple départ coûte 90 000 €.",
+    provenance: "releve",
+    source:
+      "article 5 des contrats ASO annexés à des délibérations publiées : "
+      + "140 000 € HT une arrivée, 90 000 € HT un départ",
   },
   {
     id: "studio",
