@@ -92,6 +92,26 @@ const RATIOS = {
 } as const;
 
 /**
+ * Le même cadre, rogné tant que l'écran est étroit.
+ *
+ * Sert à la pièce d'ouverture, et à elle seule pour l'instant : sur un
+ * téléphone court, chaque pixel qu'elle prend repousse la question et le bouton
+ * sous la ligne de flottaison. En 21:9 elle en rend une cinquantaine sans rien
+ * perdre de la scène, qui est large.
+ *
+ * ⚠ Classes ÉCRITES EN TOUTES LETTRES. Tailwind lit le source et n'émet que ce
+ * qu'il y trouve littéralement : une classe fabriquée par concaténation
+ * (`sm:${...}`) compile sans erreur et ne produit aucun style.
+ */
+const RATIOS_ROGNES = {
+  "16:9": "aspect-[21/9] sm:aspect-[16/9]",
+  "4:3": "aspect-[16/9] sm:aspect-[4/3]",
+  "3:2": "aspect-[16/9] sm:aspect-[3/2]",
+  "3:4": "aspect-[3/4]",
+  "1:1": "aspect-square",
+} as const;
+
+/**
  * Une pièce photographique du dossier.
  *
  * Tant que le fichier n'est pas déposé dans `public/images/`, le cadre reste
@@ -106,6 +126,7 @@ export function Scelle({
   ratio = "16:9",
   legende,
   className = "",
+  rogneSurPetitEcran = false,
 }: {
   numero: number;
   nom: string;
@@ -121,10 +142,13 @@ export function Scelle({
   ratio?: keyof typeof RATIOS;
   legende?: string;
   className?: string;
+  /** Rogne le cadre tant que l'écran est étroit. Voir RATIOS_ROGNES. */
+  rogneSurPetitEcran?: boolean;
 }) {
+  const cadre = rogneSurPetitEcran ? RATIOS_ROGNES[ratio] : RATIOS[ratio];
   if (fichier) {
     return (
-      <figure className={`relative overflow-hidden border border-cadre-bord ${RATIOS[ratio]} ${className}`}>
+      <figure className={`relative overflow-hidden border border-cadre-bord ${cadre} ${className}`}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={`/images/${fichier}`}
@@ -144,7 +168,7 @@ export function Scelle({
 
   return (
     <div
-      className={`cadre-scelle relative flex items-center justify-center ${RATIOS[ratio]} ${className}`}
+      className={`cadre-scelle relative flex items-center justify-center ${cadre} ${className}`}
     >
       <span className="px-4 text-center font-mono text-[10px] leading-relaxed tracking-[0.1em] text-encre-3">
         PIÈCE N° {String(numero).padStart(2, "0")}

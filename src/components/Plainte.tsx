@@ -67,6 +67,7 @@ export function Plainte({
         ratio="16:9"
         legende="CLICHÉ 01 · SALON, 06 H 12"
         fichier={pieces[1]}
+        rogneSurPetitEcran
       />
 
       <div className="flex flex-col gap-3">
