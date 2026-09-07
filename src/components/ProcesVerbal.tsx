@@ -79,7 +79,10 @@ export function ProcesVerbal({
       <p className="flex gap-2 font-mono text-[11px] text-encre-3">
         <span className="shrink-0">PARTIE CIVILE :</span>
         <span className="grow border-b border-encre text-encre">
-          {nomStatut.toLowerCase()}, {euros(netMensuel)} € net avant impôt
+          {nomStatut.toLowerCase()},{" "}
+          {simulation.saisieEstLeBrut
+            ? `${euros(netMensuel)} € de chiffre d’affaires par mois`
+            : `${euros(netMensuel)} € net avant impôt`}
         </span>
       </p>
 
@@ -89,20 +92,48 @@ export function ProcesVerbal({
         pas ce qui arrive sur le compte, on le CALCULE, et l'écart se voit au
         lieu d'être déjà retranché dans le chiffre saisi.
       */}
-      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-l-[3px] border-rouge bg-papier-3 px-3 py-2.5">
+      <div className="flex flex-col gap-1.5 border-l-[3px] border-rouge bg-papier-3 px-3 py-2.5">
         <span className="font-mono text-[9.5px] tracking-[0.12em] text-rouge-texte">
-          CE QUI ARRIVE VRAIMENT SUR TON COMPTE
+          CHAQUE MOIS, DANS L’ORDRE OÙ ÇA PART
         </span>
-        <span className="chiffres font-mono text-[19px] font-semibold">
-          {euros(simulation.netApresImpotActuel)} €
-        </span>
-        <span className="text-[13px] text-encre-2">
-          l’impôt sur le revenu en emporte{" "}
-          <span className="font-semibold text-rouge-texte">
-            {euros(netMensuel - simulation.netApresImpotActuel)} € par mois
-          </span>
-          , tous les mois, avant même que tu les voies.
-        </span>
+        <dl className="flex flex-col divide-y divide-ligne">
+          {simulation.saisieEstLeBrut ? (
+            // Pour un micro, la saisie est le chiffre d'affaires : les cotisations
+            // se retirent SOUS ses yeux, c'est la première ligne qu'il attend.
+            <div className="flex items-baseline justify-between gap-3 py-1">
+              <dt className="text-[13.5px]">
+                L’URSSAF prend ses cotisations,{" "}
+                {pourcent(simulation.cotisationsActuelles / simulation.brutActuel, 1)} du CA
+              </dt>
+              <dd className="chiffres shrink-0 font-mono text-[14px] font-semibold text-rouge-texte">
+                − {euros(simulation.cotisationsActuelles)} €
+              </dd>
+            </div>
+          ) : (
+            // Pour les autres, les cotisations sont déjà retirées du net saisi :
+            // on les rappelle, parce qu'elles sont parties avant qu'on regarde.
+            <div className="flex items-baseline justify-between gap-3 py-1">
+              <dt className="text-[13.5px] text-encre-2">
+                Déjà retiré avant ton net, en cotisations
+              </dt>
+              <dd className="chiffres shrink-0 font-mono text-[13px] text-encre-2">
+                − {euros(simulation.cotisationsActuelles)} €
+              </dd>
+            </div>
+          )}
+          <div className="flex items-baseline justify-between gap-3 py-1">
+            <dt className="text-[13.5px]">Puis l’impôt sur le revenu</dt>
+            <dd className="chiffres shrink-0 font-mono text-[14px] font-semibold text-rouge-texte">
+              − {euros(simulation.netAvantImpotActuel - simulation.netApresImpotActuel)} €
+            </dd>
+          </div>
+          <div className="flex items-baseline justify-between gap-3 py-1.5">
+            <dt className="text-[14px] font-semibold">Ce qui arrive vraiment sur ton compte</dt>
+            <dd className="chiffres shrink-0 font-mono text-[19px] font-semibold">
+              {euros(simulation.netApresImpotActuel)} €
+            </dd>
+          </div>
+        </dl>
       </div>
 
       {/* ─── Le curseur qui transforme tout en direct ─────────────────────── */}
@@ -111,7 +142,9 @@ export function ProcesVerbal({
           htmlFor="curseur-salaire"
           className="font-mono text-[10px] tracking-[0.13em] text-encre-3"
         >
-          FAIS GLISSER TON NET AVANT IMPÔT, LE BUTIN SUIT
+          {simulation.saisieEstLeBrut
+            ? "FAIS GLISSER TON CHIFFRE D’AFFAIRES, LE BUTIN SUIT"
+            : "FAIS GLISSER TON NET AVANT IMPÔT, LE BUTIN SUIT"}
         </label>
         <input
           id="curseur-salaire"

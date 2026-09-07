@@ -854,6 +854,7 @@ test('l’entrée est le net AVANT impôt, et l’impôt s’ajoute par-dessus',
       Math.abs(annee.netAvantImpot - 2500) < 0.5,
       `${statut} : net avant impôt à ${annee.netAvantImpot.toFixed(2)} au lieu de 2500`,
     );
+    assert.equal(s.saisieEstLeBrut, false);
     // Et ce qui arrive sur le compte est STRICTEMENT plus bas, de l'impôt.
     assert.ok(annee.netApresImpot < annee.netAvantImpot, `${statut} : l’impôt n’emporte rien`);
     assert.ok(
@@ -987,14 +988,29 @@ test('micro : le versement libératoire remplace le barème', () => {
 });
 
 test('micro : la catégorie change tout, du simple au double', () => {
-  const preleve = (cat) =>
+  // À chiffre d'affaires ÉGAL (c'est lui qu'on saisit), les cotisations
+  // vont du simple au double entre la vente (12,3 %) et le libéral (25,6 %).
+  const cotisations = (cat) =>
     M.simuler({
       netMensuel: 2500, statut: 'independant', activite: 'micro', categorieMicro: cat,
-      perimetre: { salariales: true, patronales: true, impotRevenu: true, consommation: true },
-    }).plateauGauche.total;
-  // Entre la vente (12,3 %) et le libéral (25,6 %), le prélèvement double.
-  assert.ok(preleve('liberal') > preleve('vente') * 1.8, 'l’écart entre catégories doit être massif');
-  assert.ok(preleve('services') > preleve('vente'));
+    }).carriere.totaux.salariales;
+  assert.ok(cotisations('liberal') > cotisations('vente') * 2, 'l’écart entre catégories doit être massif');
+  assert.ok(cotisations('services') > cotisations('vente'));
   // Une catégorie inconnue LÈVE, elle ne retombe pas sur un défaut.
   assert.throws(() => MICRO.categorie('bricolage'), /inconnue/);
+});
+
+
+test('micro : ce qu’on saisit est le CHIFFRE D’AFFAIRES, et l’URSSAF part sous les yeux', () => {
+  // Un micro ne connaît pas « ce qu'il lui reste après cotisations », il
+  // connaît ce qu'il déclare. Lui faire saisir un net faisait disparaître de
+  // l'écran les 26 % que l'URSSAF prend : ils étaient déjà retirés du chiffre.
+  const s = M.simuler({ netMensuel: 2803, ageActuel: 36, statut: 'independant', activite: 'micro' });
+  const annee = s.carriere.annees.find((a) => a.age === 36);
+  assert.equal(s.saisieEstLeBrut, true);
+  assert.ok(Math.abs(annee.brut - 2803) < 0.01, `CA de l'année : ${annee.brut}`);
+  assert.ok(Math.abs(s.brutActuel - 2803) < 0.01);
+  // Et les cotisations du mois valent bien 25,8 % du CA, à l'écran comme au barème.
+  assert.ok(Math.abs(s.cotisationsActuelles - 2803 * 0.258) < 0.05, `cotisations ${s.cotisationsActuelles}`);
+  assert.ok(Math.abs(s.netAvantImpotActuel - 2803 * 0.742) < 0.05);
 });

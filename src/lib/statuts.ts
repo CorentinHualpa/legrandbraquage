@@ -320,10 +320,10 @@ export const OU_LIRE_SON_NET: Record<Regime, { label: string; aide: string }> = 
       + "Ni ton chiffre d’affaires, ni ce qui reste après les acomptes.",
   },
   micro: {
-    label: "CE QU’IL TE RESTE PAR MOIS, AVANT IMPÔT SUR LE REVENU",
+    label: "TON CHIFFRE D’AFFAIRES ENCAISSÉ, PAR MOIS",
     aide:
-      "Ton chiffre d’affaires encaissé, moins les cotisations, avant l’impôt. "
-      + "Tes charges professionnelles ne se déduisent pas : c’est le régime.",
+      "Ce que tu déclares à l’URSSAF, hors TVA. Les cotisations et l’impôt, "
+      + "on les compte ici : tu vas les voir partir.",
   },
 };
 

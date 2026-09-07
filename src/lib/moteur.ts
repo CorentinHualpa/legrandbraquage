@@ -185,6 +185,10 @@ export type Simulation = {
   };
   /** Ce qui arrive réellement sur le compte cette année, impôt déduit. */
   netApresImpotActuel: number;
+  brutActuel: number;
+  netAvantImpotActuel: number;
+  cotisationsActuelles: number;
+  saisieEstLeBrut: boolean;
   verdict: {
     braquage: boolean;
     ecart: number;

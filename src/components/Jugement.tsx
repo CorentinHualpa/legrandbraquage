@@ -135,7 +135,11 @@ export function Jugement({
             <span className="chiffres font-mono text-[34px] font-semibold tracking-[-0.035em] sm:text-[40px]">
               {euros(pivot)} €
             </span>
-            <span className="text-[14px] text-encre-3">net par mois</span>
+            <span className="text-[14px] text-encre-3">
+              {simulation.entree.regime === "micro"
+                ? "de chiffre d’affaires par mois"
+                : "net par mois"}
+            </span>
           </p>
           <p className="text-[14px] leading-relaxed text-encre-2">
             En dessous, tu repars avec plus que tu n’as donné. Au-dessus,

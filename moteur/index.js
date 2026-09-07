@@ -289,6 +289,14 @@ export function simuler(entree) {
     },
     /** Ce qui arrive réellement sur le compte cette année, impôt déduit. */
     netApresImpotActuel: anneeCourante.netApresImpot,
+    /** Le brut de cette année (le chiffre d'affaires, pour un micro), mensuel. */
+    brutActuel: anneeCourante.brut,
+    /** Ce qu'il reste une fois les cotisations payées, avant impôt, mensuel. */
+    netAvantImpotActuel: anneeCourante.netAvantImpot,
+    /** Les cotisations de cette année, côté agent, mensuelles. */
+    cotisationsActuelles: anneeCourante.salariales / 12,
+    /** Vrai quand ce qui a été saisi est le brut lui-même (le micro). */
+    saisieEstLeBrut: regime === 'micro',
     carriere,
     plateauGauche: {
       total: preleve,

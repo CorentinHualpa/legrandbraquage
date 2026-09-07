@@ -69,6 +69,17 @@ const REGIMES = {
   micro: {
     // Bénéfice BIC ou BNC : pas d'abattement de 10 % pour frais professionnels.
     fraisProfessionnels: false,
+    /*
+     * ⚠ Ce que saisit un micro-entrepreneur est son CHIFFRE D'AFFAIRES, pas un
+     * net. C'est le seul nombre qu'il connaît sans calcul : il le déclare à
+     * l'URSSAF chaque mois. Lui demander « ce qu'il te reste après
+     * cotisations » l'oblige à faire la soustraction de tête, et surtout ça
+     * fait disparaître de l'écran les 26 % que l'URSSAF prend, puisqu'ils sont
+     * déjà retirés du chiffre saisi. Constaté sur l'écran de Coq le 07/09/2026 :
+     * « l'URSSAF devrait me prendre 26 % en plus des impôts, non ? ». Elle les
+     * prenait, en silence.
+     */
+    entreeEstLeBrut: true,
     brutDepuisNet: micro.brutDepuisNet,
     netsDepuisBrut: micro.netsDepuisBrut,
     salariales: micro.retenuesSalariales,
@@ -166,9 +177,13 @@ export function deroulerCarriere(netMensuelActuel, opts = {}) {
      * Le net après impôt n'a pas disparu, il est DÉDUIT plus bas : c'est lui
      * qui sert de niveau de vie pour la TVA et pour la pension.
      */
-    const netAvantImpotVise = netMensuelActuel * facteurAge * facteurGeneration;
+    const saisie = netMensuelActuel * facteurAge * facteurGeneration;
 
-    const brut = R.brutDepuisNet(netAvantImpotVise, { ...opts, cible: 'avantImpot' });
+    // Un régime dont la saisie est déjà le brut (le micro, en chiffre
+    // d'affaires) n'a rien à inverser : on lui applique ses taux directement.
+    const brut = R.entreeEstLeBrut
+      ? saisie
+      : R.brutDepuisNet(saisie, { ...opts, cible: 'avantImpot' });
 
     const sal = R.salariales(brut, opts);
     const pat = R.patronales(brut, opts);
