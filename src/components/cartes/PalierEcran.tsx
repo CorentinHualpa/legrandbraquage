@@ -1,6 +1,6 @@
 "use client";
 
-import { Carte, Commissaire, Kicker, Lien, Papier, Reponse, Volet } from "./Carte";
+import { Carte, Commissaire, Lien, Reponse, Volet } from "./Carte";
 import type { NumeroPiece, Pieces } from "@/lib/images";
 import { euros, eurosSigne } from "@/lib/format";
 import {
@@ -88,13 +88,17 @@ export function PalierEcran({
         ))}
       </div>
 
-      <Papier rotation={poste === "sante" ? 0.7 : -0.7} className="flex flex-col gap-0.5 px-3.5 py-2.5">
-        <Kicker couleur="encre">{NOTE[poste]}</Kicker>
+      {/* La note du PV : kraft et encre bleue, pour ne pas se confondre avec la réponse choisie. */}
+      <div
+        className="flex flex-col gap-0.5 border-l-4 border-bleu bg-[#cdb98d] px-3.5 py-2.5 text-encre shadow-[0_12px_24px_rgba(0,0,0,0.45)]"
+        style={{ transform: `rotate(${poste === "sante" ? 0.7 : -0.7}deg)` }}
+      >
+        <span className="font-mono text-[9.5px] tracking-[0.14em] text-[#5a4a2a] uppercase">{NOTE[poste]}</span>
         <span className="chiffres montant-anime font-mono text-[30px] leading-none font-semibold tracking-[-0.03em] text-bleu">
           {eurosSigne(montant)}
         </span>
-        <span className="text-[12.5px] leading-snug text-encre-2">{choix?.regle}</span>
-      </Papier>
+        <span className="text-[12.5px] leading-snug text-[#3d3220]">{choix?.regle}</span>
+      </div>
 
       <div className="grow" />
 
@@ -108,6 +112,11 @@ export function PalierEcran({
               <span className="font-medium text-papier">{euros(PRIX_ECOLE.college)} €</span> au collège,{" "}
               <span className="font-medium text-papier">{euros(PRIX_ECOLE.lyceeGeneral)} €</span> au lycée,{" "}
               <span className="font-medium text-papier">{euros(PRIX_ECOLE.universite)} €</span> à l’université.
+            </p>
+            <p className="text-[13px] leading-relaxed text-ligne">
+              Une école supérieure privée, c’est la famille qui paie : on ne compte alors que jusqu’au bac.
+              Une école privée sous contrat avant le bac coûte à l’État presque autant que le public, il en paie
+              les professeurs : on ne la distingue pas.
             </p>
             <p className="text-[13px] leading-relaxed text-ligne">{PRIX_ECOLE.source}.</p>
             <Lien href={PRIX_ECOLE.url}>La note de la DEPP (PDF)</Lien>

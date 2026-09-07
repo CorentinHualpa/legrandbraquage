@@ -38,7 +38,7 @@ export function Liberation({
       photo={{ numero: 21, pieces, hauteur: 300, legende: "CLICHÉ 21 · IL REGARDE SA MONTRE" }}
       action={{ libelle: "Suivant", onClick: suivant }}
     >
-      <Kicker couleur="rouge">Chaque année, tu auras travaillé pour eux jusqu’au</Kicker>
+      <Kicker couleur="rouge">Sur une année, tu travailles pour eux du 1er janvier au</Kicker>
       <span className="text-[52px] leading-none font-bold tracking-[-0.02em]">{liberation.jour.texte}</span>
       <span className="chiffres -mt-1 font-mono text-[30px] leading-tight font-semibold tracking-[-0.03em] text-ligne">
         {liberation.heureTexte}
@@ -54,9 +54,13 @@ export function Liberation({
         </div>
       </div>
 
+      <p className="text-[16px] leading-relaxed text-papier-2 italic">
+        Tout ce que ton travail rapporte jusqu’à cette date part chez eux. À partir de là seulement, tu
+        travailles pour toi. {liberation.part >= 0.5 ? "Plus de la moitié" : "Presque la moitié"} de l’année, chaque année.
+      </p>
       <Commissaire>
-        « Du 1er janvier jusqu’à cette heure-là, c’est pour eux. Le reste de l’année est à vous. Ils sont
-        réglés comme une horloge. »
+        « Regardez votre montre. Vous, vous bossez depuis janvier. Eux, ils encaissent depuis janvier. Et
+        ils s’arrêtent pile à cette heure-là, chaque année. Réglés comme une horloge. »
       </Commissaire>
 
       <div className="grow" />

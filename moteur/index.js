@@ -25,6 +25,7 @@ import * as cipav from './cipav.js';
 import * as micro from './micro.js';
 import { TAUX_REMPLACEMENT, VERSANTS } from './baremes-fonction-publique.js';
 import { lignesChoisies } from './paliers.js';
+import { accisesAnnuelles } from './consommation.js';
 
 /**
  * Le régime social derrière une qualité de victime.
@@ -73,6 +74,9 @@ export {
 } from './capitalisation.js';
 export { deroulerCarriere, totalPreleve } from './carriere.js';
 export { heureDeLiberation } from './liberation.js';
+export {
+  HABITUDES, HABITUDES_DEFAUT, TABAC, CARBURANT, ALCOOL, accisesAnnuelles, detailAccises,
+} from './consommation.js';
 export {
   PALIERS, PALIERS_DEFAUT, PRIX_ECOLE, PRIX_SANTE, PRIX_CHOMAGE,
   montantEcole, montantSante, montantChomage, santeSurUneVie, santeParAn,
@@ -164,6 +168,9 @@ function contreparties(pensionMensuelle, regime = 'salarie', paliers = null) {
  * @param {{ecole: string, sante: string, chomage: string}} [entree.paliers]
  *   ce que la personne dit avoir reçu ; absent, école, santé et chômage restent
  *   nommés sans montant
+ * @param {{tabac: string, carburant: string, alcool: string}} [entree.habitudes]
+ *   tabac, carburant, alcool : les accises s'ajoutent à la TVA chaque année.
+ *   Absent, rien n'est ajouté.
  * @param {{rendementReel: number, fraisAnnuels?: number, fraisVersement?: number}} [entree.placement]
  *   où la personne dit qu'elle aurait mis l'argent. Présent, le VERDICT se juge sur
  *   le coût d'opportunité : ce que le prélèvement serait devenu, placé à ce taux,
@@ -186,6 +193,7 @@ export function simuler(entree) {
     perimetre = { salariales: true, patronales: true, impotRevenu: false, consommation: false },
     paliers = null,
     placement = null,
+    habitudes = null,
   } = entree;
 
   if (!(netMensuel > 0)) throw new Error('netMensuel doit être positif');
@@ -203,6 +211,17 @@ export function simuler(entree) {
     categorieMicro, versementLiberatoire,
   };
   const carriere = deroulerCarriere(netMensuel, opts);
+
+  /*
+   * Les accises déclarées (tabac, carburant, alcool) s'ajoutent à la TVA de
+   * chaque année. Le taux d'effort par décile ne couvre que la TVA, et
+   * personne ne peut deviner un paquet par jour : c'est la personne qui le dit.
+   */
+  if (habitudes) {
+    const accises = accisesAnnuelles(habitudes);
+    for (const a of carriere.annees) a.taxesConsommation += accises;
+    carriere.totaux.taxesConsommation += accises * carriere.annees.length;
+  }
 
   const preleve = totalPreleve(carriere.totaux, perimetre);
 
@@ -333,7 +352,7 @@ export function simuler(entree) {
       /** ⚠ Net AVANT impôt sur le revenu. L'impôt s'ajoute, il n'est pas déjà retranché. */
       netMensuel,
       statut, regime, versant, activite, categorieMicro, versementLiberatoire,
-      ageActuel, cadre, effectif, parts, couple, perimetre, paliers, placement,
+      ageActuel, cadre, effectif, parts, couple, perimetre, paliers, placement, habitudes,
     },
     /** Ce qui arrive réellement sur le compte cette année, impôt déduit. */
     netApresImpotActuel: anneeCourante.netApresImpot,

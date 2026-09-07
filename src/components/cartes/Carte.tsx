@@ -322,11 +322,18 @@ export function Reponse({
       type="button"
       onClick={onClick}
       aria-pressed={actif}
-      className={`flex min-h-[48px] items-center gap-3 px-3.5 py-2.5 text-left text-[16px] transition-colors ${
+      className={`flex min-h-[48px] items-center gap-2.5 px-3.5 py-2.5 text-left text-[16px] transition-colors ${
         centre ? "justify-center" : "justify-between"
-      } ${actif ? "bg-papier text-encre" : "border-[1.5px] border-papier/45 text-papier hover:border-papier"}`}
+      } ${actif ? "border-[1.5px] border-rouge bg-papier font-medium text-encre shadow-[0_6px_16px_rgba(0,0,0,0.45)]" : "border-[1.5px] border-papier/45 text-papier hover:border-papier"}`}
     >
-      <span>{children}</span>
+      <span className="flex items-center gap-2">
+        {actif ? (
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#b8342a" strokeWidth="2.2" aria-hidden className="shrink-0">
+            <path d="m3 8.5 3.2 3L13 4.5" />
+          </svg>
+        ) : null}
+        <span>{children}</span>
+      </span>
       {repere ? (
         <span className={`shrink-0 font-mono text-[12px] ${actif ? "text-encre-3" : "text-ligne"}`}>{repere}</span>
       ) : null}

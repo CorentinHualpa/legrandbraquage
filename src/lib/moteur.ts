@@ -30,16 +30,28 @@ import {
   montantSante as montantSanteJs,
   montantChomage as montantChomageJs,
   santeSurUneVie as santeSurUneVieJs,
+  HABITUDES as HABITUDES_JS,
+  HABITUDES_DEFAUT as HABITUDES_DEFAUT_JS,
+  accisesAnnuelles as accisesAnnuellesJs,
+  detailAccises as detailAccisesJs,
+  TABAC as TABAC_JS,
+  CARBURANT as CARBURANT_JS,
+  ALCOOL as ALCOOL_JS,
 } from "@moteur/index.js";
+
+/** Tabac, carburant, alcool : ce que la personne déclare, et qui ajoute des accises à la TVA. */
+export type Habitudes = { tabac: string; carburant: string; alcool: string };
+export type PosteHabitude = keyof Habitudes;
+export type ChoixHabitude = { id: string; libelle: string; repere: string; parAn: number };
 
 /**
  * Le second plateau, chiffré par la personne en paliers. Les identifiants
  * sont ceux de `moteur/paliers.js`, et un identifiant inconnu fait LEVER le
  * moteur au lieu de compter zéro.
  */
-export type PalierEcole = "rien" | "bac" | "etudes";
-export type PalierSante = "fer" | "normal" | "fragile";
-export type PalierChomage = "jamais" | "trou" | "deuxAns";
+export type PalierEcole = "rien" | "bac" | "etudes" | "master" | "prive";
+export type PalierSante = "fer" | "normal" | "tuile" | "fragile";
+export type PalierChomage = "jamais" | "trou" | "deuxAns" | "longue";
 export type Paliers = {
   ecole: PalierEcole;
   sante: PalierSante;
@@ -105,6 +117,8 @@ export type Entree = {
    * rendu. Le taux est RÉEL, inflation retirée, comme tout le dossier.
    */
   placement?: PlacementChoisi;
+  /** Absent, rien ne s'ajoute à la TVA. */
+  habitudes?: Habitudes;
 };
 
 /** Un taux réel et des frais : ce qu'on donne au moteur pour le coût d'opportunité. */
@@ -139,6 +153,7 @@ export type Simulation = {
     perimetre: Perimetre;
     paliers: Paliers | null;
     placement: PlacementChoisi | null;
+    habitudes: Habitudes | null;
   };
   carriere: {
     /** Une ligne par année de carrière, en euros d'aujourd'hui. */
@@ -318,6 +333,17 @@ export function salairePivot(opts: Partial<Entree> = {}): number | null {
 export const PALIERS_ALIBI = PALIERS_ALIBI_JS as PalierAlibi[];
 
 export const PALIERS = PALIERS_JS as Record<PosteDuPlateau, DefinitionPalier>;
+export const HABITUDES = HABITUDES_JS as Record<PosteHabitude, { question: string; defaut: string; choix: ChoixHabitude[] }>;
+export const HABITUDES_DEFAUT = HABITUDES_DEFAUT_JS as Habitudes;
+export const TABAC = TABAC_JS as { prixPaquet: number; partTaxes: number; source: string };
+export const CARBURANT = CARBURANT_JS as { prixPlein: number; litres: number; ticpeParLitre: number; source: string };
+export const ALCOOL = ALCOOL_JS as { parfoisParAn: number; chaqueSoirParAn: number; source: string };
+export function accisesAnnuelles(h: Habitudes): number {
+  return accisesAnnuellesJs(h) as number;
+}
+export function detailAccises(h: Habitudes): { tabac: number; carburant: number; alcool: number; taxesParPaquet: number; taxesParPlein: number } {
+  return detailAccisesJs(h) as { tabac: number; carburant: number; alcool: number; taxesParPaquet: number; taxesParPlein: number };
+}
 export const PALIERS_DEFAUT = PALIERS_DEFAUT_JS as Paliers;
 export const PRIX_ECOLE = PRIX_ECOLE_JS as {
   maternelle: number; elementaire: number; college: number; lyceeGeneral: number;

@@ -17,9 +17,12 @@
 import {
   CRANS_FRAIS,
   CRANS_RENDEMENT,
+  HABITUDES,
+  HABITUDES_DEFAUT,
   PALIERS,
   PALIERS_DEFAUT,
   PERIMETRE_DEFAUT,
+  type Habitudes,
   type Paliers,
   type Perimetre,
   type Statut,
@@ -42,6 +45,8 @@ export type Cas = {
   /** Où l'argent aurait été placé (cran du moteur) et à quels frais : c'est ce qui décide du verdict. */
   placementId: string;
   fraisId: string;
+  /** Tabac, carburant, alcool : les accises comptent dans ce qui est pris. */
+  habitudes: Habitudes;
 };
 
 /** Le placement qu'on sert quand la personne n'a rien choisi : le fonds en euros, ce que la moitié des Français détient. */
@@ -105,6 +110,9 @@ export function requeteDuCas(cas: Cas): string {
   // Le placement décide du verdict : un lien qui l'oublie rouvre un autre procès.
   if (cas.placementId !== PLACEMENT_DEFAUT_ID) q.set("pl", cas.placementId);
   if (cas.fraisId !== FRAIS_DEFAUT_ID) q.set("pf", cas.fraisId);
+  if (cas.habitudes.tabac !== HABITUDES_DEFAUT.tabac) q.set("ht", cas.habitudes.tabac);
+  if (cas.habitudes.carburant !== HABITUDES_DEFAUT.carburant) q.set("hc", cas.habitudes.carburant);
+  if (cas.habitudes.alcool !== HABITUDES_DEFAUT.alcool) q.set("ha", cas.habitudes.alcool);
   return `?${q.toString()}`;
 }
 
@@ -164,6 +172,11 @@ export function casDepuisRequete(recherche: string): Cas | null {
     },
     placementId: litParmi(q.get("pl"), CRANS_RENDEMENT.map((c) => c.id), PLACEMENT_DEFAUT_ID),
     fraisId: litParmi(q.get("pf"), CRANS_FRAIS.map((f) => f.id), FRAIS_DEFAUT_ID),
+    habitudes: {
+      tabac: litParmi(q.get("ht"), HABITUDES.tabac.choix.map((c) => c.id), HABITUDES_DEFAUT.tabac),
+      carburant: litParmi(q.get("hc"), HABITUDES.carburant.choix.map((c) => c.id), HABITUDES_DEFAUT.carburant),
+      alcool: litParmi(q.get("ha"), HABITUDES.alcool.choix.map((c) => c.id), HABITUDES_DEFAUT.alcool),
+    },
   };
 }
 

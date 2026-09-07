@@ -20,13 +20,16 @@ import { FRAIS_DEFAUT_ID, PLACEMENT_DEFAUT_ID, casDepuisRequete } from "@/lib/li
 import {
   CRANS_FRAIS,
   CRANS_RENDEMENT,
+  HABITUDES_DEFAUT,
   PALIERS_DEFAUT,
   PERIMETRE_DEFAUT,
   salairePivot,
   simuler,
+  type Habitudes,
   type Paliers,
   type Perimetre,
   type PosteDuPlateau,
+  type PosteHabitude,
   type Simulation,
 } from "@/lib/moteur";
 import { partsFiscales, regimeCalculable, regimeDe } from "@/lib/statuts";
@@ -69,6 +72,7 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
   /* Où l'argent aurait été placé : c'est ce qui décide du verdict, donc ça vit ici. */
   const [placementId, setPlacementId] = useState(PLACEMENT_DEFAUT_ID);
   const [fraisId, setFraisId] = useState(FRAIS_DEFAUT_ID);
+  const [habitudes, setHabitudes] = useState<Habitudes>(HABITUDES_DEFAUT);
   const [ecran, setEcran] = useState<Ecran>("couverture");
 
   const changer = (patch: Partial<EtatSaisie>) => setEtat((e) => ({ ...e, ...patch }));
@@ -111,6 +115,7 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
     setPaliers(cas.paliers);
     setPlacementId(cas.placementId);
     setFraisId(cas.fraisId);
+    setHabitudes(cas.habitudes);
     const ouvrable = regimeCalculable(regimeDe(cas.statut, cas.formeTpe, cas.activite));
     const ancre = window.location.hash.slice(1) as Ecran;
     if (ouvrable && (ECRANS as readonly string[]).includes(ancre) && ancre !== "couverture") {
@@ -133,8 +138,8 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
 
   const simulation: Simulation | null = useMemo(() => {
     if (!calculable || !(etat.netMensuel > 0)) return null;
-    return simuler({ ...etat, parts, perimetre, paliers, placement });
-  }, [calculable, etat, parts, perimetre, paliers, placement]);
+    return simuler({ ...etat, parts, perimetre, paliers, placement, habitudes });
+  }, [calculable, etat, parts, perimetre, paliers, placement, habitudes]);
 
   /**
    * Le témoin : la même personne, même net avant impôt, dans l'autre statut.
@@ -149,26 +154,28 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
         netMensuel: simulation.netAvantImpotActuel,
         statut: salarie ? "independant" : "salarie",
         activite: salarie ? "ssi" : undefined,
-        parts, couple: etat.couple, perimetre, paliers, placement,
+        parts, couple: etat.couple, perimetre, paliers, placement, habitudes,
       });
     } catch {
       return null;
     }
-  }, [simulation, ecran, etat.couple, parts, perimetre, paliers, placement]);
+  }, [simulation, ecran, etat.couple, parts, perimetre, paliers, placement, habitudes]);
 
   /** Le seuil, pour CE régime, CE périmètre et CES réponses. Quarante simulations, donc seulement au verdict. */
   const pivot = useMemo(() => {
     if (!simulation || ecran !== "verdict") return null;
     const { netMensuel: _net, ...reste } = etat;
     void _net;
-    return salairePivot({ ...reste, parts, perimetre, paliers, placement });
-  }, [simulation, ecran, etat, parts, perimetre, paliers, placement]);
+    return salairePivot({ ...reste, parts, perimetre, paliers, placement, habitudes });
+  }, [simulation, ecran, etat, parts, perimetre, paliers, placement, habitudes]);
 
   const aller = (e: Ecran) => setEcran(e);
   const suivant = () => aller(ecrans[Math.min(ecrans.length - 1, indexEcran + 1)]);
   const retour = () => aller(ecrans[Math.max(0, indexEcran - 1)]);
   const choisirPalier = (poste: PosteDuPlateau, id: string) =>
     setPaliers((p) => ({ ...p, [poste]: id }));
+  const choisirHabitude = (poste: PosteHabitude, id: string) =>
+    setHabitudes((h) => ({ ...h, [poste]: id }));
 
   if (ecran === "couverture") {
     return (
@@ -199,7 +206,7 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
   }
 
   const commun = { pieces, numero, total, suivant, retour };
-  const cas = { ...etat, perimetre, paliers, placementId, fraisId };
+  const cas = { ...etat, perimetre, paliers, placementId, fraisId, habitudes };
   const rangs: Record<"ecole" | "sante" | "chomage", string> = { ecole: "1 sur 3", sante: "2 sur 3", chomage: "3 sur 3" };
   if (regime === "fonctionnaire") {
     rangs.ecole = "1 sur 2";
@@ -209,7 +216,7 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
   return (
     <main className="min-h-dvh bg-nuit">
       {ecran === "cafe" ? (
-        <Cafe {...commun} simulation={simulation} />
+        <Cafe {...commun} simulation={simulation} habitudes={habitudes} choisir={choisirHabitude} />
       ) : ecran === "pris" ? (
         <Pris {...commun} simulation={simulation} perimetre={perimetre} setPerimetre={setPerimetre} />
       ) : ecran === "butin" ? (

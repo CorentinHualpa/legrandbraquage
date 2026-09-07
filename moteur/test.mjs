@@ -1045,7 +1045,7 @@ test('paliers : chômage, allocation nette moyenne Unédic fois les mois', () =>
 });
 
 test('paliers : un palier inconnu lève, il ne retombe pas sur zéro', () => {
-  assert.throws(() => M.montantEcole('master'), /Palier inconnu/);
+  assert.throws(() => M.montantEcole('doctorat'), /Palier inconnu/);
 });
 
 test('sans paliers, école, santé et chômage restent nommés sans montant', () => {
@@ -1133,4 +1133,33 @@ test('le pivot existe aussi sur le coût d’opportunité, et monte avec le rend
   const lent = salairePivot({ perimetre, paliers, placement: { rendementReel: 0.0075 } });
   const rapide = salairePivot({ perimetre, paliers, placement: { rendementReel: 0.0677 } });
   assert.ok(lent === null || rapide === null || rapide < lent, `${rapide} < ${lent}`);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Les accises déclarées : tabac, carburant, alcool, en plus de la TVA.
+test('sans habitudes, rien ne s’ajoute à la TVA', () => {
+  const s = simuler({ netMensuel: 2190 });
+  const t = simuler({ netMensuel: 2190, habitudes: { tabac: 'non', carburant: 'non', alcool: 'non' } });
+  assert.equal(s.carriere.totaux.taxesConsommation, t.carriere.totaux.taxesConsommation);
+});
+
+test('un paquet par jour ajoute 365 fois les taxes du paquet, chaque année', () => {
+  const sans = simuler({ netMensuel: 2190, habitudes: { tabac: 'non', carburant: 'non', alcool: 'non' } });
+  const avec = simuler({ netMensuel: 2190, habitudes: { tabac: 'jour', carburant: 'non', alcool: 'non' } });
+  const parAn = 365 * 13 * 0.825;
+  assert.ok(Math.abs((avec.carriere.totaux.taxesConsommation - sans.carriere.totaux.taxesConsommation) - parAn * avec.carriere.annees.length) < 1e-6);
+  assert.ok(Math.abs(M.accisesAnnuelles({ tabac: 'jour', carburant: 'non', alcool: 'non' }) - parAn) < 1e-9);
+});
+
+test('un plein par mois : TICPE sur 50 litres plus la TVA du plein', () => {
+  const parPlein = 50 * 0.6702 + (98.5 - 98.5 / 1.2);
+  assert.ok(Math.abs(M.accisesAnnuelles({ tabac: 'non', carburant: 'mois', alcool: 'non' }) - 12 * parPlein) < 1e-9);
+  assert.throws(() => M.accisesAnnuelles({ tabac: 'non', carburant: 'vélo', alcool: 'non' }), /Habitude inconnue/);
+});
+
+test('paliers : bac+5 dans le privé compte comme le bac, bac+5 public compte cinq ans de fac', () => {
+  assert.equal(M.montantEcole('prive'), M.montantEcole('bac'));
+  assert.equal(M.montantEcole('master'), 153_480 + 5 * 12460);
+  assert.equal(M.montantSante('tuile'), Math.round(213_377 * 1.5));
+  assert.equal(M.montantChomage('longue'), 48 * 1040);
 });

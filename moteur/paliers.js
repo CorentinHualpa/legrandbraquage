@@ -98,9 +98,19 @@ export const PALIERS = {
         regle: 'rien n’est compté' },
       { id: 'bac', libelle: 'Jusqu’au bac, et ça suffisait', repere: 'BAC', montant: ECOLE_JUSQU_AU_BAC,
         regle: 'trois ans de maternelle, cinq de primaire, quatre de collège, trois de lycée' },
-      { id: 'etudes', libelle: 'Mes études m’ont amené là où je suis', repere: 'BAC +3',
+      { id: 'etudes', libelle: 'Une licence, dans le public', repere: 'BAC +3',
         montant: ECOLE_JUSQU_AU_BAC + 3 * PRIX_ECOLE.universite,
         regle: 'jusqu’au bac, plus trois ans d’université' },
+      { id: 'master', libelle: 'Bac +5, dans le public', repere: 'BAC +5',
+        montant: ECOLE_JUSQU_AU_BAC + 5 * PRIX_ECOLE.universite,
+        regle: 'jusqu’au bac, plus cinq ans d’université' },
+      // Une école supérieure privée, c'est la famille qui paie : l'État n'a
+      // financé que jusqu'au bac. ⚠ Une école privée SOUS CONTRAT avant le bac,
+      // elle, coûte à l'État presque autant que le public (il paie les
+      // professeurs) : on ne la distingue pas, et l'écran le dit.
+      { id: 'prive', libelle: 'Bac +5, mais dans le privé, payé par mes parents', repere: 'BAC +5 PRIVÉ',
+        montant: ECOLE_JUSQU_AU_BAC,
+        regle: 'jusqu’au bac seulement : les études supérieures privées, c’est vous qui les avez payées' },
     ],
   },
   sante: {
@@ -109,9 +119,11 @@ export const PALIERS = {
     choix: [
       { id: 'fer', libelle: 'Santé de fer, jamais vu un médecin', repere: '¼', facteur: 0.25,
         regle: 'un quart de ce que la Sécu rembourse à chaque âge' },
-      { id: 'normal', libelle: 'Comme tout le monde', repere: '×1', facteur: 1,
+      { id: 'normal', libelle: 'Comme tout le monde, un rhume et une jambe cassée', repere: '×1', facteur: 1,
         regle: 'ce que la Sécu rembourse à chaque âge, de la naissance à 85 ans' },
-      { id: 'fragile', libelle: 'Tout le temps malade, hypocondriaque', repere: '×2,5', facteur: 2.5,
+      { id: 'tuile', libelle: 'Une grosse tuile, une fois : un cancer soigné, une opération lourde', repere: '×1,5', facteur: 1.5,
+        regle: 'une fois et demie ce que la Sécu rembourse à chaque âge' },
+      { id: 'fragile', libelle: 'Une maladie chronique, l’hôpital tous les mois', repere: '×2,5', facteur: 2.5,
         regle: 'deux fois et demie ce que la Sécu rembourse à chaque âge' },
     ],
   },
@@ -124,6 +136,8 @@ export const PALIERS = {
         regle: 'six mois d’allocation moyenne' },
       { id: 'deuxAns', libelle: 'Deux ans, le temps de me retourner', repere: '24 MOIS', mois: 24,
         regle: 'vingt-quatre mois d’allocation moyenne' },
+      { id: 'longue', libelle: 'Quatre ans et plus, c’est ma vraie carrière', repere: '48 MOIS', mois: 48,
+        regle: 'quarante-huit mois d’allocation moyenne, sur plusieurs épisodes' },
     ],
   },
 };
