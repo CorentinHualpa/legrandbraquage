@@ -5,7 +5,7 @@ c'est la seule façon de rendre le résultat opposable : n'importe qui peut le
 lire, le rejouer et le contredire.
 
 ```bash
-node --test moteur/     # 28 tests
+pnpm test               # 52 tests
 ```
 
 Aucune dépendance, aucune étape de build. Modules ES natifs, exécutables tels
@@ -107,9 +107,24 @@ ouvrir. À corriger dès qu'on l'a, et à dire dans la page méthodologie.
    `mon-entreprise.urssaf.fr` avant mise en ligne. L'application reste sur
    l'effectif < 50 en attendant.
 
-2. **Statuts autres que salarié du privé.** Indépendant, fonctionnaire et
-   patron de TPE sont dans les maquettes mais pas dans le moteur. Chacun a son
-   propre régime : ce sont trois chantiers distincts, pas un paramètre.
+2. **Le travailleur non salarié.** C'est le seul régime qui reste. Le
+   fonctionnaire est instruit depuis le 06/09/2026, dans ses trois versants.
+   Le patron de TPE n'a jamais été un régime de plus : un gérant majoritaire de
+   SARL cotise comme un travailleur non salarié, un président de SAS comme un
+   assimilé salarié, et le moteur aiguille sur la forme juridique.
+
+   ⚠ Un régime non instruit **lève** au lieu de retomber sur le salarié. Servir
+   les barèmes du privé à un indépendant produirait un chiffre faux et
+   parfaitement crédible, c'est-à-dire exactement ce que ce dossier reproche à
+   la partie adverse.
+
+3. **Le président de SAS et l'assurance chômage.** Il n'y cotise pas, et le
+   moteur lui applique encore le calcul complet du salarié. L'écart est de
+   quelques dixièmes de point, en sa défaveur.
+
+4. **La courbe de carrière du secteur public.** Elle existe à l'INSEE et nous ne
+   l'avons pas. Le fonctionnaire est projeté sur la courbe du privé : bonne
+   forme de carrière, pente pas nécessairement juste.
 
 ---
 
@@ -122,8 +137,53 @@ ouvrir. À corriger dès qu'on l'a, et à dire dans la page méthodologie.
 | `impot.js` | Impôt sur le revenu, TVA et taxes de consommation |
 | `carriere.js` | Projection sur quarante ans, en euros constants |
 | `capitalisation.js` | Les paliers de l'alibi, les frais, la rente |
-| `index.js` | `simuler()` et `salairePivot()` |
-| `test.mjs` | 28 tests, dont l'étalon URSSAF |
+| `baremes-fonction-publique.js` | Les barèmes publics, et l'avertissement du COR |
+| `fonction-publique.js` | Retenues, cotisations, pension d'un titulaire |
+| `liberation.js` | L'heure de libération, avec ses DEUX dénominateurs |
+| `index.js` | `simuler()`, `salairePivot()`, `placerSaRetraite()` |
+| `test.mjs` | 52 tests, dont l'étalon URSSAF |
 
 Toute modification d'un barème doit citer un texte officiel. C'est cette règle,
 et pas le ton de la page, qui rend le simulateur inattaquable.
+
+---
+
+## 4. Le fonctionnaire, et le chiffre à ne pas lire de travers
+
+Ce qui change du privé n'est pas un taux, c'est l'**assiette** : les primes,
+environ un quart du brut, sont hors de l'assiette de pension. Tout en découle,
+y compris ce paradoxe apparent : un fonctionnaire retient **deux points de
+moins** qu'un salarié du privé et a un taux de remplacement projeté **plus
+faible**.
+
+| | Retenues salariales | Coût patronal |
+|---|---|---|
+| Fonction publique d'État | 18,64 % | **78,70 %** |
+| Territoriale | 18,57 % | 46,10 % |
+| Hospitalière | 18,79 % | 47,57 % |
+| Privé, même brut | 20,86 % | 31,90 à 39,27 % |
+
+⚠⚠ **Ces taux patronaux ne se comparent pas, et c'est le COR qui l'écrit.** La
+contribution publique « ne résulte pas d'une générosité plus importante du
+régime public » et « ne peut pas être comparée à la contribution des employeurs
+des salariés du secteur privé ». Elle mesure une démographie : 1,29 cotisant par
+retraité contre 2,25 au régime général. Le taux qui financerait les seuls
+droits, hors invalidité et départs anticipés, serait de 34,7 %.
+
+**Conséquence directe, et c'est le second résultat du projet :** au périmètre
+complet, un fonctionnaire d'État n'a **aucun salaire pivot**. La balance ne
+penche jamais en sa faveur, à aucun niveau de traitement. Ce n'est pas un
+résultat sur les fonctionnaires, c'est un résultat sur le dénominateur, et
+publier le premier sans le second serait malhonnête. Un test verrouille ce cas.
+
+Le biais joue dans l'autre sens aussi : un employeur public ne cotise pas au
+chômage, il s'auto-assure. Le coût existe et ne figure sur aucune ligne. La
+contrepartie chômage disparaît donc des **deux** plateaux plutôt que d'être
+portée au crédit de quelqu'un qui ne l'a pas payée.
+
+Dernier piège, désamorcé : la pension publique se calcule par une formule
+publique, et il est tentant de la préférer à un taux de remplacement. Elle rend
+un montant **brut**. Le comparer au net d'un salarié gonflait la pension d'un
+quart et sortait un taux de remplacement de 83 %, très au-dessus de tout ce que
+le COR publie. Les deux régimes passent donc par le même taux net du COR, sur la
+même génération, et la formule reste exposée à part, marquée brute.
