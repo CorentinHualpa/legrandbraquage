@@ -774,8 +774,17 @@ test('l’impôt sur le revenu est chiffré dans TOUS les régimes', () => {
     assert.ok(ir > 100_000, `${statut} : impôt de ${Math.round(ir)} €, anormalement bas`);
     return ir;
   });
-  const ecartMax = (Math.max(...impots) - Math.min(...impots)) / Math.max(...impots);
-  assert.ok(ecartMax < 0.05, `écart d’impôt entre régimes : ${(ecartMax * 100).toFixed(1)} %`);
+  // ⚠ Ils ne sont PAS égaux, et il ne faut pas l'exiger : l'abattement de 10 %
+  // pour frais professionnels ne vaut que pour les traitements et salaires
+  // (CGI art. 83, 3°). Un bénéfice BIC ou BNC n'y a pas droit, donc à net avant
+  // impôt égal un indépendant est imposé sur une assiette plus large qu'un
+  // salarié. C'est le droit, pas une anomalie.
+  const [salarie, independant] = impots;
+  assert.ok(
+    independant > salarie * 1.15,
+    `l’indépendant paie ${Math.round(independant)} € contre ${Math.round(salarie)} € au salarié : `
+    + 'l’abattement de 10 % lui est-il appliqué à tort ?',
+  );
 });
 
 test('un net imposable non chiffrable LÈVE, il ne vaut pas zéro d’impôt', () => {
@@ -846,18 +855,121 @@ test('le point de bascule et la médiane INSEE se comparent enfin', () => {
   assert.ok(pivot < 2600, `pivot ${pivot} €, anormalement haut`);
 });
 
-test('le micro-entrepreneur LÈVE tant qu’il n’est pas instruit', () => {
-  // ⚠ Le cas le plus fréquent des freelances, et le plus dangereux à bâcler :
-  // un micro cotise sur son CHIFFRE D'AFFAIRES encaissé, à taux forfaitaire,
-  // sans déduire la moindre charge, et son impôt peut passer par un versement
-  // libératoire. Lui servir le barème du réel donnerait un chiffre faux et
-  // parfaitement crédible. Il a donc son propre identifiant de régime, et le
-  // moteur refuse de le calculer plutôt que de deviner.
+test('le micro-entrepreneur a son régime, et ne retombe JAMAIS sur le réel', () => {
   assert.equal(M.regimeDuStatut('independant', undefined, 'micro'), 'micro');
-  assert.throws(
-    () => M.simuler({ netMensuel: 2500, statut: 'independant', activite: 'micro' }),
-    /non instruit/,
-  );
-  // Et surtout : il ne retombe JAMAIS sur le réel.
   assert.notEqual(M.regimeDuStatut('independant', undefined, 'micro'), 'tns');
+  const micro = M.simuler({ netMensuel: 2500, statut: 'independant', activite: 'micro' });
+  const reel = M.simuler({ netMensuel: 2500, statut: 'independant' });
+  assert.equal(micro.entree.regime, 'micro');
+  assert.notEqual(
+    Math.round(micro.plateauGauche.total),
+    Math.round(reel.plateauGauche.total),
+  );
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Le micro-entrepreneur
+import * as MICRO from './micro.js';
+import { CATEGORIES } from './baremes-micro.js';
+
+test('micro : le taux du barème opposable, catégorie par catégorie', () => {
+  // CSS art. D613-4, version en vigueur depuis le 01/01/2026 (décret 2025-943).
+  // ⚠ Le décret 2024-484 programmait 26,1 % en BNC pour 2026 et le web le
+  // répète encore : c'est le texte en vigueur qui fait foi, à 25,6 %.
+  assert.equal(CATEGORIES.vente.taux, 0.123);
+  assert.equal(CATEGORIES.services.taux, 0.212);
+  assert.equal(CATEGORIES.liberal.taux, 0.256);
+
+  // La contribution formation S'AJOUTE au taux global, elle n'y est pas incluse.
+  assert.ok(Math.abs(MICRO.tauxTotal('liberal') - (0.256 + 0.002)) < 1e-9);
+  assert.ok(Math.abs(MICRO.tauxTotal('vente') - (0.123 + 0.001 + 0.00015)) < 1e-9);
+});
+
+test('micro : l’assiette est le CHIFFRE D’AFFAIRES, pas un revenu', () => {
+  // C'est toute la différence avec le réel : il paie sur ce qu'il encaisse,
+  // y compris sur ce qu'il a dépensé pour travailler.
+  const c = MICRO.cotisationsAnnuelles(40000, { categorieMicro: 'liberal' });
+  assert.equal(Math.round(c.assiette), 40000);
+  assert.equal(Math.round(c.total), Math.round(40000 * 0.258));
+  // Aucun plancher, aucun plafond, aucun palier : le taux est constant.
+  const petit = MICRO.cotisationsAnnuelles(5000, { categorieMicro: 'liberal' });
+  assert.ok(Math.abs(petit.taux - c.taux) < 1e-9);
+});
+
+test('micro : l’inversion est exacte, pas approchée', () => {
+  // Seul régime du moteur où elle peut l'être : tous les taux portent sur le
+  // même CA, sans palier. Une dichotomie ici serait un aveu d'ignorance.
+  for (const cat of ['vente', 'services', 'liberal']) {
+    for (const net of [1000, 2500, 5000]) {
+      const ca = MICRO.brutDepuisNet(net, { categorieMicro: cat });
+      const { netAvantImpot } = MICRO.netsDepuisBrut(ca, { categorieMicro: cat });
+      assert.ok(
+        Math.abs(netAvantImpot - net) < 1e-9,
+        `${cat} à ${net} € : retrouvé à ${netAvantImpot}`,
+      );
+    }
+  }
+});
+
+test('micro : il est imposé sur un revenu qu’il ne touche pas', () => {
+  // Le fait le plus contre-intuitif du régime. L'abattement forfaitaire ne
+  // mesure pas ses charges : il n'a aucune raison de coïncider avec ce qui lui
+  // reste vraiment, et le rapport entre les deux change avec la catégorie.
+  const ca = 40000 / 12;
+  const liberal = MICRO.netsDepuisBrut(ca, { categorieMicro: 'liberal' });
+  const services = MICRO.netsDepuisBrut(ca, { categorieMicro: 'services' });
+  assert.ok(liberal.netImposable < liberal.netAvantImpot, 'le libéral est imposé sur moins');
+  assert.ok(services.netImposable < services.netAvantImpot);
+  assert.notEqual(
+    Math.round((liberal.netImposable / liberal.netAvantImpot) * 1000),
+    Math.round((services.netImposable / services.netAvantImpot) * 1000),
+  );
+});
+
+test('micro : les droits à retraite suivent la circulaire Cnav, pas le raccourci', () => {
+  // ⚠ Le raccourci qu'on lit partout est « CA après abattement / 150 SMIC ».
+  // La chaîne officielle passe par le forfait global, sa clé de répartition, et
+  // un revenu RECONSTITUÉ au taux d'un indépendant au réel.
+  const d = MICRO.droitsRetraiteAnnuels(40000, { categorieMicro: 'liberal' });
+  const attenduPartBase = 40000 * 0.256 * 0.464;
+  assert.ok(Math.abs(d.partBase - attenduPartBase) < 0.01);
+  assert.ok(Math.abs(d.revenuCotise - attenduPartBase / 0.1787) < 0.01);
+  assert.ok(d.trimestres >= 1 && d.trimestres <= 4);
+
+  // Jamais plus de quatre trimestres dans une année, quel que soit le CA.
+  assert.equal(MICRO.droitsRetraiteAnnuels(10_000_000, { categorieMicro: 'liberal' }).trimestres, 4);
+
+  // ⚠ Le revenu porté au compte est TRÈS inférieur au chiffre d'affaires :
+  // servir le CA au calcul de pension la gonflerait d'un facteur trois.
+  assert.ok(d.revenuCotise < 40000 * 0.75, `revenu cotisé ${Math.round(d.revenuCotise)} €`);
+});
+
+test('micro : le versement libératoire remplace le barème', () => {
+  const sans = M.simuler({ netMensuel: 2500, statut: 'independant', activite: 'micro' });
+  const avec = M.simuler({
+    netMensuel: 2500, statut: 'independant', activite: 'micro', versementLiberatoire: true,
+  });
+  const anneeSans = sans.carriere.annees.find((a) => a.age === 36);
+  const anneeAvec = avec.carriere.annees.find((a) => a.age === 36);
+  // Même chiffre d'affaires, impôt différent : il ne passe plus par le barème.
+  assert.ok(Math.abs(anneeSans.brut - anneeAvec.brut) < 0.01, 'le CA ne doit pas bouger');
+  assert.notEqual(
+    Math.round(sans.carriere.totaux.impotRevenu),
+    Math.round(avec.carriere.totaux.impotRevenu),
+  );
+  // Et il vaut exactement le taux publié appliqué au chiffre d'affaires.
+  assert.ok(Math.abs(anneeAvec.impotRevenu - anneeAvec.brut * 12 * 0.022) < 0.01);
+});
+
+test('micro : la catégorie change tout, du simple au double', () => {
+  const preleve = (cat) =>
+    M.simuler({
+      netMensuel: 2500, statut: 'independant', activite: 'micro', categorieMicro: cat,
+      perimetre: { salariales: true, patronales: true, impotRevenu: true, consommation: true },
+    }).plateauGauche.total;
+  // Entre la vente (12,3 %) et le libéral (25,6 %), le prélèvement double.
+  assert.ok(preleve('liberal') > preleve('vente') * 1.8, 'l’écart entre catégories doit être massif');
+  assert.ok(preleve('services') > preleve('vente'));
+  // Une catégorie inconnue LÈVE, elle ne retombe pas sur un défaut.
+  assert.throws(() => MICRO.categorie('bricolage'), /inconnue/);
 });

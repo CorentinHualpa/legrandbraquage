@@ -10,7 +10,7 @@ façon de rendre le résultat opposable : n'importe qui peut le lire, le rejouer
 et le contredire.
 
 ```bash
-node --test moteur/     # 71 tests, dont les deux étalons
+node --test moteur/     # 79 tests, dont les deux étalons
 pnpm dev                # le site
 pnpm build
 ```

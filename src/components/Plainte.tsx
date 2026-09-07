@@ -6,12 +6,14 @@ import { euros } from "@/lib/format";
 import type { Statut } from "@/lib/moteur";
 import {
   ACTIVITES,
+  CATEGORIES_MICRO,
   FORMES_TPE,
   OU_LIRE_SON_NET,
   NOMS_REGIME,
   STATUTS,
   VERSANTS,
   type Activite,
+  type CategorieMicro,
   type FormeTpe,
   type Regime,
   type Versant,
@@ -29,6 +31,10 @@ export function Plainte({
   setVersant,
   activite,
   setActivite,
+  categorieMicro,
+  setCategorieMicro,
+  versementLiberatoire,
+  setVersementLiberatoire,
   regime,
   calculable,
   ouverte,
@@ -45,6 +51,10 @@ export function Plainte({
   setVersant: (v: Versant) => void;
   activite: Activite;
   setActivite: (a: Activite) => void;
+  categorieMicro: CategorieMicro;
+  setCategorieMicro: (c: CategorieMicro) => void;
+  versementLiberatoire: boolean;
+  setVersementLiberatoire: (v: boolean) => void;
   regime: Regime | null;
   calculable: boolean;
   ouverte: boolean;
@@ -226,6 +236,73 @@ export function Plainte({
               artisan, à 250 000 € elle paie 24 % de PLUS. L’écart change de
               signe, donc aucun régime moyen ne peut servir les deux.
             </p>
+          </fieldset>
+        ) : null}
+
+        {statut === "independant" && activite === "micro" ? (
+          <fieldset className="flex flex-col gap-2 border-l-[3px] border-bleu bg-papier-3 py-3 pr-3 pl-3">
+            <legend className="mb-1 font-mono text-[10px] tracking-[0.13em] text-encre-3">
+              CE QUE TU VENDS
+            </legend>
+            <p className="text-[13px] leading-snug text-encre-2">
+              Chez un micro-entrepreneur, c’est cette question qui décide de
+              tout : entre la vente et le libéral, le taux de cotisation{" "}
+              <span className="font-semibold">double</span>.
+            </p>
+            <div className="mt-1 flex flex-col gap-2">
+              {CATEGORIES_MICRO.map((c) => {
+                const actif = categorieMicro === c.id;
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => setCategorieMicro(c.id)}
+                    aria-pressed={actif}
+                    className={`flex flex-col items-start px-3 py-2 text-left transition-colors ${
+                      actif
+                        ? "bg-encre text-papier"
+                        : "border border-cadre-bord hover:border-encre"
+                    }`}
+                  >
+                    <span className="text-[14px] font-medium">{c.libelle}</span>
+                    <span
+                      className={`text-[12.5px] leading-snug ${actif ? "text-papier/90" : "text-encre-3"}`}
+                    >
+                      {c.precision}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setVersementLiberatoire(!versementLiberatoire)}
+              aria-pressed={versementLiberatoire}
+              className="mt-1 flex w-full items-start gap-3 border-t border-ligne pt-3 text-left"
+            >
+              <span
+                className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center border-[1.6px] border-encre ${
+                  versementLiberatoire ? "bg-encre" : "bg-transparent"
+                }`}
+                aria-hidden
+              >
+                {versementLiberatoire ? (
+                  <span className="font-mono text-[10px] leading-none font-semibold text-papier">
+                    ×
+                  </span>
+                ) : null}
+              </span>
+              <span className="flex flex-col">
+                <span className="text-[14px] font-medium">
+                  J’ai pris le versement libératoire
+                </span>
+                <span className="text-[12.5px] leading-snug text-encre-3">
+                  Ton impôt devient un pourcentage de ton chiffre d’affaires,
+                  payé avec tes cotisations, et ne passe plus par le barème.
+                </span>
+              </span>
+            </button>
           </fieldset>
         ) : null}
 

@@ -15,6 +15,7 @@ import {
 import * as fp from './fonction-publique.js';
 import * as tns from './tns.js';
 import * as cipav from './cipav.js';
+import * as micro from './micro.js';
 import { impotSurLeRevenu, taxesConsommationAnnuelles } from './impot.js';
 
 /**
@@ -45,6 +46,8 @@ const REGIMES = {
       + pat.lignes.cegT1 + pat.lignes.cegT2,
   },
   tns: {
+    // Bénéfice BIC ou BNC : pas d'abattement de 10 % pour frais professionnels.
+    fraisProfessionnels: false,
     brutDepuisNet: tns.brutDepuisNet,
     netsDepuisBrut: tns.netsDepuisBrut,
     salariales: tns.retenuesSalariales,
@@ -54,12 +57,31 @@ const REGIMES = {
     vieillesse: (sal) => sal.lignes.retraiteBase + sal.lignes.retraiteComplementaire,
   },
   cipav: {
+    // Bénéfice BIC ou BNC : pas d'abattement de 10 % pour frais professionnels.
+    fraisProfessionnels: false,
     brutDepuisNet: cipav.brutDepuisNet,
     netsDepuisBrut: cipav.netsDepuisBrut,
     salariales: cipav.retenuesSalariales,
     patronales: cipav.cotisationsPatronales,
     // Pas d'employeur non plus : le libéral voit cent pour cent de ce qu'il verse.
     vieillesse: (sal) => sal.lignes.retraiteBase + sal.lignes.retraiteComplementaire,
+  },
+  micro: {
+    // Bénéfice BIC ou BNC : pas d'abattement de 10 % pour frais professionnels.
+    fraisProfessionnels: false,
+    brutDepuisNet: micro.brutDepuisNet,
+    netsDepuisBrut: micro.netsDepuisBrut,
+    salariales: micro.retenuesSalariales,
+    patronales: micro.cotisationsPatronales,
+    // Le forfait global n'est pas ventilé sur l'avis d'appel : la part qui
+    // finance la vieillesse se lit dans la clé de répartition publiée.
+    vieillesse: (sal, pat, opts) => micro.partVieillesse(sal, opts),
+    // ⚠ Le seul régime dont l'impôt peut ne PAS passer par le barème : avec le
+    // versement libératoire, c'est un pourcentage du chiffre d'affaires.
+    impotAnnuel: micro.impotAnnuel,
+    // Le revenu porté au compte n'est pas le CA : il se reconstitue par la
+    // chaîne de la circulaire Cnav. C'est LUI qui fait la pension.
+    droitsRetraite: micro.droitsRetraiteAnnuels,
   },
   fonctionnaire: {
     brutDepuisNet: fp.brutDepuisNet,
@@ -164,10 +186,25 @@ export function deroulerCarriere(netMensuelActuel, opts = {}) {
      * `netsDepuisBrut`, personne ne la lui demandait.
      */
     const { netImposable } = R.netsDepuisBrut(brut, opts);
-    const ir = impotSurLeRevenu(netImposable * 12, opts);
+    /*
+     * Un régime peut avoir son propre impôt. C'est le cas du micro qui a opté
+     * pour le versement libératoire : il paie un pourcentage de son chiffre
+     * d'affaires avec ses cotisations, et ne passe jamais par le barème. Sans
+     * cette porte, on lui appliquerait le barème sur une assiette forfaitaire
+     * qu'il ne subit pas.
+     */
+    const irRegime = R.impotAnnuel ? R.impotAnnuel(brut, opts) : null;
+    const ir = irRegime
+      ?? impotSurLeRevenu(netImposable * 12, {
+        ...opts,
+        fraisProfessionnels: R.fraisProfessionnels !== false,
+      });
     // Ce dont on VIT : c'est lui, et pas le net avant impôt, qui donne le
     // niveau de vie servant à la TVA et à la pension.
     const netApresImpot = netAvantImpot - ir / 12;
+    // Les droits à retraite d'un micro ne se lisent pas dans ses cotisations :
+    // ils se reconstituent. Les autres régimes n'en ont pas besoin.
+    const droits = R.droitsRetraite ? R.droitsRetraite(brut * 12, opts) : null;
     const tva = taxesConsommationAnnuelles(netApresImpot, opts);
 
     annees.push({
@@ -182,15 +219,19 @@ export function deroulerCarriere(netMensuelActuel, opts = {}) {
       taxesConsommation: tva,
       coutEmployeur: (brut + pat.total) * 12,
       // La cotisation vieillesse seule, pour la comparaison capitalisation.
-      cotisationVieillesse: R.vieillesse(sal, pat) * 12,
+      cotisationVieillesse: R.vieillesse(sal, pat, opts) * 12,
       // Le traitement indiciaire, quand le régime en distingue un : c'est lui
       // et lui seul qui porte la pension d'un fonctionnaire.
       tib: sal.tib ?? brut,
       primes: sal.primes ?? 0,
       // L'assiette sociale et la ligne de retraite complémentaire, en ANNUEL,
       // pour que la pension d'un indépendant se calcule par les règles.
-      assiette: (sal.assiette ?? brut) * 12,
-      retraiteComplementaire: (sal.lignes.retraiteComplementaire ?? 0) * 12,
+      assiette: droits ? droits.revenuCotise : (sal.assiette ?? brut) * 12,
+      retraiteComplementaire: droits
+        ? droits.partComplementaire
+        : (sal.lignes.retraiteComplementaire ?? 0) * 12,
+      /** Non nul seulement quand le régime reconstitue ses droits (le micro). */
+      droitsRetraite: droits,
     });
   }
 

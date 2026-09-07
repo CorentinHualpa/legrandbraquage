@@ -104,16 +104,18 @@ export const VERSANTS: Array<{ id: Versant; libelle: string; precision: string }
  * de deviner ; cette liste existe pour que l'écran le dise AVANT le calcul.
  */
 /*
- * ⚠ `micro` en est volontairement ABSENT tant que son barème n'est pas sourcé.
- *
- * Un micro-entrepreneur ne cotise PAS comme une entreprise au réel : son
- * assiette est le chiffre d'affaires encaissé, à taux forfaitaire, sans
- * déduction de charges, et son impôt peut passer par un versement libératoire.
- * Lui servir le barème du réel produirait un chiffre faux et parfaitement
- * crédible, c'est-à-dire exactement ce que ce dossier reproche à la partie
- * adverse. L'écran le dit et refuse de calculer.
+ * ⚠ `micro` a rejoint la liste le 07/09/2026, une fois son barème sourcé sur
+ * l'article D613-4 du code de la sécurité sociale. Il n'a JAMAIS partagé celui
+ * du réel : son assiette est le chiffre d'affaires encaissé, à taux
+ * forfaitaire, sans déduction de charges.
  */
-export const REGIMES_DISPONIBLES: Regime[] = ["salarie", "fonctionnaire", "tns", "cipav"];
+export const REGIMES_DISPONIBLES: Regime[] = [
+  "salarie",
+  "fonctionnaire",
+  "tns",
+  "cipav",
+  "micro",
+];
 
 export function regimeDe(
   statut: Statut,
@@ -324,3 +326,37 @@ export const OU_LIRE_SON_NET: Record<Regime, { label: string; aide: string }> = 
       + "Tes charges professionnelles ne se déduisent pas : c’est le régime.",
   },
 };
+
+
+/**
+ * Les trois catégories du micro, et elles ne se ressemblent pas : entre la
+ * vente (12,3 %) et le libéral (25,6 %), le taux de cotisation DOUBLE.
+ *
+ * Les taux affichés ici sont ceux de l'article D613-4 du code de la sécurité
+ * sociale, version en vigueur depuis le 01/01/2026. ⚠ Le décret 2024-484
+ * programmait 26,1 % en BNC pour 2026 et beaucoup de sites le répètent encore ;
+ * le décret 2025-943 a réécrit l'article avant son entrée en vigueur.
+ */
+export type CategorieMicro = "vente" | "services" | "liberal";
+
+export const CATEGORIES_MICRO: Array<{
+  id: CategorieMicro;
+  libelle: string;
+  precision: string;
+}> = [
+  {
+    id: "liberal",
+    libelle: "Prestations libérales",
+    precision: "25,6 % de cotisations, abattement fiscal de 34 %",
+  },
+  {
+    id: "services",
+    libelle: "Prestations de services",
+    precision: "artisanales ou commerciales : 21,2 %, abattement de 50 %",
+  },
+  {
+    id: "vente",
+    libelle: "Vente de marchandises",
+    precision: "12,3 %, abattement de 71 %",
+  },
+];

@@ -22,6 +22,7 @@ import {
   regimeCalculable,
   regimeDe,
   type Activite,
+  type CategorieMicro,
   type FormeTpe,
   type Versant,
 } from "@/lib/statuts";
@@ -43,6 +44,8 @@ export function Instruction({ pieces }: { pieces: Pieces }) {
   const [formeTpe, setFormeTpe] = useState<FormeTpe | undefined>(undefined);
   const [versant, setVersant] = useState<Versant>("fpt");
   const [activite, setActivite] = useState<Activite>("ssi");
+  const [categorieMicro, setCategorieMicro] = useState<CategorieMicro>("liberal");
+  const [versementLiberatoire, setVersementLiberatoire] = useState(false);
   const [perimetre, setPerimetre] = useState<Perimetre>(PERIMETRE_DEFAUT);
 
   const regime = regimeDe(statut, formeTpe, activite);
@@ -108,6 +111,8 @@ export function Instruction({ pieces }: { pieces: Pieces }) {
     setFormeTpe(cas.formeTpe);
     setVersant(cas.versant);
     setActivite(cas.activite);
+    setCategorieMicro(cas.categorieMicro);
+    setVersementLiberatoire(cas.versementLiberatoire);
     setPerimetre(cas.perimetre);
     // Un lien de patron de TPE sans forme juridique n'a pas de régime résolu :
     // on laisse le dossier fermé, la question est posée à l'écran.
@@ -137,12 +142,17 @@ export function Instruction({ pieces }: { pieces: Pieces }) {
       formeTpe,
       versant,
       activite,
+      categorieMicro,
+      versementLiberatoire,
       perimetre,
       // ⚠ Un président de SAS ne cotise pas à l'assurance chômage, et le moteur
       // ne porte pas encore ce retrait : il rend le calcul du salarié, à
       // quelques dixièmes de point près. La page le dit plutôt que de le taire.
     });
-  }, [ouverte, calculable, netMensuel, statut, formeTpe, versant, activite, perimetre]);
+  }, [
+    ouverte, calculable, netMensuel, statut, formeTpe, versant, activite,
+    categorieMicro, versementLiberatoire, perimetre,
+  ]);
 
   /**
    * Le seuil où la balance bascule, POUR CE RÉGIME.
@@ -153,8 +163,14 @@ export function Instruction({ pieces }: { pieces: Pieces }) {
    */
   const pivot = useMemo(() => {
     if (!ouverte || !calculable) return null;
-    return salairePivot({ statut, formeTpe, versant, activite, perimetre });
-  }, [ouverte, calculable, statut, formeTpe, versant, activite, perimetre]);
+    return salairePivot({
+      statut, formeTpe, versant, activite, categorieMicro,
+      versementLiberatoire, perimetre,
+    });
+  }, [
+    ouverte, calculable, statut, formeTpe, versant, activite, categorieMicro,
+    versementLiberatoire, perimetre,
+  ]);
 
   return (
     <main className="relative min-h-dvh bg-papier pb-16">
@@ -186,6 +202,10 @@ export function Instruction({ pieces }: { pieces: Pieces }) {
         setVersant={setVersant}
         activite={activite}
         setActivite={setActivite}
+        categorieMicro={categorieMicro}
+        setCategorieMicro={setCategorieMicro}
+        versementLiberatoire={versementLiberatoire}
+        setVersementLiberatoire={setVersementLiberatoire}
         regime={regime}
         calculable={calculable}
         ouverte={ouverte}
@@ -228,7 +248,10 @@ export function Instruction({ pieces }: { pieces: Pieces }) {
             pieces={pieces}
             simulation={simulation}
             netMensuel={netMensuel}
-            cas={{ netMensuel, statut, formeTpe, versant, activite, perimetre }}
+            cas={{
+              netMensuel, statut, formeTpe, versant, activite,
+              categorieMicro, versementLiberatoire, perimetre,
+            }}
           />
         </>
       ) : null}

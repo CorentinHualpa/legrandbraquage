@@ -15,7 +15,7 @@
  */
 
 import { PERIMETRE_DEFAUT, type Perimetre, type Statut } from "./moteur";
-import type { Activite, FormeTpe, Versant } from "./statuts";
+import type { Activite, CategorieMicro, FormeTpe, Versant } from "./statuts";
 
 export type Cas = {
   netMensuel: number;
@@ -23,6 +23,8 @@ export type Cas = {
   formeTpe?: FormeTpe;
   versant: Versant;
   activite: Activite;
+  categorieMicro: CategorieMicro;
+  versementLiberatoire: boolean;
   perimetre: Perimetre;
 };
 
@@ -30,6 +32,7 @@ const STATUTS_VALIDES: Statut[] = ["salarie", "independant", "fonctionnaire", "t
 const FORMES_VALIDES: FormeTpe[] = ["sarl-majoritaire", "sas"];
 const VERSANTS_VALIDES: Versant[] = ["fpe", "fpt", "fph"];
 const ACTIVITES_VALIDES: Activite[] = ["micro", "ssi", "cipav"];
+const CATEGORIES_VALIDES: CategorieMicro[] = ["vente", "services", "liberal"];
 
 /** Les quatre cases du périmètre, dans un ordre qui ne doit plus bouger. */
 const ORDRE_PERIMETRE = [
@@ -65,6 +68,12 @@ export function requeteDuCas(cas: Cas): string {
   // pension : sans ce paramètre, le dossier d'un architecte se rouvrirait en
   // artisan, sous le même lien et avec un autre montant.
   if (cas.statut === "independant" && cas.activite !== "ssi") q.set("a", cas.activite);
+  // La catégorie fait DOUBLER le prélèvement d'un micro : un lien qui l'oublie
+  // rouvre un autre dossier sous la même adresse.
+  if (cas.activite === "micro") {
+    q.set("c", cas.categorieMicro);
+    if (cas.versementLiberatoire) q.set("vl", "1");
+  }
   return `?${q.toString()}`;
 }
 
@@ -93,6 +102,12 @@ export function casDepuisRequete(recherche: string): Cas | null {
   const activite =
     activiteBrute && ACTIVITES_VALIDES.includes(activiteBrute) ? activiteBrute : "ssi";
 
+  const categorieBrute = q.get("c") as CategorieMicro | null;
+  const categorieMicro =
+    categorieBrute && CATEGORIES_VALIDES.includes(categorieBrute)
+      ? categorieBrute
+      : "liberal";
+
   const versantBrut = q.get("v") as Versant | null;
   const versant =
     versantBrut && VERSANTS_VALIDES.includes(versantBrut) ? versantBrut : "fpt";
@@ -106,6 +121,8 @@ export function casDepuisRequete(recherche: string): Cas | null {
     formeTpe: statut === "tpe" ? formeTpe : undefined,
     versant,
     activite,
+    categorieMicro,
+    versementLiberatoire: q.get("vl") === "1",
     perimetre: litPerimetre(q.get("p")) ?? PERIMETRE_DEFAUT,
   };
 }

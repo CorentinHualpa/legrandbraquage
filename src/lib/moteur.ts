@@ -43,6 +43,10 @@ export type Entree = {
    * la très grande majorité, libéraux non réglementés compris depuis 2019.
    */
   activite?: "micro" | "ssi" | "cipav";
+  /** Catégorie du micro. Sans effet sur les autres régimes. */
+  categorieMicro?: "vente" | "services" | "liberal";
+  /** Option du micro : l'impôt devient un pourcentage du chiffre d'affaires. */
+  versementLiberatoire?: boolean;
   ageActuel?: number;
   cadre?: boolean;
   effectif?: number;

@@ -284,6 +284,27 @@ export default function Methode() {
             </li>
             <li className="border-l-[3px] border-rouge pl-3">
               <span className="font-semibold">
+                Deux décrets se contredisent sur le taux du micro-entrepreneur.
+              </span>{" "}
+              Le décret 2024-484 programmait 26,1 % de cotisations en 2026 pour
+              les prestations libérales, et beaucoup de sites le répètent
+              encore ; le décret 2025-943 a réécrit l’article D613-4 du code de
+              la sécurité sociale avant cette entrée en vigueur, et la valeur
+              applicable est <span className="font-semibold">25,6 %</span>. Nous
+              retenons le texte en vigueur.
+            </li>
+            <li className="border-l-[3px] border-cadre-bord pl-3">
+              <span className="font-semibold">
+                Les trimestres de retraite d’un micro-entrepreneur.
+              </span>{" "}
+              L’URSSAF ne publie plus de chiffre d’affaires minimal par
+              trimestre, sauf pour la CIPAV (2 792 € en 2026). Pour tous les
+              autres, seule la formule de la circulaire Cnav est officielle :
+              nous l’appliquons et nous présentons le résultat comme calculé, pas
+              comme un seuil publié.
+            </li>
+            <li className="border-l-[3px] border-rouge pl-3">
+              <span className="font-semibold">
                 Deux sources officielles se contredisent sur le barème CIPAV.
               </span>{" "}
               L’URSSAF publie 8,73 % de retraite de base et 11 % puis 21 % de

@@ -5,7 +5,7 @@ c'est la seule façon de rendre le résultat opposable : n'importe qui peut le
 lire, le rejouer et le contredire.
 
 ```bash
-pnpm test               # 71 tests
+pnpm test               # 79 tests
 ```
 
 Aucune dépendance, aucune étape de build. Modules ES natifs, exécutables tels
@@ -127,9 +127,53 @@ vingt-cinq **meilleures** années. Celle d'un libéral est un régime par points
 **toute** la carrière, plafonné à 582 points par an. Une mauvaise année pèse chez
 l'un et disparaît chez l'autre.
 
-Le salaire-pivot suit : **3 910 € net** pour un libéral CIPAV, contre 4 109 €
+Le salaire-pivot suit : **3 619 € net** pour un libéral CIPAV, contre 3 871 €
 pour un artisan. Il bascule PLUS TÔT que l'artisan, alors qu'il paie moins à bas
 revenu : sa complémentaire deux fois plus chère le rattrape avant.
+
+---
+
+### 5. Le micro-entrepreneur ne cotise pas sur un revenu
+
+C'est le régime le plus fréquent chez les indépendants, et le plus dangereux à
+confondre avec le réel. Son assiette est le **chiffre d'affaires encaissé**, à
+taux forfaitaire, sans aucune déduction de charges : il paie donc aussi sur ce
+qu'il a dépensé pour travailler. La réforme de l'assiette unique de 2026 ne le
+concerne pas.
+
+| Catégorie | Cotisations | Formation | Abattement fiscal | Versement libératoire |
+|---|---|---|---|---|
+| Vente de marchandises | 12,3 % | 0,1 % | 71 % | 1 % |
+| Prestations de services | 21,2 % | 0,3 % | 50 % | 1,7 % |
+| Prestations libérales | 25,6 % | 0,2 % | 34 % | 2,2 % |
+
+Entre la vente et le libéral, le taux **double**. Le salaire-pivot suit :
+**4 834 €** pour un libéral, **6 077 €** pour un prestataire de services, et
+**AUCUN** pour la vente — sur toute la plage du curseur, un micro en vente
+reçoit plus qu'il ne verse.
+
+⚠ **Deux textes officiels se contredisent sur le taux BNC 2026.** Le décret
+n° 2024-484 du 30/05/2024 programmait **26,1 %** au 1er janvier 2026 ; le décret
+n° 2025-943 du 08/09/2025 a réécrit l'article D613-4 du code de la sécurité
+sociale AVANT cette entrée en vigueur, et la valeur applicable est **25,6 %**.
+Le texte en vigueur fait foi. Beaucoup de sites répètent encore 26,1 %.
+
+⚠ **Il est imposé sur un revenu qu'il ne touche pas.** L'abattement forfaitaire
+ne mesure pas ses charges : un libéral garde 74,2 % de son CA et n'est imposé
+que sur 66 %. C'est une faveur ou une pénalité selon les charges réelles, et
+personne ne le lui dit.
+
+⚠ **Ses droits à retraite ne se lisent pas dans ses cotisations.** Le raccourci
+qu'on lit partout, « CA après abattement rapporté à 150 SMIC », est faux. La
+chaîne officielle de la circulaire Cnav n° 2026-12 passe par le forfait global,
+sa clé de répartition publiée, puis un **revenu cotisé reconstitué** au taux d'un
+indépendant au réel. C'est ce revenu-là qui est porté au compte, et il est très
+inférieur au chiffre d'affaires : lui servir le CA gonflerait sa pension d'un
+facteur trois.
+
+Non trouvé : le chiffre d'affaires minimal par trimestre n'est PUBLIÉ que pour
+la CIPAV (2 792 € en 2026). Pour le régime général, seule la formule est
+officielle, et le moteur présente son résultat comme calculé.
 
 ---
 
@@ -181,9 +225,11 @@ revenu : sa complémentaire deux fois plus chère le rattrape avant.
 | `index.js` | `simuler()`, `salairePivot()`, `placerSaRetraite()` |
 | `baremes-tns.js` | Les barèmes de l'indépendant, et pourquoi l'étalon change |
 | `tns.js` | Assiette unique, cotisations, pension par les règles |
+| `baremes-micro.js` | Le barème du micro, et les deux décrets qui divergent |
+| `micro.js` | Cotisations sur le chiffre d'affaires, et droits reconstitués |
 | `baremes-cipav.js` | Le barème du libéral réglementé, et ses deux sources qui divergent |
 | `cipav.js` | Cotisations CIPAV, et une pension par POINTS dans les deux étages |
-| `test.mjs` | 71 tests, dont deux étalons |
+| `test.mjs` | 79 tests, dont deux étalons |
 
 Toute modification d'un barème doit citer un texte officiel. C'est cette règle,
 et pas le ton de la page, qui rend le simulateur inattaquable.
@@ -217,7 +263,7 @@ voisinage d'un plafond de sécurité sociale d'assiette, puis redescend.
 
 **Il n'y a aucune part employeur**, et cette absence n'est pas un trou : un
 indépendant voit cent pour cent de ce qu'il verse. C'est ce qui place son
-salaire pivot à **4 109 €**, au-dessus des 2 337 € du salarié.
+salaire pivot à **3 871 €**, au-dessus des 2 337 € du salarié.
 
 ⚠ Ce chiffre valait 5 669 € jusqu'au 07/09/2026, et il était faux. La projection
 de carrière reconstituait le net imposable en additionnant `csgNonDeductible` et

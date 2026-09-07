@@ -6,7 +6,15 @@ import {
   IR_TRANCHES, IR, TVA_TAUX_EFFORT, SALAIRES_REFERENCE,
 } from './baremes-2026.js';
 
-/** Abattement de 10 % pour frais professionnels, plancher et plafond compris. */
+/**
+ * Abattement de 10 % pour frais professionnels, plancher et plafond compris.
+ *
+ * ⚠ Il ne vaut QUE pour les traitements, salaires et pensions (CGI art. 83, 3°).
+ * Un bénéfice BIC ou BNC n'y a pas droit : le revenu professionnel d'un
+ * indépendant au réel est imposé tel qu'il est déclaré, et celui d'un micro a
+ * déjà son abattement forfaitaire de 71, 50 ou 34 %. L'appliquer à eux le
+ * cumule avec le leur.
+ */
 export function abattementFraisPro(netImposableAnnuel) {
   const brut = netImposableAnnuel * IR.abattementFraisPro;
   return Math.min(Math.max(brut, IR.abattementPlancher), IR.abattementPlafond);
@@ -31,7 +39,18 @@ function impotParPart(revenuParPart) {
  * @param {{parts?: number, couple?: boolean}} [opts]
  */
 export function impotSurLeRevenu(netImposableAnnuel, opts = {}) {
-  const { parts = 1, couple = false } = opts;
+  /*
+   * ⚠ `fraisProfessionnels` vaut true par DÉFAUT parce que le cas des
+   * traitements et salaires est celui de la majorité des appels et le seul où
+   * l'abattement de 10 % est dû. Les régimes de non-salariés le passent
+   * explicitement à false : leur revenu est un bénéfice, pas un salaire.
+   *
+   * Il était appliqué à TOUT LE MONDE jusqu'au 07/09/2026, ce qui allégeait
+   * indûment l'impôt d'un indépendant, d'un libéral et d'un micro de 10 % de
+   * leur assiette — et, chez le micro, se cumulait avec son propre abattement
+   * forfaitaire.
+   */
+  const { parts = 1, couple = false, fraisProfessionnels = true } = opts;
   /*
    * ⚠ Un net imposable qui n'est pas un nombre est une PANNE, pas un revenu nul.
    *
@@ -46,7 +65,9 @@ export function impotSurLeRevenu(netImposableAnnuel, opts = {}) {
       + 'son net imposable : c’est un contrat manquant, pas un revenu nul.',
     );
   }
-  const revenuNetGlobal = netImposableAnnuel - abattementFraisPro(netImposableAnnuel);
+  const revenuNetGlobal = fraisProfessionnels
+    ? netImposableAnnuel - abattementFraisPro(netImposableAnnuel)
+    : netImposableAnnuel;
   if (revenuNetGlobal <= 0) return 0;
 
   const brut = impotParPart(revenuNetGlobal / parts) * parts;

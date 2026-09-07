@@ -21,6 +21,7 @@ import { RETRAITE, SALAIRES_REFERENCE } from './baremes-2026.js';
 import * as fp from './fonction-publique.js';
 import * as tns from './tns.js';
 import * as cipav from './cipav.js';
+import * as micro from './micro.js';
 import { TAUX_REMPLACEMENT, VERSANTS } from './baremes-fonction-publique.js';
 
 /**
@@ -138,6 +139,8 @@ export function simuler(entree) {
     statut = 'salarie',
     formeTpe,
     activite,
+    categorieMicro = 'liberal',
+    versementLiberatoire = false,
     versant = 'fpt',
     ageActuel = 36,
     cadre = false,
@@ -156,7 +159,10 @@ export function simuler(entree) {
     );
   }
 
-  const opts = { cadre, effectif, parts, ageActuel, regime, versant };
+  const opts = {
+    cadre, effectif, parts, ageActuel, regime, versant,
+    categorieMicro, versementLiberatoire,
+  };
   const carriere = deroulerCarriere(netMensuel, opts);
 
   const preleve = totalPreleve(carriere.totaux, perimetre);
@@ -195,13 +201,20 @@ export function simuler(entree) {
   let tauxRemplacement;
   let pensionTns = null;
 
-  if (regime === 'tns' || regime === 'cipav') {
+  if (regime === 'tns' || regime === 'cipav' || regime === 'micro') {
     // Les deux régimes de non-salariés calculent leur pension par les règles,
     // faute de tout taux de remplacement publié. Mais PAS par les mêmes règles :
     // la base d'un artisan est celle du régime général, sur ses vingt-cinq
     // meilleures années ; celle d'un libéral CIPAV est un régime par points, sur
     // toute la carrière. Une mauvaise année pèse chez l'un et disparaît chez
     // l'autre : c'est une différence de structure, pas de taux.
+    /*
+     * ⚠ Un micro passe par le calcul du RÉGIME GÉNÉRAL, comme un artisan au
+     * réel, et surtout PAS sur son chiffre d'affaires : `carriere.js` a déjà
+     * remplacé son assiette par le « revenu cotisé » reconstitué selon la
+     * circulaire Cnav. Lui appliquer sa propre assiette gonflerait sa pension
+     * d'un facteur trois.
+     */
     const moteurPension = regime === 'cipav' ? cipav : tns;
     pensionTns = moteurPension.pension(
       carriere.annees.map((a) => a.assiette),
@@ -251,7 +264,8 @@ export function simuler(entree) {
     entree: {
       /** ⚠ Net AVANT impôt sur le revenu. L'impôt s'ajoute, il n'est pas déjà retranché. */
       netMensuel,
-      statut, regime, versant, activite, ageActuel, cadre, effectif, parts, perimetre,
+      statut, regime, versant, activite, categorieMicro, versementLiberatoire,
+      ageActuel, cadre, effectif, parts, perimetre,
     },
     /** Ce qui arrive réellement sur le compte cette année, impôt déduit. */
     netApresImpotActuel: anneeCourante.netApresImpot,
