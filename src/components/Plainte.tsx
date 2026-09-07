@@ -4,14 +4,15 @@ import { EnTete, Feuille, PiecesVersees, Renvoi, Scelle, Tampon } from "./papier
 import type { Pieces } from "./Instruction";
 import { euros } from "@/lib/format";
 import type { Statut } from "@/lib/moteur";
-import { FORMES_TPE, STATUTS, type FormeTpe, type Regime } from "@/lib/statuts";
-
-const NOMS_REGIME: Record<Regime, string> = {
-  salarie: "salarié du privé",
-  tns: "travailleur non salarié",
-  fonctionnaire: "fonctionnaire",
-  "assimile-salarie": "assimilé salarié",
-};
+import {
+  FORMES_TPE,
+  NOMS_REGIME,
+  STATUTS,
+  VERSANTS,
+  type FormeTpe,
+  type Regime,
+  type Versant,
+} from "@/lib/statuts";
 
 export function Plainte({
   pieces,
@@ -21,6 +22,8 @@ export function Plainte({
   setStatut,
   formeTpe,
   setFormeTpe,
+  versant,
+  setVersant,
   regime,
   calculable,
   ouverte,
@@ -33,6 +36,8 @@ export function Plainte({
   setStatut: (s: Statut) => void;
   formeTpe: FormeTpe | undefined;
   setFormeTpe: (f: FormeTpe) => void;
+  versant: Versant;
+  setVersant: (v: Versant) => void;
   regime: Regime | null;
   calculable: boolean;
   ouverte: boolean;
@@ -164,6 +169,41 @@ export function Plainte({
                 );
               })}
             </div>
+          </fieldset>
+        ) : null}
+
+        {statut === "fonctionnaire" ? (
+          <fieldset className="flex flex-col gap-2">
+            <legend className="mb-2 font-mono text-[10px] tracking-[0.13em] text-encre-3">
+              VERSANT
+            </legend>
+            <div className="flex flex-wrap gap-2">
+              {VERSANTS.map((v) => {
+                const actif = versant === v.id;
+                return (
+                  <button
+                    key={v.id}
+                    type="button"
+                    onClick={() => setVersant(v.id)}
+                    aria-pressed={actif}
+                    title={v.precision}
+                    className={`px-3 py-2 text-[14px] transition-colors ${
+                      actif
+                        ? "bg-encre font-medium text-papier"
+                        : "border border-cadre-bord text-encre hover:border-encre"
+                    }`}
+                  >
+                    {v.libelle}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-[12.5px] leading-snug text-encre-3">
+              Le versant change tout du côté de l’employeur : sa contribution au
+              régime de pension va de 37,65 % du traitement à la CNRACL à
+              82,28 % pour l’État. Ces deux taux ne se comparent PAS à celui
+              d’un employeur privé, et la page méthode dit pourquoi.
+            </p>
           </fieldset>
         ) : null}
 

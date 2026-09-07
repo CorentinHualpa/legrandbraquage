@@ -33,6 +33,10 @@ export type Perimetre = {
 export type Entree = {
   netMensuel: number;
   statut?: Statut;
+  /** Obligatoire pour un patron de TPE : c'est elle qui décide du régime. */
+  formeTpe?: "sarl-majoritaire" | "sas";
+  /** Versant de la fonction publique. Sans effet sur les autres statuts. */
+  versant?: "fpe" | "fpt" | "fph";
   ageActuel?: number;
   cadre?: boolean;
   effectif?: number;
@@ -49,7 +53,17 @@ export type LigneContrepartie = {
 };
 
 export type Simulation = {
-  entree: Required<Omit<Entree, "statut">> & { statut?: Statut };
+  entree: {
+    netMensuel: number;
+    statut: Statut;
+    regime: string;
+    versant: string;
+    ageActuel: number;
+    cadre: boolean;
+    effectif: number;
+    parts: number;
+    perimetre: Perimetre;
+  };
   carriere: {
     /** Une ligne par année de carrière, en euros d'aujourd'hui. */
     annees: Array<{
@@ -63,6 +77,9 @@ export type Simulation = {
       taxesConsommation: number;
       coutEmployeur: number;
       cotisationVieillesse: number;
+      /** Traitement indiciaire. Vaut le brut pour un régime qui n'en distingue pas. */
+      tib: number;
+      primes: number;
     }>;
     totaux: {
       salariales: number;
@@ -87,13 +104,29 @@ export type Simulation = {
     total: number;
     pensionMensuelle: number;
     tauxRemplacement: number;
+    /** `chomage` est ABSENT pour un fonctionnaire : il ne cotise pas au chômage. */
     lignes: {
       retraite: LigneContrepartie;
       sante: LigneContrepartie;
       education: LigneContrepartie;
-      chomage: LigneContrepartie;
+      chomage?: LigneContrepartie;
     };
     fourchetteRetraite: { bas: number; haut: number };
+    /**
+     * La pension rendue par la FORMULE, quand le régime en publie une. Elle est
+     * BRUTE, contrairement à la pension du plateau : ne jamais l'utiliser pour
+     * la balance, seulement pour la montrer.
+     */
+    detailPension: {
+      base: number;
+      renteRafp: number;
+      points: number;
+      totale: number;
+      minimumGaranti: boolean;
+      brut: true;
+      note: string;
+      versant?: string;
+    } | null;
   };
   verdict: {
     braquage: boolean;
@@ -153,6 +186,16 @@ export function simuler(entree: Entree): Simulation {
   return simulerJs(entree) as Simulation;
 }
 
+/**
+ * Le salaire où la balance bascule, pour un régime et un périmètre donnés.
+ *
+ * Rend `null` quand il n'y a AUCUNE bascule sur la plage, ce qui est un
+ * résultat et non une panne : pour un fonctionnaire d'État au périmètre
+ * complet, la balance ne penche en faveur de l'agent à aucun niveau de
+ * traitement, parce que la contribution de l'État à son propre régime pèse
+ * 82,28 % du traitement indiciaire. Toute surface qui affiche ce cas doit
+ * afficher l'avertissement du COR avec.
+ */
 export function salairePivot(opts: Partial<Entree> = {}): number | null {
   return salairePivotJs(opts) as number | null;
 }
@@ -215,5 +258,12 @@ export function placerSaRetraite(
   simulation: Simulation,
   placementId?: string,
 ): PlacementResultat {
-  return placerSaRetraiteJs(simulation, placementId) as PlacementResultat;
+  // Le moteur n'a besoin que du flux de cotisation vieillesse et du capital
+  // équivalent à la pension. Le type inféré depuis le JS est structurellement
+  // plus strict que le nôtre sur des champs que cette fonction ne lit pas
+  // (le chômage, absent chez un fonctionnaire) : on la nourrit telle quelle.
+  return placerSaRetraiteJs(
+    simulation as unknown as Parameters<typeof placerSaRetraiteJs>[0],
+    placementId,
+  ) as PlacementResultat;
 }

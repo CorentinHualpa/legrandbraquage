@@ -208,6 +208,67 @@ export default function Methode() {
 
         <section className="flex flex-col gap-3 border-t-2 border-encre pt-5">
           <h2 className="font-mono text-[10px] tracking-[0.13em] text-bleu">
+            LE CAS DU FONCTIONNAIRE, ET LE CHIFFRE QU’ON NE DOIT PAS LIRE DE TRAVERS
+          </h2>
+          <p className="text-[14.5px] leading-relaxed">
+            Le fonctionnaire cotise sur une assiette amputée : les primes, un
+            quart du brut en moyenne, sont hors de l’assiette de pension. Il
+            retient donc deux points de moins qu’un salarié du privé, et son
+            employeur verse beaucoup plus.
+          </p>
+          <ul className="flex flex-col border-t border-ligne">
+            <Ligne
+              quoi="Retenue pour pension, sur le seul traitement indiciaire"
+              valeur="11,10 %"
+              source="art. L61 CPCMR ; décret 2010-1749 modifié"
+            />
+            <Ligne
+              quoi="Contribution employeur au CAS Pensions, État"
+              valeur="82,28 %"
+              source="décret 2025-1341 du 26/12/2025"
+            />
+            <Ligne
+              quoi="Contribution employeur CNRACL, territoriale et hospitalière"
+              valeur="37,65 %"
+              source="décret 2025-86 ; 40,65 % en 2027, 43,65 % en 2028"
+            />
+            <Ligne
+              quoi="Taux employeur comparable dans le privé, tel que le COR le pose"
+              valeur="16,67 %"
+              source="COR, rapport annuel juin 2026, p. 17"
+            />
+          </ul>
+          <p className="border-l-[3px] border-bleu bg-papier-3 px-3 py-3 text-[14px] leading-relaxed">
+            <span className="font-semibold">
+              Ces taux ne se comparent pas, et c’est le COR qui l’écrit.
+            </span>{" "}
+            La contribution publique « ne résulte pas d’une générosité plus
+            importante du régime public » et « ne peut pas être comparée à la
+            contribution des employeurs du secteur privé ». Elle mesure une
+            démographie : 1,29 cotisant par retraité contre 2,25 au régime
+            général. Le taux qui financerait les seuls droits, hors invalidité
+            et départs anticipés, serait de 34,7 %. La page affiche cet
+            avertissement à côté du chiffre, pas en note de bas de page.
+          </p>
+          <p className="text-[14.5px] leading-relaxed">
+            Dans l’autre sens : un employeur public ne cotise pas au chômage, il
+            s’auto-assure. Le coût existe et ne figure sur aucune ligne, ce qui
+            biaise la comparaison des parts patronales EN FAVEUR du public. La
+            contrepartie chômage disparaît donc aussi du second plateau, plutôt
+            que d’être portée au crédit de quelqu’un qui ne l’a pas payée.
+          </p>
+          <p className="text-[14.5px] leading-relaxed">
+            Enfin, le taux de remplacement retenu est celui que le COR PROJETTE
+            pour la génération 2000, comme pour le salarié du privé. Le taux
+            réellement OBSERVÉ, lui, ne montre presque aucun écart entre public
+            et privé : 73,8 % contre 74,8 % pour la génération 1950 à carrière
+            complète. Les deux chiffres sont vrais et ne mesurent pas la même
+            chose.
+          </p>
+        </section>
+
+        <section className="flex flex-col gap-3 border-t-2 border-encre pt-5">
+          <h2 className="font-mono text-[10px] tracking-[0.13em] text-bleu">
             CE QUI RESTE OUVERT
           </h2>
           <ul className="flex flex-col gap-2.5 text-[14px] leading-relaxed">
@@ -224,14 +285,33 @@ export default function Methode() {
             </li>
             <li className="border-l-[3px] border-cadre-bord pl-3">
               <span className="font-semibold">
-                Les statuts autres que salarié du privé.
+                Le travailleur non salarié.
               </span>{" "}
-              L’indépendant et le fonctionnaire ont chacun leur propre régime, et
-              leurs barèmes sont en cours de vérification. Tant qu’ils ne sont
-              pas instruits, la page le dit au lieu de leur servir le calcul du
-              salarié. Le patron de TPE, lui, n’est pas un troisième régime : un
-              gérant majoritaire de SARL cotise comme un travailleur non salarié,
-              un président de SAS comme un assimilé salarié.
+              C’est le seul régime qui reste à instruire. Tant qu’il ne l’est
+              pas, le moteur REFUSE de le calculer plutôt que de lui servir les
+              barèmes du salarié : un chiffre emprunté à un autre régime est
+              faux, et il est d’autant plus dangereux qu’il est crédible. Le
+              patron de TPE, lui, n’est pas un régime de plus : un gérant
+              majoritaire de SARL cotise comme un travailleur non salarié, un
+              président de SAS comme un assimilé salarié.
+            </li>
+            <li className="border-l-[3px] border-cadre-bord pl-3">
+              <span className="font-semibold">
+                Le président de SAS et l’assurance chômage.
+              </span>{" "}
+              Il n’y cotise pas, alors que le moteur lui applique aujourd’hui le
+              calcul complet du salarié. L’écart est de quelques dixièmes de
+              point, et il joue en sa défaveur : son prélèvement est légèrement
+              surestimé.
+            </li>
+            <li className="border-l-[3px] border-cadre-bord pl-3">
+              <span className="font-semibold">
+                La courbe de carrière du secteur public.
+              </span>{" "}
+              Elle existe à l’INSEE et nous ne l’avons pas encore. Le
+              fonctionnaire est donc projeté sur la courbe de salaire par âge du
+              privé, ce qui donne la bonne forme de carrière et pas
+              nécessairement la bonne pente.
             </li>
             {restant.length > 0 ? (
               <li className="border-l-[3px] border-cadre-bord pl-3">

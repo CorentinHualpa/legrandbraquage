@@ -11,12 +11,13 @@ import { AvisDeRecherche } from "./AvisDeRecherche";
 import type { NumeroPiece } from "@/lib/images";
 import {
   PERIMETRE_DEFAUT,
+  salairePivot,
   simuler,
   type Perimetre,
   type Simulation,
   type Statut,
 } from "@/lib/moteur";
-import { regimeCalculable, regimeDe, type FormeTpe } from "@/lib/statuts";
+import { regimeCalculable, regimeDe, type FormeTpe, type Versant } from "@/lib/statuts";
 
 export type Pieces = Record<NumeroPiece, string | null>;
 
@@ -28,17 +29,12 @@ export type Pieces = Record<NumeroPiece, string | null>;
  * mouvement sans temporisation. C'est ce qui permet à l'objet de se transformer
  * en direct pendant qu'on fait glisser le salaire.
  */
-export function Instruction({
-  pieces,
-  pivot,
-}: {
-  pieces: Pieces;
-  pivot: number | null;
-}) {
+export function Instruction({ pieces }: { pieces: Pieces }) {
   const [ouverte, setOuverte] = useState(false);
   const [netMensuel, setNetMensuel] = useState(2500);
   const [statut, setStatut] = useState<Statut>("salarie");
   const [formeTpe, setFormeTpe] = useState<FormeTpe | undefined>(undefined);
+  const [versant, setVersant] = useState<Versant>("fpt");
   const [perimetre, setPerimetre] = useState<Perimetre>(PERIMETRE_DEFAUT);
 
   const regime = regimeDe(statut, formeTpe);
@@ -49,12 +45,26 @@ export function Instruction({
     return simuler({
       netMensuel,
       statut,
+      formeTpe,
+      versant,
       perimetre,
-      // Un président de SAS ne cotise pas à l'assurance chômage ; tant que le
-      // moteur ne porte pas ce retrait, on le dit dans la page plutôt que de
-      // servir un chiffre qu'on sait faux de quelques dixièmes de point.
+      // ⚠ Un président de SAS ne cotise pas à l'assurance chômage, et le moteur
+      // ne porte pas encore ce retrait : il rend le calcul du salarié, à
+      // quelques dixièmes de point près. La page le dit plutôt que de le taire.
     });
-  }, [ouverte, calculable, netMensuel, statut, perimetre]);
+  }, [ouverte, calculable, netMensuel, statut, formeTpe, versant, perimetre]);
+
+  /**
+   * Le seuil où la balance bascule, POUR CE RÉGIME.
+   *
+   * Il coûte quarante simulations, donc il ne se recalcule pas au mouvement du
+   * curseur de salaire : il ne dépend que du régime, du versant et du périmètre
+   * coché. Il peut valoir null, et c'est un résultat, pas une panne.
+   */
+  const pivot = useMemo(() => {
+    if (!ouverte || !calculable) return null;
+    return salairePivot({ statut, formeTpe, versant, perimetre });
+  }, [ouverte, calculable, statut, formeTpe, versant, perimetre]);
 
   return (
     <main className="min-h-dvh bg-papier pb-16">
@@ -69,6 +79,8 @@ export function Instruction({
         }}
         formeTpe={formeTpe}
         setFormeTpe={setFormeTpe}
+        versant={versant}
+        setVersant={setVersant}
         regime={regime}
         calculable={calculable}
         ouverte={ouverte}

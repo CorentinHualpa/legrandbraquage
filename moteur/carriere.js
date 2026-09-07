@@ -10,7 +10,56 @@
 
 import { COURBE_AGE, CARRIERE } from './baremes-2026.js';
 import { brutDepuisNet, cotisationsSalariales, cotisationsPatronales } from './salaire.js';
+import * as fp from './fonction-publique.js';
 import { impotSurLeRevenu, taxesConsommationAnnuelles } from './impot.js';
+
+/**
+ * Les régimes que la projection sait dérouler.
+ *
+ * Chacun expose le MÊME contrat, pour que `deroulerCarriere` n'ait pas à savoir
+ * lequel elle déroule : inverser un net en brut, rendre les retenues du côté de
+ * l'agent, rendre les cotisations du côté de l'employeur, et dire quelle part
+ * de ce qui est versé finance la vieillesse.
+ *
+ * ⚠ Un régime absent de cette table ne doit JAMAIS retomber sur celui du privé.
+ * Servir le calcul du salarié à un indépendant produirait un chiffre faux et
+ * crédible, c'est-à-dire exactement le reproche que ce dossier adresse à la
+ * partie adverse. `regimeDe` lève plutôt que de deviner.
+ */
+const REGIMES = {
+  salarie: {
+    brutDepuisNet,
+    salariales: cotisationsSalariales,
+    patronales: cotisationsPatronales,
+    vieillesse: (sal, pat) =>
+      sal.lignes.vieillessePlafonnee + sal.lignes.vieillesseDeplafonnee
+      + sal.lignes.retraiteCompT1 + sal.lignes.retraiteCompT2
+      + sal.lignes.cegT1 + sal.lignes.cegT2
+      + pat.lignes.vieillessePlafonnee + pat.lignes.vieillesseDeplafonnee
+      + pat.lignes.retraiteCompT1 + pat.lignes.retraiteCompT2
+      + pat.lignes.cegT1 + pat.lignes.cegT2,
+  },
+  fonctionnaire: {
+    brutDepuisNet: fp.brutDepuisNet,
+    salariales: fp.retenuesSalariales,
+    patronales: fp.cotisationsPatronales,
+    // Côté public, la contribution employeur au régime de pension EST la
+    // cotisation vieillesse : il n'y a pas d'étage complémentaire à additionner
+    // en dehors du régime additionnel, assis sur les seules primes.
+    vieillesse: (sal, pat) => sal.lignes.pension + sal.lignes.rafp + pat.lignes.pension + pat.lignes.rafp,
+  },
+};
+
+export function regimeDe(id = 'salarie') {
+  const r = REGIMES[id];
+  if (!r) {
+    throw new Error(
+      `Régime « ${id} » non instruit. Les régimes disponibles sont : ${Object.keys(REGIMES).join(', ')}. `
+      + 'Aucun repli sur le salarié du privé : un chiffre emprunté à un autre régime est un chiffre faux.',
+    );
+  }
+  return r;
+}
 
 /** Indice de salaire à un âge donné, interpolé sur la courbe INSEE. */
 export function indiceAge(age) {
@@ -44,7 +93,10 @@ export function deroulerCarriere(netMensuelActuel, opts = {}) {
     ageDebut = CARRIERE.ageDebut,
     ageFin = CARRIERE.ageFin,
     croissance = CARRIERE.croissanceReelleGenerale,
+    regime = 'salarie',
   } = opts;
+
+  const R = regimeDe(regime);
 
   const indiceReference = indiceAge(ageActuel);
   const annees = [];
@@ -56,14 +108,14 @@ export function deroulerCarriere(netMensuelActuel, opts = {}) {
     const facteurGeneration = Math.pow(1 + croissance, age - ageActuel);
     const netApresImpot = netMensuelActuel * facteurAge * facteurGeneration;
 
-    const brut = brutDepuisNet(netApresImpot, {
+    const brut = R.brutDepuisNet(netApresImpot, {
       ...opts,
       cible: 'apresImpot',
       calculerImpot: (netImposableAnnuel) => impotSurLeRevenu(netImposableAnnuel, opts),
     });
 
-    const sal = cotisationsSalariales(brut, opts);
-    const pat = cotisationsPatronales(brut, opts);
+    const sal = R.salariales(brut, opts);
+    const pat = R.patronales(brut, opts);
     const netAvantImpot = brut - sal.total;
     const netImposable = netAvantImpot + sal.lignes.csgNonDeductible + sal.lignes.crds;
     const ir = impotSurLeRevenu(netImposable * 12, opts);
@@ -80,13 +132,11 @@ export function deroulerCarriere(netMensuelActuel, opts = {}) {
       taxesConsommation: tva,
       coutEmployeur: (brut + pat.total) * 12,
       // La cotisation vieillesse seule, pour la comparaison capitalisation.
-      cotisationVieillesse:
-        (sal.lignes.vieillessePlafonnee + sal.lignes.vieillesseDeplafonnee
-          + sal.lignes.retraiteCompT1 + sal.lignes.retraiteCompT2
-          + sal.lignes.cegT1 + sal.lignes.cegT2
-          + pat.lignes.vieillessePlafonnee + pat.lignes.vieillesseDeplafonnee
-          + pat.lignes.retraiteCompT1 + pat.lignes.retraiteCompT2
-          + pat.lignes.cegT1 + pat.lignes.cegT2) * 12,
+      cotisationVieillesse: R.vieillesse(sal, pat) * 12,
+      // Le traitement indiciaire, quand le régime en distingue un : c'est lui
+      // et lui seul qui porte la pension d'un fonctionnaire.
+      tib: sal.tib ?? brut,
+      primes: sal.primes ?? 0,
     });
   }
 

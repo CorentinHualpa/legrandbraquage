@@ -18,6 +18,28 @@ import {
   PLACEMENT_DEFAUT,
 } from './capitalisation.js';
 import { RETRAITE, SALAIRES_REFERENCE } from './baremes-2026.js';
+import * as fp from './fonction-publique.js';
+import { TAUX_REMPLACEMENT, VERSANTS } from './baremes-fonction-publique.js';
+
+/**
+ * Le régime social derrière une qualité de victime.
+ *
+ * « Patron de TPE » n'est PAS un régime : un gérant majoritaire de SARL cotise
+ * comme un travailleur non salarié, un président de SAS comme un assimilé
+ * salarié. Le statut pose donc une question de forme juridique et aiguille, il
+ * ne fabrique aucun calcul de plus.
+ */
+export function regimeDuStatut(statut = 'salarie', forme) {
+  if (statut === 'salarie') return 'salarie';
+  if (statut === 'fonctionnaire') return 'fonctionnaire';
+  if (statut === 'independant') return 'tns';
+  if (statut === 'tpe') {
+    if (forme === 'sarl-majoritaire') return 'tns';
+    if (forme === 'sas') return 'salarie';
+    return null;
+  }
+  return null;
+}
 
 export {
   PALIERS_ALIBI,
@@ -46,9 +68,20 @@ function espacer(n) {
   return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 }
 
-function contreparties(pensionMensuelle) {
+function contreparties(pensionMensuelle, regime = 'salarie') {
   const retraite = capitalPourRente(pensionMensuelle);
-  return {
+  // Un employeur public est en auto-assurance : ni l'agent ni l'employeur ne
+  // cotisent au chômage. La ligne disparaît donc des DEUX plateaux, sinon on
+  // porterait au crédit du fonctionnaire une contrepartie qu'il n'a pas payée.
+  const chomage = regime === 'fonctionnaire'
+    ? null
+    : {
+      montant: 47000,
+      libelle: 'Un filet, le jour où tu es tombé',
+      calcule: false,
+      note: '91 % des carrières connaissent au moins un épisode indemnisé',
+    };
+  const sortie = {
     retraite: {
       montant: retraite,
       libelle: 'Une rente à vie, indexée, réversible',
@@ -67,13 +100,9 @@ function contreparties(pensionMensuelle) {
       calcule: false,
       note: 'coût public reconstitué du CP au baccalauréat',
     },
-    chomage: {
-      montant: 47000,
-      libelle: 'Un filet, le jour où tu es tombé',
-      calcule: false,
-      note: '91 % des carrières connaissent au moins un épisode indemnisé',
-    },
   };
+  if (chomage) sortie.chomage = chomage;
+  return sortie;
 }
 
 /**
@@ -91,6 +120,9 @@ function contreparties(pensionMensuelle) {
 export function simuler(entree) {
   const {
     netMensuel,
+    statut = 'salarie',
+    formeTpe,
+    versant = 'fpt',
     ageActuel = 36,
     cadre = false,
     effectif = 10,
@@ -100,25 +132,57 @@ export function simuler(entree) {
 
   if (!(netMensuel > 0)) throw new Error('netMensuel doit être positif');
 
-  const opts = { cadre, effectif, parts, ageActuel };
+  const regime = entree.regime ?? regimeDuStatut(statut, formeTpe);
+  if (!regime) {
+    throw new Error(
+      `Statut « ${statut} » sans régime résolu. Pour un patron de TPE, il faut la forme `
+      + 'juridique : sarl-majoritaire ou sas.',
+    );
+  }
+
+  const opts = { cadre, effectif, parts, ageActuel, regime, versant };
   const carriere = deroulerCarriere(netMensuel, opts);
 
   const preleve = totalPreleve(carriere.totaux, perimetre);
 
-  // Pension estimée au taux de remplacement du COR, appliqué au dernier net.
   const dernier = carriere.annees[carriere.annees.length - 1];
-  const tauxRemplacement = cadre
-    ? RETRAITE.tauxRemplacementCadre
-    : RETRAITE.tauxRemplacementNonCadre;
+
+  // ⚠ Les DEUX régimes passent par un taux de remplacement NET du COR, sur la
+  // même génération. C'est une contrainte de comparabilité, pas un choix de
+  // confort : la formule de la pension publique est publique et calculable, et
+  // c'est tentant de la préférer, mais elle rend un montant BRUT. Le comparer
+  // au net d'un salarié gonfle la pension du fonctionnaire d'un quart, ce qui
+  // se lit comme un privilège et n'est qu'une erreur de dénominateur.
+  //
+  // La formule reste calculée, dans `detailPension` : elle a sa place à
+  // l'écran, à condition d'être présentée pour ce qu'elle est.
+  const tauxRemplacement = regime === 'fonctionnaire'
+    ? TAUX_REMPLACEMENT.projeteCatBGeneration2000
+    : (cadre ? RETRAITE.tauxRemplacementCadre : RETRAITE.tauxRemplacementNonCadre);
+
   const pensionMensuelle = dernier.netApresImpot * tauxRemplacement;
 
-  const recu = contreparties(pensionMensuelle);
+  const detailPension = regime === 'fonctionnaire'
+    ? {
+      ...fp.pension(dernier.tib, {
+        tauxLiquidation: 1,
+        anneesRafp: Math.min(40, carriere.annees.length),
+        primesMensuelles: dernier.primes,
+        ageLiquidation: 64,
+      }),
+      brut: true,
+      note: 'montant BRUT rendu par la formule des pensions civiles, hors primes',
+      versant: VERSANTS[versant]?.nom,
+    }
+    : null;
+
+  const recu = contreparties(pensionMensuelle, regime);
   const totalRecu = Object.values(recu).reduce((t, c) => t + c.montant, 0);
 
   const ecart = preleve - totalRecu;
 
   return {
-    entree: { netMensuel, ageActuel, cadre, effectif, parts, perimetre },
+    entree: { netMensuel, statut, regime, versant, ageActuel, cadre, effectif, parts, perimetre },
     carriere,
     plateauGauche: {
       total: preleve,
@@ -134,6 +198,7 @@ export function simuler(entree) {
       total: totalRecu,
       pensionMensuelle,
       tauxRemplacement,
+      detailPension,
       lignes: recu,
       fourchetteRetraite: fourchetteCapitalPourRente(pensionMensuelle),
     },

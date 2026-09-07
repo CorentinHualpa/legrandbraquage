@@ -14,6 +14,7 @@ import {
   SEUIL_ANNEES,
   anneesSansTravailler,
   comptageAbsurde,
+  enAnneesDeDepute,
   objetPour,
 } from "@/lib/objets";
 import { STATUTS } from "@/lib/statuts";
@@ -153,6 +154,44 @@ export function ProcesVerbal({
           })}
         </ul>
 
+        {/*
+          ⚠ L'avertissement du COR voyage avec le chiffre, il ne vit pas dans
+          une note de bas de page. Un employeur public cotise deux fois plus
+          qu'un employeur privé, et ça ne veut PAS dire ce qu'on croit : sans
+          cette phrase, la ligne « cotisations patronales » du fonctionnaire se
+          lit comme un privilège alors qu'elle mesure une démographie.
+        */}
+        {simulation.entree.regime === "fonctionnaire" && perimetre.patronales ? (
+          <div className="border-l-[3px] border-bleu bg-papier-3 px-3 py-3">
+            <p className="font-mono text-[9.5px] tracking-[0.12em] text-bleu">
+              CE QUE CE CHIFFRE NE DIT PAS
+            </p>
+            <p className="mt-1 text-[13.5px] leading-relaxed">
+              La contribution de ton employeur au régime de pension est
+              beaucoup plus élevée que dans le privé, et le Conseil
+              d’orientation des retraites écrit lui-même qu’elle{" "}
+              <span className="font-semibold">
+                « ne résulte pas d’une générosité plus importante du régime
+                public »
+              </span>{" "}
+              et qu’elle{" "}
+              <span className="font-semibold">
+                « ne peut pas être comparée à la contribution des employeurs du
+                secteur privé »
+              </span>
+              . Elle mesure une démographie : 1,29 cotisant par retraité contre
+              2,25 au régime général. Le taux qui financerait les seuls droits,
+              hors invalidité et départs anticipés, serait de 34,7 %.
+            </p>
+            <p className="mt-2 text-[13.5px] leading-relaxed">
+              Et le biais joue dans l’autre sens aussi : ton employeur ne cotise
+              pas au chômage, il s’auto-assure. Le coût existe, il n’apparaît sur
+              aucune ligne. La contrepartie a donc disparu du second plateau
+              plutôt que de t’être portée au crédit.
+            </p>
+          </div>
+        ) : null}
+
         {/* Le convertisseur d'objets. */}
         <div className="mt-1 border-l-[3px] border-rouge bg-papier-3 px-3 py-3">
           <p className="font-mono text-[9.5px] tracking-[0.12em] text-rouge-texte">
@@ -183,7 +222,11 @@ export function ProcesVerbal({
             <span className="chiffres font-mono font-medium text-encre">
               {euros(comptage.nombre)}
             </span>{" "}
-            {comptage.unite.pluriel}.
+            {comptage.unite.pluriel}. Ou encore{" "}
+            <span className="chiffres font-mono font-medium text-encre">
+              {enAnneesDeDepute(plateauGauche.total).toFixed(1).replace(".", ",")}
+            </span>{" "}
+            années de rémunération d’un député.
           </p>
         </div>
       </section>

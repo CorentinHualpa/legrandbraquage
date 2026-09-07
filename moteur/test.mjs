@@ -377,3 +377,154 @@ test('ajouter un périmètre recule l’heure de libération, jamais l’inverse
   );
   assert.ok(avecIr.rangJour > base.rangJour);
 });
+
+// ─── Le régime du fonctionnaire ──────────────────────────────────────────────
+// L'étalon vient du rapport de recherche du 06/09/2026, lui-même monté sur les
+// textes (décret 2025-1341 pour le CAS Pensions, décret 2025-86 pour la CNRACL,
+// URSSAF secteur public au 01/01/2026) et sur les parts de primes DGAFP 2023.
+// Si un de ces tests casse, c'est le moteur qui a tort, pas les textes.
+
+import * as FP from './fonction-publique.js';
+import { VERSANTS, TAUX_REMPLACEMENT } from './baremes-fonction-publique.js';
+
+test('fonction publique : taux de retenue salariale par versant', () => {
+  const cas = [['fpe', 18.64], ['fpt', 18.57], ['fph', 18.79]];
+  for (const [v, attendu] of cas) {
+    const { taux } = FP.retenuesSalariales(3000, { versant: v });
+    assert.ok(
+      Math.abs(pourcent(taux) - attendu) < 0.02,
+      `${v} : ${pourcent(taux)} % attendu ${attendu} %`,
+    );
+  }
+});
+
+test('fonction publique : taux de cotisation patronale par versant', () => {
+  const cas = [['fpe', 78.70], ['fpt', 46.10], ['fph', 47.57]];
+  for (const [v, attendu] of cas) {
+    const { taux } = FP.cotisationsPatronales(3000, { versant: v });
+    assert.ok(
+      Math.abs(pourcent(taux) - attendu) < 0.02,
+      `${v} : ${pourcent(taux)} % attendu ${attendu} %`,
+    );
+  }
+});
+
+test('fonction publique : le taux ne dépend PAS du niveau de traitement', () => {
+  // Aucune réduction générale, aucun plafond de tranche : le taux est constant
+  // tant qu'on reste sous quatre plafonds de sécurité sociale. C'est ce qui
+  // distingue le plus nettement ce régime de celui du privé.
+  const a = FP.cotisationsPatronales(2000, { versant: 'fpt' }).taux;
+  const b = FP.cotisationsPatronales(6000, { versant: 'fpt' }).taux;
+  assert.ok(Math.abs(a - b) < 1e-9, `${pourcent(a)} % contre ${pourcent(b)} %`);
+});
+
+test('fonction publique : aucune réduction générale, par construction', () => {
+  for (const v of Object.keys(VERSANTS)) {
+    assert.equal(FP.cotisationsPatronales(1900, { versant: v }).reduction, 0);
+  }
+});
+
+test('fonction publique : l’assiette RAFP est plafonnée à 20 % du traitement', () => {
+  // Un agent très primé ne cotise pas davantage au régime additionnel.
+  assert.equal(FP.assietteRafp(1000, 500), 200);
+  // Un agent peu primé cotise sur ses seules primes.
+  assert.equal(FP.assietteRafp(1000, 120), 120);
+});
+
+test('fonction publique : inversion net vers brut, aller-retour', () => {
+  for (const v of Object.keys(VERSANTS)) {
+    for (const brut of [2000, 3000, 5000]) {
+      const { netAvantImpot } = FP.netsDepuisBrut(brut, { versant: v });
+      const retrouve = FP.brutDepuisNet(netAvantImpot, { versant: v });
+      assert.ok(
+        Math.abs(retrouve - brut) < 0.5,
+        `${v} brut ${brut} retrouvé à ${retrouve.toFixed(2)}`,
+      );
+    }
+  }
+});
+
+test('fonction publique : la pension se calcule sur le TRAITEMENT, pas sur le brut', () => {
+  // 75 % du traitement indiciaire, primes exclues. Le régime additionnel
+  // s'ajoute et pèse peu : c'est tout le sujet de ce régime.
+  const p = FP.pension(2894, { primesMensuelles: 951, anneesRafp: 40, ageLiquidation: 62 });
+  assert.ok(Math.abs(p.base - 2170.5) < 1, `base = ${p.base.toFixed(0)}`);
+  assert.ok(p.renteRafp > 50 && p.renteRafp < 150, `RAFP = ${p.renteRafp.toFixed(0)} €/mois`);
+  assert.ok(
+    p.renteRafp / p.totale < 0.08,
+    `le régime additionnel pèse ${pourcent(p.renteRafp / p.totale)} % de la pension`,
+  );
+});
+
+test('fonction publique : le minimum garanti prend le relais en bas de grille', () => {
+  const p = FP.pension(900, { primesMensuelles: 100 });
+  assert.equal(p.minimumGaranti, true);
+  assert.ok(p.totale >= 1366.35);
+});
+
+test('un régime non instruit LÈVE, il ne retombe pas sur le salarié', () => {
+  // C'est la garde qui protège le dossier : servir le calcul du salarié à un
+  // indépendant produirait un chiffre faux et parfaitement crédible.
+  assert.throws(() => deroulerCarriere(2500, { regime: 'tns' }), /non instruit/);
+  assert.throws(() => M.simuler({ netMensuel: 2500, statut: 'independant' }), /non instruit/);
+});
+
+test('un patron de TPE doit dire sa forme juridique, sinon on refuse', () => {
+  assert.throws(() => M.simuler({ netMensuel: 4000, statut: 'tpe' }), /forme/);
+  // Un président de SAS est un assimilé salarié : même moteur que le privé.
+  const sas = M.simuler({ netMensuel: 4000, statut: 'tpe', formeTpe: 'sas' });
+  const salarie = M.simuler({ netMensuel: 4000, statut: 'salarie' });
+  assert.equal(Math.round(sas.plateauGauche.total), Math.round(salarie.plateauGauche.total));
+});
+
+test('fonctionnaire : le taux de remplacement reste dans la fourchette du COR', () => {
+  const s = M.simuler({ netMensuel: 2400, statut: 'fonctionnaire', versant: 'fpt' });
+  assert.equal(s.plateauDroit.tauxRemplacement, TAUX_REMPLACEMENT.projeteCatBGeneration2000);
+  // Garde contre le retour du bug : une pension BRUTE comparée à un net donnait
+  // 83 %, très au-dessus de tout ce que le COR publie, dans les deux sens.
+  assert.ok(
+    s.plateauDroit.tauxRemplacement > 0.5 && s.plateauDroit.tauxRemplacement < 0.78,
+    `taux de remplacement à ${pourcent(s.plateauDroit.tauxRemplacement)} %`,
+  );
+});
+
+test('fonctionnaire : le chômage disparaît des DEUX plateaux', () => {
+  // Ni l'agent ni l'employeur ne cotisent au chômage : porter au crédit du
+  // fonctionnaire une contrepartie qu'il n'a pas payée fausserait la balance.
+  const f = M.simuler({ netMensuel: 2400, statut: 'fonctionnaire', versant: 'fpt' });
+  const s = M.simuler({ netMensuel: 2400, statut: 'salarie' });
+  assert.equal(f.plateauDroit.lignes.chomage, undefined);
+  assert.ok(s.plateauDroit.lignes.chomage.montant > 0);
+});
+
+test('fonctionnaire : la formule de pension reste exposée, marquée BRUTE', () => {
+  const s = M.simuler({ netMensuel: 2400, statut: 'fonctionnaire', versant: 'fpe' });
+  assert.equal(s.plateauDroit.detailPension.brut, true);
+  assert.ok(s.plateauDroit.detailPension.base > 0);
+  assert.equal(M.simuler({ netMensuel: 2400 }).plateauDroit.detailPension, null);
+});
+
+test('LE SECOND CHIFFRE DU PROJET : le pivot du fonctionnaire n’est pas celui du privé', () => {
+  const p = { salariales: true, patronales: true, impotRevenu: true, consommation: true };
+
+  // Territoriale : la bascule existe, très en dessous de celle du privé.
+  const fpt = M.salairePivot({ statut: 'fonctionnaire', versant: 'fpt', perimetre: p });
+  assert.ok(fpt !== null, 'la territoriale doit avoir un pivot');
+  assert.ok(fpt < M.salairePivot({ perimetre: p }), 'il doit être sous celui du privé');
+
+  // ⚠ État : il n'y en a AUCUN. À aucun niveau de traitement la balance ne
+  // penche en faveur de l'agent, parce que la contribution de l'État à son
+  // propre régime de pension pèse 82,28 % du traitement.
+  //
+  // Ce n'est PAS un résultat sur les fonctionnaires, c'est un résultat sur le
+  // dénominateur, et le COR écrit lui-même que ce taux ne se compare pas à
+  // celui d'un employeur privé. Le publier sans cet avertissement fabriquerait
+  // exactement le genre de titre que ce dossier reproche à la partie adverse.
+  // Si ce test se met à rendre un nombre un jour, c'est que quelqu'un a changé
+  // le traitement de la part employeur publique : il faut alors relire la page
+  // méthode avant de laisser passer le chiffre.
+  assert.equal(
+    M.salairePivot({ statut: 'fonctionnaire', versant: 'fpe', perimetre: p }),
+    null,
+  );
+});
