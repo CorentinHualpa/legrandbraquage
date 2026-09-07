@@ -25,6 +25,12 @@
   --color-rouge-texte: #9c2b22;
   --color-bleu: #2c4a6e;
 
+  /* La nuit du commissariat : le fond des cartes, et le rouge qui se lit dessus. */
+  --color-nuit: #0f151c;
+  --color-nuit-2: #1b2430;
+  --color-rouge-clair: #e0564a;
+  --color-jaune-police: #e8c126;
+
   --font-serif: var(--police-serif), Georgia, "Times New Roman", serif;
   --font-mono: var(--police-mono), ui-monospace, "Courier New", monospace;
 }
@@ -102,6 +108,11 @@ body {
 /* Un montant qui change ne doit pas faire sauter la ligne qui le porte. */
 .montant-anime {
   transition: color 240ms ease;
+}
+
+/* Le ruban de police : rayures jaunes et noires, à poser de travers. */
+.ruban {
+  background: repeating-linear-gradient(135deg, var(--color-jaune-police) 0 22px, var(--color-nuit-2) 22px 44px);
 }
 
 /* Le voile d'attente d'une image qui n'est pas encore déposée. */

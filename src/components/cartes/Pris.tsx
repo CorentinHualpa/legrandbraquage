@@ -1,18 +1,17 @@
 "use client";
 
-import { Carte, Chiffre, Ligne, Volet } from "./Carte";
-import { Scelle } from "../papier";
+import { Carte, Chiffre, Commissaire, Kicker, Ligne, Volet } from "./Carte";
 import type { Pieces } from "@/lib/images";
 import { eurosSigne } from "@/lib/format";
 import type { Perimetre, Simulation } from "@/lib/moteur";
 import { LIGNES_PERIMETRE, type Regime } from "@/lib/statuts";
 
 /**
- * Écran 2 : d'ici la fin de ta carrière, ils t'auront pris.
+ * Écran 3 : la pièce à conviction. D'ici la fin de ta carrière, ils t'auront pris.
  *
- * Un seul chiffre. Le volet « Comment ? » donne les quatre lignes, et c'est
- * là que l'on décoche : une ligne décochée sort du total, sous les yeux. Les
- * libellés viennent du RÉGIME, un freelance n'a pas de paie.
+ * Un seul chiffre. Le volet donne les quatre lignes, et c'est là qu'on
+ * décoche : une ligne décochée sort du total, sous les yeux. Les libellés
+ * viennent du RÉGIME, un freelance n'a pas de paie.
  */
 export function Pris({
   pieces,
@@ -41,22 +40,22 @@ export function Pris({
     <Carte
       numero={numero}
       total={total}
+      nature="Pièce à conviction"
       retour={retour}
+      photo={{ numero: 2, pieces, hauteur: 330, legende: "CLICHÉ 02 · SOUS SCELLÉ" }}
       action={{ libelle: "Suivant", onClick: suivant }}
     >
-      <Scelle numero={2} nom="La pièce à conviction" ratio="16:9" fichier={pieces[2]} legende="CLICHÉ 02 · SOUS SCELLÉ" />
+      <Kicker couleur="rouge">D’ici la fin de ta carrière, ils t’auront pris</Kicker>
+      <Chiffre>{eurosSigne(plateauGauche.total)}</Chiffre>
+      <Commissaire>
+        {micro
+          ? "« Sur tout ce que vous aurez encaissé. Une partie avant même que vous vous payiez. »"
+          : "« Ça fait beaucoup pour un seul plaignant. Pour l’essentiel sans que vous le voyiez, évidemment. »"}
+      </Commissaire>
 
-      <div className="flex flex-col gap-3">
-        <p className="text-[24px] leading-tight font-medium">D’ici la fin de ta carrière, ils t’auront pris</p>
-        <Chiffre>{eurosSigne(plateauGauche.total)}</Chiffre>
-        <p className="text-[16px] leading-relaxed text-encre-2 italic">
-          {micro
-            ? "Sur tout ce que tu auras encaissé. Une partie avant même que tu te paies."
-            : "Pour l’essentiel sans te le dire."}
-        </p>
-      </div>
+      <div className="grow" />
 
-      <Volet titre="Comment ?">
+      <Volet titre="Comment ? Les quatre lignes">
         <ul className="flex flex-col">
           {lignes.map((ligne) => {
             const montant = plateauGauche.lignes[ligne.cle];
@@ -74,10 +73,10 @@ export function Pris({
                   libelle={
                     <span className="flex items-center gap-2.5">
                       <span
-                        className={`flex h-4 w-4 shrink-0 items-center justify-center border-[1.6px] border-encre ${actif ? "bg-encre" : "bg-transparent"}`}
+                        className={`flex h-4 w-4 shrink-0 items-center justify-center border-[1.6px] border-papier ${actif ? "bg-papier" : "bg-transparent"}`}
                         aria-hidden
                       >
-                        {actif ? <span className="font-mono text-[10px] leading-none font-semibold text-papier">×</span> : null}
+                        {actif ? <span className="font-mono text-[10px] leading-none font-semibold text-encre">×</span> : null}
                       </span>
                       <span>{ligne.geste}</span>
                     </span>
@@ -91,10 +90,9 @@ export function Pris({
             );
           })}
         </ul>
-        <p className="text-[13px] leading-relaxed text-encre-2">
-          Tape une ligne pour la sortir du total. Tout est en euros d’aujourd’hui,
-          inflation corrigée, aux barèmes 2026 :{" "}
-          <a href="/methode" className="text-bleu underline underline-offset-2">la méthode, ligne par ligne</a>.
+        <p className="text-[13px] leading-relaxed text-ligne">
+          Tape une ligne pour la sortir du total. Tout est en euros d’aujourd’hui, aux barèmes 2026 :{" "}
+          <a href="/methode" className="underline underline-offset-2">la méthode, ligne par ligne</a>.
         </p>
       </Volet>
     </Carte>

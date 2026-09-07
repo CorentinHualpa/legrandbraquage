@@ -11,9 +11,9 @@ import type { Simulation } from "@/lib/moteur";
 import { SEUIL_ANNEES, anneesSansTravailler, objetPour } from "@/lib/objets";
 
 /**
- * Écran 11 : l'avis de recherche, à placarder.
+ * Écran 13 : l'avis de recherche, collé sur le mur.
  *
- * Le lien rouvre CE dossier, paliers compris, sur l'écran du verdict. Le
+ * Le lien rouvre CE dossier, réponses comprises, sur l'écran du verdict. Le
  * Braqueur s'interroge ici, au clic. Et on peut tout refaire.
  */
 export function Avis({
@@ -67,27 +67,33 @@ export function Avis({
     <Carte
       numero={numero}
       total={total}
+      nature="Pièce à placarder"
       retour={retour}
+      photo={{ numero: 6, pieces, hauteur: 220 }}
       action={{ libelle: copie ? "Lien copié" : "Partager", onClick: partager }}
-      actionSecondaire={{ libelle: "Refaire la simulation", onClick: recommencer }}
+      actionSecondaire={{ libelle: "Refaire la déposition", onClick: recommencer }}
       pied={
-        <p className="text-center text-[12.5px] text-encre-3">
-          Le lien porte ton salaire, ton statut et tes paliers, rien d’autre.{" "}
+        <p className="text-center text-[12.5px] text-ligne">
+          Le lien porte ton salaire, ton statut et tes réponses, rien d’autre.{" "}
           <a href="/methode" className="underline underline-offset-2">Comment c’est calculé.</a>
         </p>
       }
     >
-      <CarteAvis
-        preleve={plateauGauche.total}
-        recu={plateauDroit.total}
-        ecart={verdict.ecart}
-        braquage={verdict.braquage}
-        objet={objet}
-        portrait={pieces[13]}
-      />
+      <div className="-mt-6 -rotate-[1.5deg]">
+        <CarteAvis
+          preleve={plateauGauche.total}
+          recu={plateauDroit.total}
+          ecart={verdict.ecart}
+          braquage={verdict.braquage}
+          objet={objet}
+          portrait={pieces[13]}
+        />
+      </div>
+
+      <div className="grow" />
 
       <Volet titre="Interroger le Braqueur">
-        <div className="-mx-5 sm:-mx-6">
+        <div className="-mx-5 bg-papier text-encre sm:-mx-6">
           <Audition pieces={pieces} simulation={simulation} ouvrirAudition={() => {}} />
         </div>
       </Volet>

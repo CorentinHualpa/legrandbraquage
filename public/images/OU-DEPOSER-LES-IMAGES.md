@@ -22,6 +22,13 @@ laisse le cadre de scellé numéroté à sa place, un fichier présent le rempli
 | `15-bulletin-scelle.jpg` | planche 2, n° 15 | 4:3 | l'écran École |
 | `16-bracelet-hopital.jpg` | planche 2, n° 16 | 4:3 | l'écran Santé |
 | `17-bureau-vide.jpg` | planche 2, n° 17 | 4:3 | l'écran Chômage |
+| `18-commissariat.jpg` | planche 2, n° 18 | 4:3 | la déposition (écran 2) |
+| `19-commissaire-dossier.jpg` | planche 2, n° 19 | 4:3 | réserve, « ils t'auront pris » |
+| `20-commissaire-fenetre.jpg` | planche 2, n° 20 | 4:3 | le coup de la bourse (écran 5) |
+| `21-commissaire-montre.jpg` | planche 2, n° 21 | 4:3 | réserve, l'horaire |
+| `22-commissaire-aparte.jpg` | planche 2, n° 22 | 4:3 | l'aparté (écran 7) |
+| `23-commissaire-interrogatoire.jpg` | planche 2, n° 23 | 4:3 | réserve, l'interrogatoire |
+| `24-commissaire-porte.jpg` | planche 2, n° 24 | 4:3 | réserve, le verdict |
 
 Plus, quand elle existera :
 

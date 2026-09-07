@@ -2,11 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import { Saisie, type EtatSaisie } from "./cartes/Saisie";
+import { Couverture } from "./cartes/Couverture";
+import { Deposition, type EtatSaisie } from "./cartes/Deposition";
 import { Pris } from "./cartes/Pris";
 import { Butin } from "./cartes/Butin";
+import { Bourse } from "./cartes/Bourse";
 import { Liberation } from "./cartes/Liberation";
-import { Intermede } from "./cartes/Intermede";
+import { Aparte } from "./cartes/Aparte";
 import { PalierEcran } from "./cartes/PalierEcran";
 import { Rendu } from "./cartes/Rendu";
 import { Verdict } from "./cartes/Verdict";
@@ -26,27 +28,25 @@ import {
 import { partsFiscales, regimeCalculable, regimeDe } from "@/lib/statuts";
 
 /**
- * Les écrans, dans l'ordre. Un fonctionnaire ne cotise pas au chômage : la
- * question ne lui est pas posée, et le compteur du bandeau le sait.
+ * Les écrans, dans l'ordre. La couverture n'est pas comptée dans le bandeau :
+ * on n'est pas encore dans le dossier. Un fonctionnaire ne cotise pas au
+ * chômage : la question ne lui est pas posée.
  */
 const ECRANS = [
-  "saisie", "pris", "butin", "liberation", "intermede",
+  "couverture", "deposition", "pris", "butin", "bourse", "liberation", "aparte",
   "ecole", "sante", "chomage", "rendu", "verdict", "avis",
 ] as const;
 type Ecran = (typeof ECRANS)[number];
 
 /**
- * Le parcours, de bout en bout : un écran, un chiffre, le détail au clic.
+ * Le parcours, de bout en bout : la nuit du commissariat, un écran, un
+ * chiffre, le détail au clic. Tout l'état vit ici et le calcul tourne dans le
+ * navigateur : on recalcule à chaque changement, y compris quand on revient
+ * décocher une ligne ou changer une réponse.
  *
- * Tout l'état vit ici et le calcul tourne dans le navigateur. Une simulation
- * complète coûte 1,2 ms : on recalcule à chaque changement, y compris quand
- * on revient décocher une ligne ou changer un palier, et chaque écran suivant
- * se remet d'équerre tout seul.
- *
- * Refonte du 08/09/2026 : le dossier de dix mille pixels de prose est devenu
- * onze cartes. Retour de Coq : « repenser tout le parcours comme si on était
- * des ados, vraiment basique ; si la personne clique sur un élément, là il y a
- * plus de détails ».
+ * Refonte du 08/09/2026 (Coq : « repenser tout le parcours comme si on était
+ * des ados », puis « plus tourner ça comme une investigation, un
+ * interrogatoire, avec des images immersives »).
  */
 export function Parcours({ pieces }: { pieces: Pieces }) {
   const [etat, setEtat] = useState<EtatSaisie>({
@@ -62,7 +62,7 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
   });
   const [perimetre, setPerimetre] = useState<Perimetre>(PERIMETRE_DEFAUT);
   const [paliers, setPaliers] = useState<Paliers>(PALIERS_DEFAUT);
-  const [ecran, setEcran] = useState<Ecran>("saisie");
+  const [ecran, setEcran] = useState<Ecran>("couverture");
 
   const changer = (patch: Partial<EtatSaisie>) => setEtat((e) => ({ ...e, ...patch }));
 
@@ -75,20 +75,19 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
     [regime],
   );
   const indexEcran = Math.max(0, ecrans.indexOf(ecran));
-  const total = ecrans.length;
+  /* Le bandeau compte à partir de la déposition : la couverture est hors dossier. */
+  const total = ecrans.length - 1;
+  const numero = indexEcran;
 
   /**
-   * Un lien partagé rouvre CE dossier, paliers compris, et pose le visiteur
-   * sur l'écran de l'ancre s'il y en a une. Lu APRÈS le montage, parce que la
-   * page est prérendue en statique et que l'état initial doit être le même
+   * Un lien partagé rouvre CE dossier, réponses comprises, et pose le
+   * visiteur sur l'écran de l'ancre s'il y en a une. Lu APRÈS le montage :
+   * la page est prérendue en statique et l'état initial doit être le même
    * des deux côtés.
    */
   useEffect(() => {
     const cas = casDepuisRequete(window.location.search);
     if (!cas) return;
-    // La page est prérendue en statique : lire l'adresse dans l'état initial
-    // ferait diverger le rendu du serveur de celui du navigateur. On pose donc
-    // l'état APRÈS le montage, et c'est le seul endroit où on le fait.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setEtat({
       netMensuel: cas.netMensuel,
@@ -105,8 +104,10 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
     setPaliers(cas.paliers);
     const ouvrable = regimeCalculable(regimeDe(cas.statut, cas.formeTpe, cas.activite));
     const ancre = window.location.hash.slice(1) as Ecran;
-    if (ouvrable && (ECRANS as readonly string[]).includes(ancre) && ancre !== "saisie") {
+    if (ouvrable && (ECRANS as readonly string[]).includes(ancre) && ancre !== "couverture") {
       setEcran(ancre);
+    } else {
+      setEcran("deposition");
     }
   }, []);
 
@@ -120,10 +121,7 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
     return simuler({ ...etat, parts, perimetre, paliers });
   }, [calculable, etat, parts, perimetre, paliers]);
 
-  /**
-   * Le seuil, POUR CE RÉGIME, CE PÉRIMÈTRE ET CES PALIERS. Quarante
-   * simulations, donc seulement quand on affiche le verdict.
-   */
+  /** Le seuil, pour CE régime, CE périmètre et CES réponses. Quarante simulations, donc seulement au verdict. */
   const pivot = useMemo(() => {
     if (!simulation || ecran !== "verdict") return null;
     const { netMensuel: _net, ...reste } = etat;
@@ -132,24 +130,32 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
   }, [simulation, ecran, etat, parts, perimetre, paliers]);
 
   const aller = (e: Ecran) => setEcran(e);
-  const suivant = () => aller(ecrans[Math.min(total - 1, indexEcran + 1)]);
+  const suivant = () => aller(ecrans[Math.min(ecrans.length - 1, indexEcran + 1)]);
   const retour = () => aller(ecrans[Math.max(0, indexEcran - 1)]);
   const choisirPalier = (poste: PosteDuPlateau, id: string) =>
     setPaliers((p) => ({ ...p, [poste]: id }));
 
-  const commun = { pieces, numero: indexEcran + 1, total, suivant, retour };
-
-  // Sans simulation, il n'y a que la saisie. Un écran demandé sans dossier
-  // ouvrable retombe dessus, sans rien casser.
-  if (ecran === "saisie" || !simulation) {
+  if (ecran === "couverture") {
     return (
-      <main className="min-h-dvh bg-cadre">
-        <Saisie
+      <main className="min-h-dvh bg-nuit">
+        <Couverture pieces={pieces} porterPlainte={() => aller("deposition")} />
+      </main>
+    );
+  }
+
+  // Sans simulation, il n'y a que la déposition. Un écran demandé sans
+  // dossier ouvrable retombe dessus, sans rien casser.
+  if (ecran === "deposition" || !simulation) {
+    return (
+      <main className="min-h-dvh bg-nuit">
+        <Deposition
+          pieces={pieces}
           etat={etat}
           changer={changer}
           regime={regime}
           calculable={calculable}
-          lancer={() => aller("pris")}
+          signer={() => aller("pris")}
+          retour={() => aller("couverture")}
           numero={1}
           total={total}
         />
@@ -157,26 +163,37 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
     );
   }
 
+  const commun = { pieces, numero, total, suivant, retour };
   const cas = { ...etat, perimetre, paliers };
+  const rangs: Record<"ecole" | "sante" | "chomage", string> = { ecole: "1 sur 3", sante: "2 sur 3", chomage: "3 sur 3" };
+  if (regime === "fonctionnaire") {
+    rangs.ecole = "1 sur 2";
+    rangs.sante = "2 sur 2";
+  }
 
   return (
-    <main className="min-h-dvh bg-cadre">
+    <main className="min-h-dvh bg-nuit">
       {ecran === "pris" ? (
         <Pris {...commun} simulation={simulation} perimetre={perimetre} setPerimetre={setPerimetre} />
       ) : ecran === "butin" ? (
         <Butin {...commun} simulation={simulation} />
+      ) : ecran === "bourse" ? (
+        <Bourse {...commun} simulation={simulation} />
       ) : ecran === "liberation" ? (
         <Liberation {...commun} simulation={simulation} />
-      ) : ecran === "intermede" ? (
-        <Intermede {...commun} />
+      ) : ecran === "aparte" ? (
+        <Aparte {...commun} />
       ) : ecran === "ecole" || ecran === "sante" || ecran === "chomage" ? (
         <PalierEcran
           {...commun}
           poste={ecran}
+          rang={rangs[ecran]}
           paliers={paliers}
           choisir={(id) => choisirPalier(ecran, id)}
           libelleSuivant={
-            ecran === "sante" && regime === "fonctionnaire" ? "Voir ce qu’ils m’auront rendu" : undefined
+            ecran === "chomage" || (ecran === "sante" && regime === "fonctionnaire")
+              ? "Voir ce qu’ils m’auront rendu"
+              : "Question suivante"
           }
         />
       ) : ecran === "rendu" ? (
@@ -184,12 +201,7 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
       ) : ecran === "verdict" ? (
         <Verdict {...commun} simulation={simulation} pivot={pivot} perimetre={perimetre} />
       ) : (
-        <Avis
-          {...commun}
-          simulation={simulation}
-          cas={cas}
-          recommencer={() => aller("saisie")}
-        />
+        <Avis {...commun} simulation={simulation} cas={cas} recommencer={() => aller("deposition")} />
       )}
     </main>
   );

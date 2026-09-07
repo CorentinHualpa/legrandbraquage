@@ -1,15 +1,13 @@
 "use client";
 
-import { Carte, Kicker, Volet } from "./Carte";
-import { Scelle } from "../papier";
+import { Carte, Commissaire, Kicker, Volet } from "./Carte";
 import type { Pieces } from "@/lib/images";
 import { pourcent } from "@/lib/format";
 import { heureDeLiberation, type Simulation } from "@/lib/moteur";
 
 /**
- * Écran 4 : chaque année, tu auras travaillé pour eux jusqu'au…
- *
- * La date et l'heure sont le chiffre de la carte. La barre dit la part. Le
+ * Écran 6 : l'horaire du braquage. Chaque année, tu auras travaillé pour
+ * eux jusqu'au… La date et l'heure sont le chiffre de la carte. Le
  * dénominateur, qui décide de tout, est expliqué au clic.
  */
 export function Liberation({
@@ -32,31 +30,23 @@ export function Liberation({
   const partToi = Math.round((100 - partEux) * 10) / 10;
 
   return (
-    <Carte numero={numero} total={total} retour={retour} action={{ libelle: "Suivant", onClick: suivant }}>
-      <Scelle numero={10} nom="Le distributeur sous scellés" ratio="16:9" fichier={pieces[10]} legende="CLICHÉ 10 · LE GUICHET, LA NUIT" />
+    <Carte
+      numero={numero}
+      total={total}
+      nature="L’horaire du braquage"
+      retour={retour}
+      photo={{ numero: 10, pieces, hauteur: 300, legende: "CLICHÉ 10 · LE GUICHET, LA NUIT" }}
+      action={{ libelle: "Suivant", onClick: suivant }}
+    >
+      <Kicker couleur="rouge">Chaque année, tu auras travaillé pour eux jusqu’au</Kicker>
+      <span className="text-[52px] leading-none font-bold tracking-[-0.02em]">{liberation.jour.texte}</span>
+      <span className="chiffres -mt-1 font-mono text-[30px] leading-tight font-semibold tracking-[-0.03em] text-ligne">
+        {liberation.heureTexte}
+      </span>
 
-      <p className="text-[24px] leading-tight font-medium">
-        Chaque année, tu auras travaillé pour eux jusqu’au
-      </p>
-
-      <div className="flex flex-col gap-1">
-        <span className="text-[50px] leading-none font-bold tracking-[-0.02em] text-rouge">
-          {liberation.jour.texte}
-        </span>
-        <span className="chiffres font-mono text-[34px] leading-tight font-semibold tracking-[-0.03em] text-rouge">
-          {liberation.heureTexte}
-        </span>
-      </div>
-
-      <p className="text-[17px] leading-relaxed text-encre-2 italic">
-        Du 1er janvier jusqu’à cette heure-là, tout ce que ton travail rapporte
-        part chez eux. Le reste de l’année est à toi.
-      </p>
-
-      <div className="flex flex-col gap-2 border-2 border-encre bg-papier-2 px-4 py-3.5">
-        <div className="flex h-3.5 border border-encre">
+      <div className="flex flex-col gap-1.5">
+        <div className="flex h-2.5 border border-papier">
           <div className="bg-rouge" style={{ width: `${partEux}%` }} />
-          <div className="grow bg-papier" />
         </div>
         <div className="flex justify-between">
           <Kicker couleur="rouge">{String(partEux).replace(".", ",")} % pour eux</Kicker>
@@ -64,17 +54,20 @@ export function Liberation({
         </div>
       </div>
 
+      <Commissaire>
+        « Du 1er janvier jusqu’à cette heure-là, c’est pour eux. Le reste de l’année est à vous. Ils sont
+        réglés comme une horloge. »
+      </Commissaire>
+
+      <div className="grow" />
+
       <Volet titre="Comment on calcule ça ?">
-        <p className="text-[14.5px] leading-relaxed text-encre-2">
-          C’est {pourcent(liberation.part, 1)} de ce que ton travail coûte en tout,
-          part employeur comprise. Rapporté à ce qui arrive vraiment sur ton
-          compte, la même somme vaut{" "}
-          <span className="font-semibold text-encre">
-            {liberation.partDuNet.toFixed(2).replace(".", ",")} € prélevés pour 1 € reçu
-          </span>
-          . Les deux chiffres sont exacts. Ils ne racontent pas la même histoire,
-          et c’est le dénominateur qui décide :{" "}
-          <a href="/methode" className="text-bleu underline underline-offset-2">la méthode dit lequel on a pris, et pourquoi</a>.
+        <p className="text-[14px] leading-relaxed text-ligne">
+          C’est {pourcent(liberation.part, 1)} de ce que ton travail coûte en tout, part employeur comprise.
+          Rapporté à ce qui arrive vraiment sur ton compte, la même somme vaut{" "}
+          <span className="font-semibold text-papier">{liberation.partDuNet.toFixed(2).replace(".", ",")} € prélevés pour 1 € reçu</span>.
+          Les deux chiffres sont exacts et ne racontent pas la même histoire :{" "}
+          <a href="/methode" className="underline underline-offset-2">la méthode dit quel dénominateur on a pris, et pourquoi</a>.
         </p>
       </Volet>
     </Carte>

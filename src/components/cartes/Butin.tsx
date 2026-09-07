@@ -1,6 +1,7 @@
 "use client";
 
-import { Carte, Kicker, Lien, Volet } from "./Carte";
+import { Carte, Commissaire, Kicker, Lien, Volet } from "./Carte";
+import type { Pieces } from "@/lib/images";
 import { euros, eurosSigne } from "@/lib/format";
 import type { Simulation } from "@/lib/moteur";
 import {
@@ -13,18 +14,20 @@ import {
 } from "@/lib/objets";
 
 /**
- * Écran 3 : ce que ça fait, en vrai.
+ * Écran 4 : le butin. Avec ça, ils se sont payé…
  *
- * L'objet est la tête d'affiche, et son image aussi. Le comptage absurde et
- * le député viennent après, en une phrase. Les sources des prix sont au clic.
+ * Le dessin du butin en plein cadre, l'objet en gros, et le commissaire qui
+ * compte la monnaie. Les sources des prix sont au clic.
  */
 export function Butin({
+  pieces,
   simulation,
   numero,
   total,
   suivant,
   retour,
 }: {
+  pieces: Pieces;
   simulation: Simulation;
   numero: number;
   total: number;
@@ -37,66 +40,68 @@ export function Butin({
   const reste = montant - objet.seuil;
   const annees = anneesSansTravailler(montant, simulation.netApresImpotActuel);
   const deputes = enAnneesDeDepute(montant);
+  void pieces;
 
   return (
-    <Carte numero={numero} total={total} retour={retour} action={{ libelle: "Suivant", onClick: suivant }}>
-      <p className="text-[24px] leading-tight font-medium">
-        {eurosSigne(montant)}, c’est quoi, en vrai ?
-      </p>
-
-      {objet.image ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={`/images/butin/${objet.image}.webp`}
-          alt={objet.nom}
-          className="aspect-[3/2] w-full border border-cadre-bord object-cover"
-          loading="lazy"
-          decoding="async"
+    <Carte
+      numero={numero}
+      total={total}
+      nature="Le butin"
+      retour={retour}
+      action={{ libelle: "Suivant", onClick: suivant }}
+    >
+      <div className="relative -mx-5 -mt-16 h-[340px] overflow-hidden bg-papier sm:-mx-6">
+        {objet.image ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={`/images/butin/${objet.image}.webp`} alt={objet.nom} className="h-full w-full object-cover" decoding="async" />
+        ) : (
+          <div className="flex h-full items-center justify-center">
+            <span className="font-mono text-[10px] tracking-[0.12em] text-encre-3">LE BUTIN, EN DESSIN</span>
+          </div>
+        )}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{ background: "linear-gradient(180deg, rgba(15,21,28,0.55) 0%, rgba(15,21,28,0) 30%, rgba(15,21,28,0) 60%, #0f151c 100%)" }}
         />
-      ) : (
-        <div className="cadre-scelle flex aspect-[3/2] items-center justify-center">
-          <span className="font-mono text-[10px] tracking-[0.1em] text-encre-3">LE BUTIN, EN DESSIN</span>
-        </div>
-      )}
-
-      <div className="flex flex-col gap-1.5">
-        <p className="text-[26px] leading-[1.15] font-bold tracking-[-0.015em]">{objet.nom}.</p>
-        <p className="text-[16px] leading-relaxed text-encre-2 italic">
-          {objet.seuil > 0 && reste > 1000
-            ? `Payée cash. Il te reste ${eurosSigne(reste)} de monnaie.`
-            : objet.pointe}
-        </p>
       </div>
 
-      <div className="flex flex-col gap-1.5 border-t border-ligne pt-3">
-        <Kicker>Ou, si tu préfères</Kicker>
-        <p className="text-[16px] leading-relaxed">
-          <span className="chiffres font-mono font-medium">{euros(comptage.nombre)}</span> {comptage.unite.pluriel}.{" "}
-          <span className="chiffres font-mono font-medium">{deputes.toFixed(1).replace(".", ",")}</span> années
-          de salaire net d’un député.
+      <div className="-mt-10 flex flex-col gap-3">
+        <Kicker>Avec ça, ils se sont payé</Kicker>
+        <p className="text-[32px] leading-[1.1] font-bold tracking-[-0.02em]">{objet.nom}.</p>
+        <Commissaire>
+          {objet.seuil > 0 && reste > 1000 ? (
+            <>« Cash. Et il leur reste {eurosSigne(reste)} de monnaie. Ou {euros(comptage.nombre)} {comptage.unite.pluriel}, si vous préférez compter. »</>
+          ) : (
+            <>« {objet.pointe} Ou {euros(comptage.nombre)} {comptage.unite.pluriel}, si vous préférez compter. »</>
+          )}
+        </Commissaire>
+        <p className="text-[14.5px] leading-relaxed text-ligne">
+          <span className="chiffres font-mono font-medium text-papier">{deputes.toFixed(1).replace(".", ",")}</span> années de salaire net d’un député.
           {montant >= SEUIL_ANNEES ? (
             <>
-              {" "}Ou <span className="chiffres font-mono font-medium">{annees.toFixed(1).replace(".", ",")}</span> années
-              de ta vie sans travailler, à ton niveau de vie.
+              {" "}<span className="chiffres font-mono font-medium text-papier">{annees.toFixed(1).replace(".", ",")}</span> années de ta vie sans travailler, à ton niveau de vie.
             </>
           ) : null}
         </p>
       </div>
 
+      <div className="grow" />
+
       <Volet titre="D’où viennent ces prix ?">
-        <p className="text-[14px] leading-relaxed text-encre-2">
-          <span className="font-medium text-encre">{objet.nom}</span> : {objet.source}.
+        <p className="text-[14px] leading-relaxed text-ligne">
+          <span className="font-medium text-papier">{objet.nom}</span> : {objet.source}.
         </p>
-        <ul className="flex flex-col gap-1 text-[13.5px] leading-relaxed text-encre-2">
+        <ul className="flex flex-col gap-1 text-[13.5px] leading-relaxed text-ligne">
           {UNITES.map((u) => (
             <li key={u.id}>
-              <span className="font-medium text-encre">{u.pluriel}</span>, {eurosSigne(u.prix).replace(" €", " €")} l’unité : {u.source}
+              <span className="font-medium text-papier">{u.pluriel}</span>, {eurosSigne(u.prix)} l’unité : {u.source}
             </li>
           ))}
         </ul>
-        <p className="text-[13.5px] leading-relaxed text-encre-2">
-          Le député : 71 440,08 € nets par an, tels que l’Assemblée nationale les publie. Sans
-          l’avance de frais de mandat, qui n’existe plus depuis le 1er janvier 2026.
+        <p className="text-[13.5px] leading-relaxed text-ligne">
+          Le député : 71 440,08 € nets par an, tels que l’Assemblée nationale les publie. Sans l’avance
+          de frais de mandat, qui n’existe plus depuis le 1er janvier 2026.
         </p>
         <Lien href="/methode">Toutes les sources</Lien>
       </Volet>
