@@ -14,8 +14,10 @@ import { Rendu } from "./cartes/Rendu";
 import { Verdict } from "./cartes/Verdict";
 import { Avis } from "./cartes/Avis";
 import type { Pieces } from "@/lib/images";
-import { casDepuisRequete } from "@/lib/lien";
+import { FRAIS_DEFAUT_ID, PLACEMENT_DEFAUT_ID, casDepuisRequete } from "@/lib/lien";
 import {
+  CRANS_FRAIS,
+  CRANS_RENDEMENT,
   PALIERS_DEFAUT,
   PERIMETRE_DEFAUT,
   salairePivot,
@@ -33,8 +35,8 @@ import { partsFiscales, regimeCalculable, regimeDe } from "@/lib/statuts";
  * chômage : la question ne lui est pas posée.
  */
 const ECRANS = [
-  "couverture", "deposition", "pris", "butin", "bourse", "liberation", "aparte",
-  "ecole", "sante", "chomage", "rendu", "verdict", "avis",
+  "couverture", "deposition", "pris", "butin", "liberation", "aparte",
+  "ecole", "sante", "chomage", "rendu", "bourse", "verdict", "avis",
 ] as const;
 type Ecran = (typeof ECRANS)[number];
 
@@ -62,6 +64,9 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
   });
   const [perimetre, setPerimetre] = useState<Perimetre>(PERIMETRE_DEFAUT);
   const [paliers, setPaliers] = useState<Paliers>(PALIERS_DEFAUT);
+  /* Où l'argent aurait été placé : c'est ce qui décide du verdict, donc ça vit ici. */
+  const [placementId, setPlacementId] = useState(PLACEMENT_DEFAUT_ID);
+  const [fraisId, setFraisId] = useState(FRAIS_DEFAUT_ID);
   const [ecran, setEcran] = useState<Ecran>("couverture");
 
   const changer = (patch: Partial<EtatSaisie>) => setEtat((e) => ({ ...e, ...patch }));
@@ -102,6 +107,8 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
     });
     setPerimetre(cas.perimetre);
     setPaliers(cas.paliers);
+    setPlacementId(cas.placementId);
+    setFraisId(cas.fraisId);
     const ouvrable = regimeCalculable(regimeDe(cas.statut, cas.formeTpe, cas.activite));
     const ancre = window.location.hash.slice(1) as Ecran;
     if (ouvrable && (ECRANS as readonly string[]).includes(ancre) && ancre !== "couverture") {
@@ -116,18 +123,24 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [ecran]);
 
+  const placement = useMemo(() => {
+    const cran = CRANS_RENDEMENT.find((c) => c.id === placementId) ?? CRANS_RENDEMENT[0];
+    const frais = CRANS_FRAIS.find((f) => f.id === fraisId) ?? CRANS_FRAIS[0];
+    return { rendementReel: cran.reel, fraisAnnuels: frais.annuels, fraisVersement: frais.versement };
+  }, [placementId, fraisId]);
+
   const simulation: Simulation | null = useMemo(() => {
     if (!calculable || !(etat.netMensuel > 0)) return null;
-    return simuler({ ...etat, parts, perimetre, paliers });
-  }, [calculable, etat, parts, perimetre, paliers]);
+    return simuler({ ...etat, parts, perimetre, paliers, placement });
+  }, [calculable, etat, parts, perimetre, paliers, placement]);
 
   /** Le seuil, pour CE régime, CE périmètre et CES réponses. Quarante simulations, donc seulement au verdict. */
   const pivot = useMemo(() => {
     if (!simulation || ecran !== "verdict") return null;
     const { netMensuel: _net, ...reste } = etat;
     void _net;
-    return salairePivot({ ...reste, parts, perimetre, paliers });
-  }, [simulation, ecran, etat, parts, perimetre, paliers]);
+    return salairePivot({ ...reste, parts, perimetre, paliers, placement });
+  }, [simulation, ecran, etat, parts, perimetre, paliers, placement]);
 
   const aller = (e: Ecran) => setEcran(e);
   const suivant = () => aller(ecrans[Math.min(ecrans.length - 1, indexEcran + 1)]);
@@ -164,7 +177,7 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
   }
 
   const commun = { pieces, numero, total, suivant, retour };
-  const cas = { ...etat, perimetre, paliers };
+  const cas = { ...etat, perimetre, paliers, placementId, fraisId };
   const rangs: Record<"ecole" | "sante" | "chomage", string> = { ecole: "1 sur 3", sante: "2 sur 3", chomage: "3 sur 3" };
   if (regime === "fonctionnaire") {
     rangs.ecole = "1 sur 2";
@@ -178,7 +191,14 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
       ) : ecran === "butin" ? (
         <Butin {...commun} simulation={simulation} />
       ) : ecran === "bourse" ? (
-        <Bourse {...commun} simulation={simulation} />
+        <Bourse
+          {...commun}
+          simulation={simulation}
+          placementId={placementId}
+          fraisId={fraisId}
+          choisirPlacement={setPlacementId}
+          choisirFrais={setFraisId}
+        />
       ) : ecran === "liberation" ? (
         <Liberation {...commun} simulation={simulation} />
       ) : ecran === "aparte" ? (
@@ -199,7 +219,7 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
       ) : ecran === "rendu" ? (
         <Rendu {...commun} simulation={simulation} paliers={paliers} allerAuPalier={(poste) => aller(poste)} />
       ) : ecran === "verdict" ? (
-        <Verdict {...commun} simulation={simulation} pivot={pivot} perimetre={perimetre} />
+        <Verdict {...commun} simulation={simulation} pivot={pivot} perimetre={perimetre} placementId={placementId} />
       ) : (
         <Avis {...commun} simulation={simulation} cas={cas} recommencer={() => aller("deposition")} />
       )}

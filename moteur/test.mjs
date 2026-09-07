@@ -1095,3 +1095,42 @@ test('le pivot monte quand la personne déclare avoir plus reçu', () => {
   assert.ok(peu > nu, `${peu} > ${nu}`);
   assert.ok(beaucoup > peu, `${beaucoup} > ${peu}`);
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Le coût d'opportunité : avec un placement, le verdict compare ce que le
+// prélèvement serait devenu, placé, à ce qui a été rendu.
+test('sans placement, le verdict compare pris et rendu, et opportunite est null', () => {
+  const s = simuler({ netMensuel: 2190 });
+  assert.equal(s.opportunite, null);
+  assert.equal(s.verdict.ecart, Math.abs(s.plateauGauche.total - s.plateauDroit.total));
+});
+
+test('avec placement, le capital placé remplace le prélèvement dans la balance', () => {
+  const pe = { salariales: true, patronales: true, impotRevenu: true, consommation: true };
+  const paliers = { ecole: 'bac', sante: 'normal', chomage: 'trou' };
+  const nu = simuler({ netMensuel: 2190, perimetre: pe, paliers });
+  const zero = simuler({ netMensuel: 2190, perimetre: pe, paliers, placement: { rendementReel: 0 } });
+  // À 0 % réel et sans frais, le capital vaut exactement la somme prélevée.
+  assert.ok(Math.abs(zero.opportunite.capital - nu.plateauGauche.total) < 1e-6);
+  assert.equal(zero.verdict.braquage, nu.verdict.braquage);
+  const sp = simuler({ netMensuel: 2190, perimetre: pe, paliers, placement: { rendementReel: 0.0677 } });
+  assert.ok(sp.opportunite.capital > 3 * nu.plateauGauche.total, `${sp.opportunite.capital}`);
+  assert.equal(sp.verdict.braquage, true);
+  assert.equal(sp.verdict.ecart, sp.opportunite.capital - sp.plateauDroit.total);
+  // Un rendement réel négatif (le Livret A) peut retourner le verdict.
+  const livret = simuler({ netMensuel: 2190, perimetre: pe, paliers, placement: { rendementReel: -0.0024 } });
+  assert.ok(livret.opportunite.capital < nu.plateauGauche.total);
+});
+
+test('les frais mordent sur le capital placé, et sansFrais les ignore', () => {
+  const s = simuler({ netMensuel: 2190, placement: { rendementReel: 0.05, fraisAnnuels: 0.02, fraisVersement: 0.015 } });
+  assert.ok(s.opportunite.capital < s.opportunite.sansFrais);
+});
+
+test('le pivot existe aussi sur le coût d’opportunité, et monte avec le rendement', () => {
+  const perimetre = { salariales: true, patronales: true, impotRevenu: true, consommation: true };
+  const paliers = { ecole: 'bac', sante: 'normal', chomage: 'trou' };
+  const lent = salairePivot({ perimetre, paliers, placement: { rendementReel: 0.0075 } });
+  const rapide = salairePivot({ perimetre, paliers, placement: { rendementReel: 0.0677 } });
+  assert.ok(lent === null || rapide === null || rapide < lent, `${rapide} < ${lent}`);
+});

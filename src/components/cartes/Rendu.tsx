@@ -6,7 +6,7 @@ import { euros, eurosSigne } from "@/lib/format";
 import { PALIERS, type Paliers, type PosteDuPlateau, type Simulation } from "@/lib/moteur";
 
 /**
- * Écran 11 : sur toute ta vie, ils t'auront rendu.
+ * Écran 10 : sur toute ta vie, ils t'auront rendu. Juste avant la bourse et le verdict.
  *
  * La retraite est CALCULÉE, les trois autres lignes sont les réponses qu'on
  * vient de donner au commissaire. Taper une ligne ramène à sa question.
@@ -45,7 +45,7 @@ export function Rendu({
       nature="Ce qu’ils ont laissé"
       retour={retour}
       photo={{ numero: 4, pieces, hauteur: 300, legende: "CLICHÉ 04 · LE COFFRE, APRÈS" }}
-      action={{ libelle: "Le verdict", onClick: suivant }}
+      action={{ libelle: "Une dernière question", onClick: suivant }}
     >
       <Kicker couleur="bleu">Et sur toute ta vie, ils t’auront rendu</Kicker>
       <Chiffre>{eurosSigne(plateauDroit.total)}</Chiffre>

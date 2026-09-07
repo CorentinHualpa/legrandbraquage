@@ -164,6 +164,10 @@ function contreparties(pensionMensuelle, regime = 'salarie', paliers = null) {
  * @param {{ecole: string, sante: string, chomage: string}} [entree.paliers]
  *   ce que la personne dit avoir reçu ; absent, école, santé et chômage restent
  *   nommés sans montant
+ * @param {{rendementReel: number, fraisAnnuels?: number, fraisVersement?: number}} [entree.placement]
+ *   où la personne dit qu'elle aurait mis l'argent. Présent, le VERDICT se juge sur
+ *   le coût d'opportunité : ce que le prélèvement serait devenu, placé à ce taux,
+ *   contre ce qui a été rendu. Absent, le verdict compare pris et rendu tels quels.
  */
 export function simuler(entree) {
   const {
@@ -181,6 +185,7 @@ export function simuler(entree) {
     couple = false,
     perimetre = { salariales: true, patronales: true, impotRevenu: false, consommation: false },
     paliers = null,
+    placement = null,
   } = entree;
 
   if (!(netMensuel > 0)) throw new Error('netMensuel doit être positif');
@@ -293,14 +298,42 @@ export function simuler(entree) {
   // Une ligne non chiffrée ne pèse rien : c'est tout le sens du tiret.
   const totalRecu = Object.values(recu).reduce((t, c) => t + (c.montant ?? 0), 0);
 
-  const ecart = preleve - totalRecu;
+  /*
+   * Le coût d'opportunité (Coq, 08/09/2026 au soir) : « c'est sur ce coût
+   * d'opportunité que ce sera calculé coupable ou non ». Chaque année, ce qui
+   * a été pris (au périmètre coché) est placé au taux choisi par la personne,
+   * frais compris, et c'est CE capital à 64 ans qu'on met en face de ce qui a
+   * été rendu. Tout est en euros d'aujourd'hui, donc le taux est RÉEL.
+   */
+  let opportunite = null;
+  if (placement) {
+    const versements = carriere.annees.map((a) =>
+      (perimetre.salariales ? a.salariales : 0)
+      + (perimetre.patronales ? a.patronales : 0)
+      + (perimetre.impotRevenu ? a.impotRevenu : 0)
+      + (perimetre.consommation ? a.taxesConsommation : 0));
+    const opts = {
+      rendementReel: placement.rendementReel,
+      fraisAnnuels: placement.fraisAnnuels ?? 0,
+      fraisVersement: placement.fraisVersement ?? 0,
+    };
+    const capital = capitaliser(versements, opts);
+    opportunite = {
+      verse: preleve,
+      capital,
+      sansFrais: capitaliser(versements, { ...opts, fraisAnnuels: 0, fraisVersement: 0 }),
+      ...opts,
+    };
+  }
+
+  const ecart = (opportunite ? opportunite.capital : preleve) - totalRecu;
 
   return {
     entree: {
       /** ⚠ Net AVANT impôt sur le revenu. L'impôt s'ajoute, il n'est pas déjà retranché. */
       netMensuel,
       statut, regime, versant, activite, categorieMicro, versementLiberatoire,
-      ageActuel, cadre, effectif, parts, couple, perimetre, paliers,
+      ageActuel, cadre, effectif, parts, couple, perimetre, paliers, placement,
     },
     /** Ce qui arrive réellement sur le compte cette année, impôt déduit. */
     netApresImpotActuel: anneeCourante.netApresImpot,
@@ -331,6 +364,8 @@ export function simuler(entree) {
       lignes: recu,
       fourchetteRetraite: fourchetteCapitalPourRente(pensionMensuelle),
     },
+    /** Le capital qu'aurait fait le prélèvement, placé. Absent sans placement. */
+    opportunite,
     verdict: {
       braquage: ecart > 0,
       ecart: Math.abs(ecart),

@@ -1,15 +1,18 @@
 "use client";
 
 import { Carte, Commissaire, Papier, Volet } from "./Carte";
+import { taux } from "./Bourse";
 import type { Pieces } from "@/lib/images";
 import { euros, eurosSigne } from "@/lib/format";
-import type { Perimetre, Simulation } from "@/lib/moteur";
+import { CRANS_RENDEMENT, type Perimetre, type Simulation } from "@/lib/moteur";
 
 /**
  * Écran 12 : le verdict. Le tampon sur le papier, dans le prétoire.
  *
- * Le seuil est le chiffre inédit de la page : personne ne le publie. Il peut
- * ne pas exister (un fonctionnaire d'État au périmètre complet), et c'est un
+ * Il se juge sur le COÛT D'OPPORTUNITÉ : ce que le prélèvement serait devenu,
+ * placé là où la personne l'a dit, contre ce qui a été rendu. Le seuil est
+ * le chiffre inédit de la page ; il peut ne pas exister (avec un placement
+ * en actions, la balance penche du même côté à tout niveau), et c'est un
  * résultat. Le commissaire le lâche en sortant.
  */
 export function Verdict({
@@ -17,6 +20,7 @@ export function Verdict({
   simulation,
   pivot,
   perimetre,
+  placementId,
   numero,
   total,
   suivant,
@@ -26,14 +30,16 @@ export function Verdict({
   simulation: Simulation;
   pivot: number | null;
   perimetre: Perimetre;
+  placementId: string;
   numero: number;
   total: number;
   suivant: () => void;
   retour: () => void;
 }) {
-  const { plateauGauche, plateauDroit, verdict } = simulation;
+  const { plateauDroit, verdict, opportunite } = simulation;
+  const cran = CRANS_RENDEMENT.find((c) => c.id === placementId) ?? CRANS_RENDEMENT[0];
+  const capital = opportunite?.capital ?? simulation.plateauGauche.total;
   const fonctionnaire = simulation.entree.regime === "fonctionnaire";
-  const sansEmployeur = ["tns", "cipav", "micro"].includes(simulation.entree.regime);
   const complet = Object.values(perimetre).every(Boolean);
 
   return (
@@ -50,17 +56,18 @@ export function Verdict({
           <p className="font-mono text-[8.5px] tracking-[0.16em]">TRIBUNAL DES PRÉLÈVEMENTS</p>
           <p className="text-[38px] leading-[1.05] font-extrabold">{verdict.braquage ? "COUPABLE" : "RELAXE"}</p>
         </div>
-        <p className="text-[16px] leading-snug text-encre-2">
-          {verdict.braquage ? "Sur toute ta vie, ils t’auront pris" : "Sur toute ta vie, ils t’auront rendu"}
+        <p className="text-[15.5px] leading-snug text-encre-2">
+          Placé en {cran.nom} à {taux(cran.reel)}, ton argent aurait fait {eurosSigne(capital)}.
+          Ils t’auront rendu {eurosSigne(plateauDroit.total)}.
         </p>
         <span className={`chiffres font-mono text-[40px] leading-none font-semibold tracking-[-0.03em] ${verdict.braquage ? "text-rouge" : "text-bleu"}`}>
           {eurosSigne(verdict.ecart)}
         </span>
         <p className="text-[16px] leading-snug text-encre-2">
-          {verdict.braquage ? "de plus qu’ils ne t’auront rendu." : "de plus qu’ils ne t’auront pris."}
+          {verdict.braquage ? "de manque à gagner, pour toi." : "de mieux, grâce à eux."}
         </p>
         <div className="flex w-full justify-between border-t border-ligne pt-2">
-          <span className="font-mono text-[10px] tracking-[0.1em] text-rouge-texte">PRIS {euros(plateauGauche.total)} €</span>
+          <span className="font-mono text-[10px] tracking-[0.1em] text-rouge-texte">PLACÉ {euros(capital)} €</span>
           <span className="font-mono text-[10px] tracking-[0.1em] text-bleu">RENDU {euros(plateauDroit.total)} €</span>
         </div>
       </Papier>
@@ -68,55 +75,36 @@ export function Verdict({
       <Commissaire qui="Le commissaire, en sortant">
         {pivot ? (
           <>« En dessous de {euros(pivot)} € par mois, vous seriez gagnant. Au-dessus, vous savez déjà. Ne me citez pas. »</>
+        ) : verdict.braquage ? (
+          <>« Avec ce placement, il n’y a pas de seuil : ça penche de leur côté à tous les niveaux de revenu. Ne me citez pas. »</>
         ) : (
-          <>« Sur votre régime, il n’y a pas de seuil : ça penche de leur côté à tous les niveaux. Ne me citez pas. »</>
+          <>« Avec ce placement, il n’y a pas de seuil : ça penche de votre côté à tous les niveaux de revenu. Vous pouvez me citer. »</>
         )}
       </Commissaire>
 
       <div className="grow" />
 
-      <Volet titre="Pourquoi ce seuil ?">
-        {pivot ? (
-          fonctionnaire ? (
-            <p className="text-[14px] leading-relaxed text-ligne">
-              Ce seuil est très en dessous de celui d’un salarié du privé, et c’est la part employeur qui
-              l’explique : la contribution au régime de pension pèse{" "}
-              <span className="font-semibold text-papier">37,65 % du traitement</span> à la CNRACL, 82,28 % pour
-              l’État. Le Conseil d’orientation des retraites écrit lui-même que ces taux ne se comparent pas à
-              ceux d’un employeur privé.
-            </p>
-          ) : sansEmployeur ? (
-            <p className="text-[14px] leading-relaxed text-ligne">
-              Tu vois cent pour cent de ce que tu verses : personne ne prélève avant que tu te paies. C’est la
-              fiche la plus honnête des cinq, et c’est ce qui rend le procès plus difficile que celui d’un
-              salarié, à qui l’on cache la moitié du prélèvement.
-            </p>
-          ) : (
-            <p className="text-[14px] leading-relaxed text-ligne">
-              Au SMIC, les cotisations patronales tombent à{" "}
-              <span className="font-semibold text-papier">3,09 % du brut</span>, contre 43,05 % à dix mille euros.
-              Le salaire net médian du privé est de <span className="font-semibold text-papier">2 190 €</span>{" "}
-              (INSEE 2024, net avant impôt, comme le chiffre que tu as donné). Personne ne publie ce seuil.
-            </p>
-          )
-        ) : simulation.entree.versant === "fpe" && fonctionnaire ? (
+      <Volet titre="Pourquoi ce verdict ?">
+        <p className="text-[14px] leading-relaxed text-ligne">
+          Chaque année de ta carrière, ce qui t’a été pris (au périmètre coché à la pièce à conviction)
+          est placé à {taux(cran.reel)} par an, en réel, frais compris, jusqu’à 64 ans. Le capital
+          obtenu est comparé à ce qu’ils t’auront rendu : ta retraite jusqu’à 85 ans, l’école, les soins
+          et le chômage tels que tu les as déclarés. Change l’enveloppe, le verdict change.
+        </p>
+        {fonctionnaire ? (
           <p className="text-[14px] leading-relaxed text-ligne">
-            La contribution de l’État à son propre régime de pension pèse{" "}
-            <span className="font-semibold text-papier">82,28 % du traitement indiciaire</span>. La compter comme
-            un prélèvement subi condamne d’avance, et le Conseil d’orientation des retraites écrit que ce taux ne
-            peut pas être comparé à la contribution d’un employeur privé. Décoche « ce que ton employeur public
-            verse en plus », à la pièce à conviction, pour voir le procès sans elle.
+            Chez un fonctionnaire, c’est la part employeur qui pèse : la contribution au régime de pension
+            vaut <span className="font-semibold text-papier">37,65 % du traitement</span> à la CNRACL,
+            82,28 % pour l’État, et le Conseil d’orientation des retraites écrit lui-même que ces taux ne
+            se comparent pas à ceux d’un employeur privé. Décoche cette ligne à la pièce à conviction pour
+            voir le procès sans elle.
           </p>
-        ) : (
-          <p className="text-[14px] leading-relaxed text-ligne">
-            Ce que l’employeur verse au régime de retraite l’emporte à tout niveau de revenu. Décoche cette ligne
-            à la pièce à conviction : c’est le même dossier, sans le chiffre qui décide de tout.
-          </p>
-        )}
+        ) : null}
         <p className="text-[13px] leading-relaxed text-ligne">
-          Le seuil dépend de ce que tu as coché et de tes réponses au commissaire :
-          {complet ? " ici, tout est compté." : " ici, une ligne au moins est décochée."} Ce n’est pas un verdict
-          sur toi, c’est un verdict sur le calcul.
+          Le seuil dépend de ce que tu as coché, de tes réponses au commissaire et de l’enveloppe :
+          {complet ? " ici, tout est compté." : " ici, une ligne au moins est décochée."} Le salaire net
+          médian du privé est de 2 190 € (INSEE 2024, net avant impôt). Ce n’est pas un verdict sur toi,
+          c’est un verdict sur le calcul.
         </p>
       </Volet>
     </Carte>

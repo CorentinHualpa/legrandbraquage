@@ -99,6 +99,19 @@ export type Entree = {
   perimetre?: Perimetre;
   /** Absent, école, santé et chômage restent nommés sans montant. */
   paliers?: Paliers;
+  /**
+   * Où la personne aurait mis l'argent. Présent, le verdict se juge sur le
+   * coût d'opportunité : le prélèvement placé à ce taux, contre ce qui a été
+   * rendu. Le taux est RÉEL, inflation retirée, comme tout le dossier.
+   */
+  placement?: PlacementChoisi;
+};
+
+/** Un taux réel et des frais : ce qu'on donne au moteur pour le coût d'opportunité. */
+export type PlacementChoisi = {
+  rendementReel: number;
+  fraisAnnuels?: number;
+  fraisVersement?: number;
 };
 
 export type LigneContrepartie = {
@@ -125,6 +138,7 @@ export type Simulation = {
     parts: number;
     perimetre: Perimetre;
     paliers: Paliers | null;
+    placement: PlacementChoisi | null;
   };
   carriere: {
     /** Une ligne par année de carrière, en euros d'aujourd'hui. */
@@ -235,6 +249,15 @@ export type Simulation = {
   netAvantImpotActuel: number;
   cotisationsActuelles: number;
   saisieEstLeBrut: boolean;
+  /** Ce que le prélèvement serait devenu, placé. Null sans placement. */
+  opportunite: {
+    verse: number;
+    capital: number;
+    sansFrais: number;
+    rendementReel: number;
+    fraisAnnuels: number;
+    fraisVersement: number;
+  } | null;
   verdict: {
     braquage: boolean;
     ecart: number;

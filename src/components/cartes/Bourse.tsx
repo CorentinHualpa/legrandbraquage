@@ -1,17 +1,9 @@
 "use client";
 
-import { useState } from "react";
-
 import { Carte, Chiffre, Commissaire, Kicker, Ligne, Reponse, Volet } from "./Carte";
 import type { Pieces } from "@/lib/images";
-import { euros, eurosSigne, pourcent } from "@/lib/format";
-import {
-  CRANS_FRAIS,
-  CRANS_RENDEMENT,
-  PALIERS_ALIBI,
-  placerSaRetraiteAuTaux,
-  type Simulation,
-} from "@/lib/moteur";
+import { euros, eurosSigne } from "@/lib/format";
+import { CRANS_FRAIS, CRANS_RENDEMENT, PALIERS_ALIBI, type Simulation } from "@/lib/moteur";
 
 /**
  * Où sont les six enveloppes sur la photo n° 25, en pour cent de l'image.
@@ -34,22 +26,33 @@ const ETIQUETTES: Record<string, string> = {
   cac40: "CAC 40",
 };
 
+/** 0,0677 → « 6,8 % », −0,0024 → « −0,2 % ». Le taux RÉEL, inflation retirée. */
+export function taux(reel: number): string {
+  const v = (reel * 100).toFixed(1).replace(".", ",").replace("-", "−");
+  return `${v} %`;
+}
+
 /**
- * Écran 5 : le coup de la bourse. Le commissaire nous regarde.
+ * Écran 11 : la bourse, la dernière question avant le verdict.
  *
  * « Si vous aviez eu le choix, vous l'auriez mis où, le pognon ? » La table
- * aux six enveloppes, vue du dessus. On tape une enveloppe, la liasse glisse
- * dessus, et le capital à 64 ans se recalcule. C'est la carte qui bouge sous
- * le doigt, celle qui donne au parcours sa variabilité (Coq, 08/09/2026).
+ * aux six enveloppes, chacune marquée de son placement ET de son taux. On en
+ * tape une, la liasse glisse dessus, et le capital à 64 ans tombe en face de
+ * ce qu'ils ont rendu. C'est SUR CE COÛT D'OPPORTUNITÉ que le verdict se
+ * juge (Coq, 08/09/2026 au soir), d'où le choix qui vit dans le parcours et
+ * pas dans cette carte.
  *
- * ⚠ Ce sont les cotisations VIEILLESSE qui sont placées, pas le total
- * braqué : c'est la seule somme comparable à la pension en face. Le
- * commissaire le dit. La contre-expertise (les hypothèses qu'on retire, les
- * frais) est au clic : c'est l'ancien « alibi du million », replié.
+ * ⚠ Les taux sont RÉELS, inflation retirée, parce que tout le dossier est en
+ * euros d'aujourd'hui. Le Livret A est négatif : c'est un fait, pas une
+ * provocation, et c'est ce qui rend le choix intéressant.
  */
 export function Bourse({
   pieces,
   simulation,
+  placementId,
+  fraisId,
+  choisirPlacement,
+  choisirFrais,
   numero,
   total,
   suivant,
@@ -57,25 +60,20 @@ export function Bourse({
 }: {
   pieces: Pieces;
   simulation: Simulation;
+  placementId: string;
+  fraisId: string;
+  choisirPlacement: (id: string) => void;
+  choisirFrais: (id: string) => void;
   numero: number;
   total: number;
   suivant: () => void;
   retour: () => void;
 }) {
-  const [cranId, setCranId] = useState<string | null>(null);
-  const [fraisId, setFraisId] = useState("aucun");
-  const cran = CRANS_RENDEMENT.find((c) => c.id === cranId) ?? null;
-  const frais = CRANS_FRAIS.find((f) => f.id === fraisId) ?? CRANS_FRAIS[0];
-  const place = cran
-    ? placerSaRetraiteAuTaux(simulation, {
-        rendementReel: cran.reel,
-        fraisAnnuels: frais.annuels,
-        fraisVersement: frais.versement,
-      })
-    : null;
-  const verse = simulation.carriere.annees.reduce((t, a) => t + a.cotisationVieillesse, 0);
-  const indexCran = cran ? CRANS_RENDEMENT.indexOf(cran) : -1;
-  const liasse = indexCran >= 0 ? ENVELOPPES[indexCran] : LIASSE_AU_DEPART;
+  const cran = CRANS_RENDEMENT.find((c) => c.id === placementId) ?? CRANS_RENDEMENT[0];
+  const indexCran = CRANS_RENDEMENT.indexOf(cran);
+  const liasse = ENVELOPPES[indexCran] ?? LIASSE_AU_DEPART;
+  const opportunite = simulation.opportunite;
+  const rendu = simulation.plateauDroit.total;
   const table = pieces[25];
 
   return (
@@ -85,10 +83,10 @@ export function Bourse({
       nature="La bourse"
       retour={retour}
       photo={{ numero: 20, pieces, hauteur: 320, legende: "CLICHÉ 20 · IL VOUS REGARDE", position: "50% 18%" }}
-      action={{ libelle: place ? "Suivant" : "Je ne joue pas, suivant", onClick: suivant, couleur: place ? "rouge" : "papier" }}
+      action={{ libelle: "Le verdict", onClick: suivant }}
     >
       <Commissaire>
-        « Alors, entre nous. Rien que vos cotisations retraite, {eurosSigne(verse)} sur 43 ans. Si vous aviez
+        « Alors, entre nous. Ces {eurosSigne(simulation.plateauGauche.total)} sur 43 ans. Si vous aviez
         eu le choix, vous l’auriez mis où, le pognon ? »
       </Commissaire>
 
@@ -97,32 +95,26 @@ export function Bourse({
         {table ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={`/images/${table}`} alt="" className="absolute inset-0 h-full w-full object-cover" decoding="async" />
-        ) : (
-          <div className="absolute inset-0 grid grid-cols-3 grid-rows-[1fr_1fr_2fr] gap-3 p-6">
-            {ENVELOPPES.map((e) => (
-              <div key={`${e.x}-${e.y}`} className="border border-dashed border-papier/30" />
-            ))}
-          </div>
-        )}
+        ) : null}
         {CRANS_RENDEMENT.map((c, i) => {
           const pos = ENVELOPPES[i];
-          const actif = c.id === cranId;
+          const actif = c.id === placementId;
           return (
             <button
               key={c.id}
               type="button"
               role="radio"
               aria-checked={actif}
-              onClick={() => setCranId(c.id)}
-              className="absolute flex -translate-x-1/2 -translate-y-1/2 items-center justify-center"
+              aria-label={`${c.nom}, ${taux(c.reel)} par an`}
+              onClick={() => choisirPlacement(c.id)}
+              className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center gap-0.5"
               style={{ left: `${pos.x}%`, top: `${pos.y}%`, width: "27%", height: "12%" }}
             >
-              <span
-                className={`px-1.5 py-0.5 font-mono text-[10px] tracking-[0.1em] uppercase transition-colors ${
-                  actif ? "bg-encre text-papier" : "bg-[#c9a56a]/90 text-[#2b2620]"
-                }`}
-              >
+              <span className={`px-1.5 py-0.5 font-mono text-[10px] leading-tight tracking-[0.08em] uppercase ${actif ? "bg-encre text-papier" : "bg-[#2b2620] text-[#e9d9b8]"}`}>
                 {ETIQUETTES[c.id] ?? c.nom}
+              </span>
+              <span className={`chiffres px-1.5 py-0.5 font-mono text-[13px] leading-tight font-semibold ${actif ? "bg-encre text-papier" : "bg-[#2b2620] text-[#e9d9b8]"}`}>
+                {taux(c.reel)}
               </span>
             </button>
           );
@@ -130,29 +122,29 @@ export function Bourse({
         {/* La liasse, qui glisse. */}
         <div
           aria-hidden
-          className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 transition-[left,top] duration-500 ease-out"
-          style={{ left: `${liasse.x}%`, top: `${liasse.y}%`, width: "34%", transform: `translate(-50%,-50%) rotate(${indexCran >= 0 ? -6 : 3}deg)` }}
+          className="pointer-events-none absolute transition-[left,top] duration-500 ease-out"
+          style={{ left: `${liasse.x}%`, top: `${liasse.y}%`, width: "30%", transform: "translate(-50%,-50%) rotate(-6deg)" }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/images/liasse.webp" alt="" className="w-full drop-shadow-[0_10px_14px_rgba(0,0,0,0.6)]" decoding="async" />
         </div>
-        {!place ? (
-          <span className="absolute inset-x-0 bottom-4 text-center font-mono text-[10px] tracking-[0.14em] text-ligne uppercase">
-            Tape une enveloppe
-          </span>
-        ) : null}
+        <span className="absolute inset-x-0 bottom-3 text-center font-mono text-[9.5px] tracking-[0.14em] text-ligne uppercase">
+          Taux réels par an, inflation retirée
+        </span>
       </div>
 
-      {place && cran ? (
+      {opportunite ? (
         <div className="flex flex-col gap-1.5">
-          <Kicker>À 64 ans, {ETIQUETTES[cran.id] ?? cran.nom}, ça vous aurait fait</Kicker>
-          <Chiffre taille={44}>{eurosSigne(place.capital)}</Chiffre>
+          <Kicker>À 64 ans, en {ETIQUETTES[cran.id] ?? cran.nom} à {taux(cran.reel)}, ça vous aurait fait</Kicker>
+          <Chiffre taille={44}>{eurosSigne(opportunite.capital)}</Chiffre>
           <p className="text-[14.5px] leading-relaxed text-ligne">
-            contre {eurosSigne(place.equivalentPension)} de pension à recevoir.{" "}
+            contre {eurosSigne(rendu)} qu’ils vous auront rendu.{" "}
             <span className="text-papier">
-              {place.gagnant ? `${eurosSigne(place.ecart)} de plus` : `${eurosSigne(-place.ecart)} de moins`}
-            </span>
-            . {cran.source}, {pourcent(cran.reel, 1)} par an, inflation retirée.
+              {opportunite.capital > rendu
+                ? `${eurosSigne(opportunite.capital - rendu)} de plus pour vous.`
+                : `${eurosSigne(rendu - opportunite.capital)} de moins pour vous.`}
+            </span>{" "}
+            {cran.source}.
           </p>
         </div>
       ) : null}
@@ -161,7 +153,8 @@ export function Bourse({
 
       <Volet titre="Sauf que… la contre-expertise">
         <p className="text-[14px] leading-relaxed text-ligne">
-          Le million de la défense tient à trois hypothèses. Ce qu’il reste quand on les retire :
+          Personne ne place quarante-trois ans sans y toucher, et rien n’est gratuit. Le million de la
+          défense tient à trois hypothèses ; ce qu’il en reste quand on les retire :
         </p>
         <ul className="flex flex-col">
           {PALIERS_ALIBI.map((palier) => (
@@ -171,26 +164,31 @@ export function Bourse({
           ))}
         </ul>
         <div className="flex flex-col gap-2">
-          <Kicker>Et les frais</Kicker>
+          <Kicker>Les frais, qui comptent dans le verdict</Kicker>
           {CRANS_FRAIS.map((f) => (
             <Reponse
               key={f.id}
               actif={f.id === fraisId}
-              onClick={() => setFraisId(f.id)}
+              onClick={() => choisirFrais(f.id)}
               repere={`${(f.annuels * 100).toFixed(1).replace(".", ",")} % par an`}
             >
               <span className="text-[14.5px]">{f.nom}</span>
             </Reponse>
           ))}
-          {place ? (
+          {opportunite ? (
             <p className="text-[13px] leading-relaxed text-ligne">
               Avec ces frais, le capital vaut{" "}
-              <span className="chiffres font-mono font-medium text-papier">{euros(place.capital)} €</span>, et les
-              frais auront pris <span className="chiffres font-mono font-medium text-papier">{euros(place.fraisPayes)} €</span>{" "}
-              au passage. Sans compter que personne ne place quarante-trois ans sans jamais toucher au compte.
+              <span className="chiffres font-mono font-medium text-papier">{euros(opportunite.capital)} €</span> ; sans
+              eux, il vaudrait{" "}
+              <span className="chiffres font-mono font-medium text-papier">{euros(opportunite.sansFrais)} €</span>.
             </p>
           ) : null}
         </div>
+        <p className="text-[13px] leading-relaxed text-ligne">
+          Les taux nominaux, avant inflation :{" "}
+          {CRANS_RENDEMENT.filter((c) => c.nominal !== null).map((c) => `${ETIQUETTES[c.id] ?? c.nom} ${taux(c.nominal as number)}`).join(", ")}.
+          L’immobilier est mesuré directement en réel.
+        </p>
       </Volet>
     </Carte>
   );

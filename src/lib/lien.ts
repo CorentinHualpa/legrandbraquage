@@ -15,6 +15,8 @@
  */
 
 import {
+  CRANS_FRAIS,
+  CRANS_RENDEMENT,
   PALIERS,
   PALIERS_DEFAUT,
   PERIMETRE_DEFAUT,
@@ -37,7 +39,14 @@ export type Cas = {
   perimetre: Perimetre;
   /** Les trois paliers du second plateau : ils changent le verdict. */
   paliers: Paliers;
+  /** Où l'argent aurait été placé (cran du moteur) et à quels frais : c'est ce qui décide du verdict. */
+  placementId: string;
+  fraisId: string;
 };
+
+/** Le placement qu'on sert quand la personne n'a rien choisi : le fonds en euros, ce que la moitié des Français détient. */
+export const PLACEMENT_DEFAUT_ID = "fonds-euros";
+export const FRAIS_DEFAUT_ID = "aucun";
 
 const STATUTS_VALIDES: Statut[] = ["salarie", "independant", "fonctionnaire", "tpe"];
 const FORMES_VALIDES: FormeTpe[] = ["sarl-majoritaire", "sas"];
@@ -93,6 +102,9 @@ export function requeteDuCas(cas: Cas): string {
   if (cas.paliers.ecole !== PALIERS_DEFAUT.ecole) q.set("pe", cas.paliers.ecole);
   if (cas.paliers.sante !== PALIERS_DEFAUT.sante) q.set("ps", cas.paliers.sante);
   if (cas.paliers.chomage !== PALIERS_DEFAUT.chomage) q.set("pc", cas.paliers.chomage);
+  // Le placement décide du verdict : un lien qui l'oublie rouvre un autre procès.
+  if (cas.placementId !== PLACEMENT_DEFAUT_ID) q.set("pl", cas.placementId);
+  if (cas.fraisId !== FRAIS_DEFAUT_ID) q.set("pf", cas.fraisId);
   return `?${q.toString()}`;
 }
 
@@ -150,7 +162,13 @@ export function casDepuisRequete(recherche: string): Cas | null {
       sante: litPalier("sante", q.get("ps")) as Paliers["sante"],
       chomage: litPalier("chomage", q.get("pc")) as Paliers["chomage"],
     },
+    placementId: litParmi(q.get("pl"), CRANS_RENDEMENT.map((c) => c.id), PLACEMENT_DEFAUT_ID),
+    fraisId: litParmi(q.get("pf"), CRANS_FRAIS.map((f) => f.id), FRAIS_DEFAUT_ID),
   };
+}
+
+function litParmi(valeur: string | null, valides: string[], defaut: string): string {
+  return valeur && valides.includes(valeur) ? valeur : defaut;
 }
 
 /** Un palier inconnu retombe sur le défaut du poste, jamais sur une erreur. */
