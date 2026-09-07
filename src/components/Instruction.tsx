@@ -18,7 +18,13 @@ import {
   type Simulation,
   type Statut,
 } from "@/lib/moteur";
-import { regimeCalculable, regimeDe, type FormeTpe, type Versant } from "@/lib/statuts";
+import {
+  regimeCalculable,
+  regimeDe,
+  type Activite,
+  type FormeTpe,
+  type Versant,
+} from "@/lib/statuts";
 
 export type Pieces = Record<NumeroPiece, string | null>;
 
@@ -36,9 +42,10 @@ export function Instruction({ pieces }: { pieces: Pieces }) {
   const [statut, setStatut] = useState<Statut>("salarie");
   const [formeTpe, setFormeTpe] = useState<FormeTpe | undefined>(undefined);
   const [versant, setVersant] = useState<Versant>("fpt");
+  const [activite, setActivite] = useState<Activite>("ssi");
   const [perimetre, setPerimetre] = useState<Perimetre>(PERIMETRE_DEFAUT);
 
-  const regime = regimeDe(statut, formeTpe);
+  const regime = regimeDe(statut, formeTpe, activite);
   const calculable = regimeCalculable(regime);
 
   /**
@@ -58,10 +65,11 @@ export function Instruction({ pieces }: { pieces: Pieces }) {
     setStatut(cas.statut);
     setFormeTpe(cas.formeTpe);
     setVersant(cas.versant);
+    setActivite(cas.activite);
     setPerimetre(cas.perimetre);
     // Un lien de patron de TPE sans forme juridique n'a pas de régime résolu :
     // on laisse le dossier fermé, la question est posée à l'écran.
-    if (regimeCalculable(regimeDe(cas.statut, cas.formeTpe))) setOuverte(true);
+    if (regimeCalculable(regimeDe(cas.statut, cas.formeTpe, cas.activite))) setOuverte(true);
   }, []);
 
   const simulation: Simulation | null = useMemo(() => {
@@ -71,12 +79,13 @@ export function Instruction({ pieces }: { pieces: Pieces }) {
       statut,
       formeTpe,
       versant,
+      activite,
       perimetre,
       // ⚠ Un président de SAS ne cotise pas à l'assurance chômage, et le moteur
       // ne porte pas encore ce retrait : il rend le calcul du salarié, à
       // quelques dixièmes de point près. La page le dit plutôt que de le taire.
     });
-  }, [ouverte, calculable, netMensuel, statut, formeTpe, versant, perimetre]);
+  }, [ouverte, calculable, netMensuel, statut, formeTpe, versant, activite, perimetre]);
 
   /**
    * Le seuil où la balance bascule, POUR CE RÉGIME.
@@ -87,8 +96,8 @@ export function Instruction({ pieces }: { pieces: Pieces }) {
    */
   const pivot = useMemo(() => {
     if (!ouverte || !calculable) return null;
-    return salairePivot({ statut, formeTpe, versant, perimetre });
-  }, [ouverte, calculable, statut, formeTpe, versant, perimetre]);
+    return salairePivot({ statut, formeTpe, versant, activite, perimetre });
+  }, [ouverte, calculable, statut, formeTpe, versant, activite, perimetre]);
 
   return (
     <main className="relative min-h-dvh bg-papier pb-16">
@@ -118,6 +127,8 @@ export function Instruction({ pieces }: { pieces: Pieces }) {
         setFormeTpe={setFormeTpe}
         versant={versant}
         setVersant={setVersant}
+        activite={activite}
+        setActivite={setActivite}
         regime={regime}
         calculable={calculable}
         ouverte={ouverte}
@@ -153,7 +164,7 @@ export function Instruction({ pieces }: { pieces: Pieces }) {
             pieces={pieces}
             simulation={simulation}
             netMensuel={netMensuel}
-            cas={{ netMensuel, statut, formeTpe, versant, perimetre }}
+            cas={{ netMensuel, statut, formeTpe, versant, activite, perimetre }}
           />
         </>
       ) : null}

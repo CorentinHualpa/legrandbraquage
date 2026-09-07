@@ -241,6 +241,15 @@ export function pension(assiettesAnnuelles, cotisationsComplementaires, opts = {
   const complementaire = (points * RETRAITE_COMPLEMENTAIRE.valeurServicePoint) / 12;
 
   return {
+    /**
+     * ⚠ Le régime est stampé DANS la pension, et ce n'est pas décoratif.
+     * Les deux régimes de non-salariés rendent des objets de formes
+     * différentes : celui-ci porte une pension moyenne observée, celui de la
+     * CIPAV porte une réserve sur ses points. L'écran doit pouvoir les
+     * distinguer sans deviner d'après les clés présentes, sinon il lit une
+     * propriété absente et la page entière tombe.
+     */
+    regime: 'tns',
     base,
     complementaire,
     points,

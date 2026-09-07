@@ -2,7 +2,7 @@
 
 import { EnTete, Feuille, Renvoi, Scelle, Tampon } from "./papier";
 import type { Pieces } from "./Instruction";
-import { euros, eurosSigne, pourcent } from "@/lib/format";
+import { euros, eurosSigne, nombre, pourcent } from "@/lib/format";
 import {
   LIGNES_PERIMETRE,
   heureDeLiberation,
@@ -360,7 +360,14 @@ export function ProcesVerbal({
           ))}
         </ul>
 
-        {detail && detail.brut === false ? (
+        {/*
+          ⚠ Les deux régimes de non-salariés rendent des pensions de FORMES
+          différentes, et le type le disait faux : la propriété lue ici
+          n'existait que chez l'artisan, donc un libéral CIPAV faisait tomber la
+          page entière. On discrimine sur `regime`, jamais sur la présence d'une
+          clé.
+        */}
+        {detail && detail.brut === false && detail.regime === "tns" ? (
           <div className="border-l-[3px] border-rouge bg-papier-3 px-3 py-3">
             <p className="font-mono text-[9.5px] tracking-[0.12em] text-rouge-texte">
               POURQUOI CETTE PENSION EST BIEN AU-DESSUS DE CE QU’ON LIT PARTOUT
@@ -380,6 +387,40 @@ export function ProcesVerbal({
               97 % des anciens artisans touchent aussi d’un autre régime, et la
               moitié de leur pension vient d’un travail salarié. La moyenne basse
               mesure des carrières courtes dans le régime, pas des règles avares.
+            </p>
+          </div>
+        ) : null}
+
+        {detail && detail.brut === false && detail.regime === "cipav" ? (
+          <div className="border-l-[3px] border-rouge bg-papier-3 px-3 py-3">
+            <p className="font-mono text-[9.5px] tracking-[0.12em] text-rouge-texte">
+              CE QUE CETTE PENSION SUPPOSE, ET CE QU’ELLE DOIT À UNE SOURCE FLOUE
+            </p>
+            <p className="mt-1 text-[13.5px] leading-relaxed">
+              Elle est calculée par les POINTS dans les deux étages, sur{" "}
+              <span className="font-semibold">
+                {detail.anneesRetenues} années
+              </span>{" "}
+              passées entièrement à la CIPAV, soit{" "}
+              <span className="font-semibold">
+                {nombre(detail.pointsBase)} points
+              </span>{" "}
+              de base et{" "}
+              <span className="font-semibold">
+                {nombre(detail.points)} points
+              </span>{" "}
+              de complémentaire. Toutes les années comptent, y compris les
+              mauvaises : chez un artisan, seules les vingt-cinq meilleures sont
+              retenues.
+            </p>
+            <p className="mt-2 text-[13.5px] leading-relaxed">
+              La CIPAV publie dans la même phrase un ratio d’un point pour
+              89,71 € de revenus et un plafond de 557 points, et les deux ne se
+              réconcilient pas. Nous appliquons les deux tels qu’ils sont
+              publiés : la pension de base est donc{" "}
+              <span className="font-semibold">minorée d’environ 4 %</span>. Nous
+              préférons ça à corriger un chiffre officiel pour faire tomber
+              l’autre juste.
             </p>
           </div>
         ) : null}

@@ -282,16 +282,29 @@ export default function Methode() {
               référence. L’application reste sur l’effectif inférieur à cinquante
               en attendant.
             </li>
+            <li className="border-l-[3px] border-rouge pl-3">
+              <span className="font-semibold">
+                Deux sources officielles se contredisent sur le barème CIPAV.
+              </span>{" "}
+              L’URSSAF publie 8,73 % de retraite de base et 11 % puis 21 % de
+              complémentaire ; la fiche pratique 2026 de la CIPAV elle-même
+              annonce 8,23 %, puis 9 % et 22 %. Aucune des deux ne mentionne
+              l’autre. Nous retenons l’URSSAF, parce que c’est elle qui recouvre
+              ces cotisations depuis 2023 et que ses taux sont ceux du décret
+              2024-688. Un libéral qui compare avec sa fiche CIPAV verra donc un
+              écart, et il aura raison de le signaler : c’est écrit ici pour
+              qu’il sache d’où il vient.
+            </li>
             <li className="border-l-[3px] border-cadre-bord pl-3">
               <span className="font-semibold">
-                Le professionnel libéral réglementé.
+                Les points de retraite de base d’un libéral.
               </span>{" "}
-              Il relève de la CIPAV et pas de la Sécurité sociale des
-              indépendants, et l’écart n’est pas négligeable : il change de
-              signe selon le revenu. Le moteur REFUSE de le calculer plutôt que
-              de lui servir le barème voisin. Un chiffre emprunté à un autre
-              régime est faux, et il est d’autant plus dangereux qu’il est
-              crédible.
+              La CIPAV publie dans la même phrase un ratio d’un point pour
+              89,71 € de revenus et un plafond de 557 points, or les deux ne se
+              réconcilient pas : au plafond de la tranche, le ratio ne rend que
+              536 points. Nous appliquons les deux tels qu’ils sont publiés
+              plutôt que d’en corriger un pour faire tomber l’autre juste. La
+              pension de base s’en trouve minorée d’environ 4 %.
             </li>
             <li className="border-l-[3px] border-cadre-bord pl-3">
               <span className="font-semibold">

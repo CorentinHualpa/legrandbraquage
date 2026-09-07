@@ -12,6 +12,7 @@ import { COURBE_AGE, CARRIERE } from './baremes-2026.js';
 import { brutDepuisNet, cotisationsSalariales, cotisationsPatronales } from './salaire.js';
 import * as fp from './fonction-publique.js';
 import * as tns from './tns.js';
+import * as cipav from './cipav.js';
 import { impotSurLeRevenu, taxesConsommationAnnuelles } from './impot.js';
 
 /**
@@ -46,6 +47,13 @@ const REGIMES = {
     patronales: tns.cotisationsPatronales,
     // Un indépendant n'a pas d'employeur : tout ce qui finance sa vieillesse
     // sort de sa poche, et il le voit.
+    vieillesse: (sal) => sal.lignes.retraiteBase + sal.lignes.retraiteComplementaire,
+  },
+  cipav: {
+    brutDepuisNet: cipav.brutDepuisNet,
+    salariales: cipav.retenuesSalariales,
+    patronales: cipav.cotisationsPatronales,
+    // Pas d'employeur non plus : le libéral voit cent pour cent de ce qu'il verse.
     vieillesse: (sal) => sal.lignes.retraiteBase + sal.lignes.retraiteComplementaire,
   },
   fonctionnaire: {

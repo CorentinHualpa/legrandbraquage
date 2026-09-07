@@ -630,3 +630,121 @@ test('un patron de TPE en SARL passe bien par le régime des indépendants', () 
     Math.round(independant.plateauGauche.total),
   );
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Le professionnel libéral réglementé (CIPAV)
+import * as CIPAV from './cipav.js';
+
+test('CIPAV : la table de référence, poste par poste, au centime', () => {
+  // Reconstruite depuis le barème opposable de l'URSSAF (mise à jour du
+  // 27/02/2026), et non depuis l'API mon-entreprise, qui ne sert pas ce régime.
+  // Chaque ligne est un calcul indépendant : si une seule casse, c'est ce
+  // poste-là qui a bougé, pas le barème entier.
+  //
+  // ⚠ La retraite de base tombe un euro sous la ligne du rapport de recherche à
+  // partir d'un plafond d'assiette (5 579 contre 5 580). Le rapport arrondit
+  // chaque tranche AVANT de les additionner ; le moteur additionne puis
+  // arrondit. C'est le rapport qui a une décimale de retard, pas le barème.
+  const cas = [
+    // revenu brut social, assiette, retraite base, retraite compl., invalidité
+    [25000, 18500, 1961, 2035, 93],
+    [50000, 37000, 3922, 4070, 185],
+    [100000, 74000, 5579, 10734, 370],
+    [150000, 111000, 6271, 18504, 445],
+    [250000, 187522, 7702, 34574, 445],
+  ];
+  for (const [rbs, assiette, base, compl, invalidite] of cas) {
+    const c = CIPAV.cotisationsAnnuelles(rbs);
+    assert.equal(Math.round(c.assiette), assiette, `assiette pour ${rbs}`);
+    assert.equal(Math.round(c.lignes.retraiteBase), base, `retraite de base pour ${rbs}`);
+    assert.equal(
+      Math.round(c.lignes.retraiteComplementaire), compl,
+      `retraite complémentaire pour ${rbs}`,
+    );
+    assert.equal(
+      Math.round(c.lignes.invaliditeDeces), invalidite,
+      `invalidité-décès pour ${rbs}`,
+    );
+  }
+});
+
+test('CIPAV : les deux tranches de retraite de base portent sur la MÊME assiette', () => {
+  // C'est le piège du régime. Si T2 était traitée comme une tranche marginale
+  // de 1 à 5 plafonds, la cotisation minimale publiée par la CIPAV ne
+  // tomberait plus : 573 € = 5 409 × (8,73 % + 1,87 %), les deux taux sur la
+  // même base. Un moteur qui rend autre chose ici sous-estime tous les hauts
+  // revenus.
+  const minimum = CIPAV.cotisationsAnnuelles(1).lignes.retraiteBase;
+  assert.equal(Math.round(minimum), 573, `plancher = ${minimum.toFixed(2)} €`);
+});
+
+test('CIPAV : l’écart avec l’artisan CHANGE DE SIGNE, il ne s’ignore pas', () => {
+  // Le résultat qui justifie un quatrième régime à lui seul. En bas, le libéral
+  // paie MOINS parce que sa retraite de base est deux fois moins chère ; en
+  // haut il paie BEAUCOUP plus, parce que sa complémentaire est deux fois plus
+  // chère. Servir un régime « moyen » aux deux serait faux des deux côtés.
+  const ecart = (rbs) =>
+    CIPAV.cotisationsAnnuelles(rbs).total - TNS.cotisationsAnnuelles(rbs).total;
+  assert.ok(ecart(25000) < 0, `à 25 000 € : ${Math.round(ecart(25000))} €`);
+  assert.ok(ecart(50000) < 0, `à 50 000 € : ${Math.round(ecart(50000))} €`);
+  assert.ok(ecart(150000) > 0, `à 150 000 € : ${Math.round(ecart(150000))} €`);
+  assert.ok(ecart(250000) > 0, `à 250 000 € : ${Math.round(ecart(250000))} €`);
+});
+
+test('CIPAV : aucune part employeur, comme l’artisan', () => {
+  const s = M.simuler({ netMensuel: 3000, statut: 'independant', activite: 'cipav' });
+  assert.equal(s.entree.regime, 'cipav');
+  assert.equal(s.plateauGauche.lignes.patronales, 0);
+  assert.ok(s.plateauGauche.lignes.salariales > 0);
+});
+
+test('CIPAV : la pension est un régime par POINTS dans les DEUX étages', () => {
+  // Différence de structure avec l'artisan, pas de taux : la base d'un artisan
+  // est celle du régime général, la moitié du revenu moyen de ses 25 meilleures
+  // années, donc plafonnée à la moitié d'un plafond mensuel. Celle d'un libéral
+  // n'a pas ce plafond, elle compte des points sur TOUTE la carrière.
+  const s = M.simuler({ netMensuel: 6000, statut: 'independant', activite: 'cipav' });
+  const d = s.plateauDroit.detailPension;
+  assert.equal(d.brut, false);
+  assert.ok(d.pointsBase > 0, 'des points de base sont acquis');
+  assert.equal(s.plateauDroit.pensionMensuelle, d.totale);
+
+  // Une année ne peut jamais rapporter plus que le maximum publié de 582 points,
+  // quel que soit le revenu. C'est un plafond de DROITS, pas de cotisation :
+  // au-dessus, on cotise sans acquérir un point de plus.
+  const maxAnnuel = CIPAV.pointsDeBase(10_000_000);
+  assert.ok(maxAnnuel <= 582.001, `plafond annuel de points : ${maxAnnuel.toFixed(1)}`);
+
+  // Ce plafond BORNE la pension de base de toute la carrière, et c'est la
+  // différence de structure avec l'artisan : chez lui la base se calcule sur les
+  // 25 meilleures années, ici toutes les années comptent mais chacune est
+  // plafonnée. Une carrière entière au maximum ne peut pas dépasser cette borne.
+  const borneBase = (582 * d.anneesRetenues * 0.6599) / 12;
+  assert.ok(d.base <= borneBase + 0.01, `base ${d.base.toFixed(0)} > borne ${borneBase.toFixed(0)}`);
+  assert.ok(d.base > 0.5 * borneBase, `base ${d.base.toFixed(0)} anormalement basse`);
+
+  // Toutes les années comptent, pas seulement 25 : le moteur en déroule 43.
+  assert.ok(d.anneesRetenues > 25, `années retenues : ${d.anneesRetenues}`);
+});
+
+test('CIPAV : sans précision d’activité, on reste au régime des indépendants', () => {
+  // Le libéral réglementé est une MINORITÉ des indépendants : depuis 2019 les
+  // libéraux non réglementés relèvent eux aussi de la sécurité sociale des
+  // indépendants. Le défaut doit donc rester `tns`, et jamais l'inverse.
+  assert.equal(M.regimeDuStatut('independant'), 'tns');
+  assert.equal(M.regimeDuStatut('independant', undefined, 'ssi'), 'tns');
+  assert.equal(M.regimeDuStatut('independant', undefined, 'cipav'), 'cipav');
+  // L'activité n'a aucun effet sur les autres statuts.
+  assert.equal(M.regimeDuStatut('salarie', undefined, 'cipav'), 'salarie');
+  assert.equal(M.regimeDuStatut('fonctionnaire', undefined, 'cipav'), 'fonctionnaire');
+});
+
+test('CIPAV : inversion du disponible vers le revenu brut social', () => {
+  for (const rbs of [2000, 4000, 8000, 20000]) {
+    const { netAvantImpot } = CIPAV.netsDepuisBrut(rbs);
+    assert.ok(
+      Math.abs(CIPAV.brutDepuisNet(netAvantImpot) - rbs) < 0.5,
+      `revenu ${rbs} retrouvé à ${CIPAV.brutDepuisNet(netAvantImpot).toFixed(2)}`,
+    );
+  }
+});

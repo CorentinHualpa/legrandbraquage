@@ -5,10 +5,12 @@ import type { Pieces } from "./Instruction";
 import { euros } from "@/lib/format";
 import type { Statut } from "@/lib/moteur";
 import {
+  ACTIVITES,
   FORMES_TPE,
   NOMS_REGIME,
   STATUTS,
   VERSANTS,
+  type Activite,
   type FormeTpe,
   type Regime,
   type Versant,
@@ -24,6 +26,8 @@ export function Plainte({
   setFormeTpe,
   versant,
   setVersant,
+  activite,
+  setActivite,
   regime,
   calculable,
   ouverte,
@@ -38,6 +42,8 @@ export function Plainte({
   setFormeTpe: (f: FormeTpe) => void;
   versant: Versant;
   setVersant: (v: Versant) => void;
+  activite: Activite;
+  setActivite: (a: Activite) => void;
   regime: Regime | null;
   calculable: boolean;
   ouverte: boolean;
@@ -168,6 +174,45 @@ export function Plainte({
                 );
               })}
             </div>
+          </fieldset>
+        ) : null}
+
+        {statut === "independant" ? (
+          <fieldset className="flex flex-col gap-2">
+            <legend className="mb-2 font-mono text-[10px] tracking-[0.13em] text-encre-3">
+              NATURE DE L’ACTIVITÉ
+            </legend>
+            <div className="flex flex-col gap-2">
+              {ACTIVITES.map((a) => {
+                const actif = activite === a.id;
+                return (
+                  <button
+                    key={a.id}
+                    type="button"
+                    onClick={() => setActivite(a.id)}
+                    aria-pressed={actif}
+                    className={`flex flex-col items-start px-3 py-2 text-left transition-colors ${
+                      actif
+                        ? "bg-encre text-papier"
+                        : "border border-cadre-bord hover:border-encre"
+                    }`}
+                  >
+                    <span className="text-[14px] font-medium">{a.libelle}</span>
+                    <span
+                      className={`text-[12.5px] leading-snug ${actif ? "text-papier/90" : "text-encre-3"}`}
+                    >
+                      {a.precision}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-[12.5px] leading-relaxed text-encre-3">
+              Une profession réglementée cotise à la CIPAV, et ce n’est pas une
+              nuance : à 25 000 € de revenu elle paie 13 % de MOINS qu’un
+              artisan, à 250 000 € elle paie 24 % de PLUS. L’écart change de
+              signe, donc aucun régime moyen ne peut servir les deux.
+            </p>
           </fieldset>
         ) : null}
 

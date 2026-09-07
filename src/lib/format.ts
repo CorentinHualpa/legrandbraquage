@@ -7,10 +7,18 @@
  */
 
 /** 1 379 000 → « 1 379 000 ». Espace insécable fine, pour que rien ne se coupe. */
-export function euros(n: number): string {
+export function nombre(n: number): string {
   return Math.round(n)
     .toString()
     .replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+}
+
+export function euros(n: number): string {
+  // Le même rendu que `nombre`, quand ce qu'on écrit est un MONTANT. Les deux
+  // existent parce que le site affiche aussi des points de retraite, et appeler
+  // `euros()` sur un nombre de points se relit mal six mois plus tard : la
+  // prochaine personne ajoute un « € » derrière, de bonne foi.
+  return nombre(n);
 }
 
 /** 1 379 000 → « 1 379 000 € ». */

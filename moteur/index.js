@@ -20,6 +20,7 @@ import {
 import { RETRAITE, SALAIRES_REFERENCE } from './baremes-2026.js';
 import * as fp from './fonction-publique.js';
 import * as tns from './tns.js';
+import * as cipav from './cipav.js';
 import { TAUX_REMPLACEMENT, VERSANTS } from './baremes-fonction-publique.js';
 
 /**
@@ -30,10 +31,18 @@ import { TAUX_REMPLACEMENT, VERSANTS } from './baremes-fonction-publique.js';
  * salarié. Le statut pose donc une question de forme juridique et aiguille, il
  * ne fabrique aucun calcul de plus.
  */
-export function regimeDuStatut(statut = 'salarie', forme) {
+export function regimeDuStatut(statut = 'salarie', forme, activite) {
   if (statut === 'salarie') return 'salarie';
   if (statut === 'fonctionnaire') return 'fonctionnaire';
-  if (statut === 'independant') return 'tns';
+  if (statut === 'independant') {
+    // ⚠ Le libéral RÉGLEMENTÉ n'est pas une nuance de l'artisan : son barème
+    // change de signe autour de 1,5 plafond d'assiette. Sans précision, on
+    // sert la sécurité sociale des indépendants, qui couvre les artisans, les
+    // commerçants ET les libéraux non réglementés créés depuis 2019, soit la
+    // très grande majorité. L'écran pose la question.
+    if (activite === 'cipav') return 'cipav';
+    return 'tns';
+  }
   if (statut === 'tpe') {
     if (forme === 'sarl-majoritaire') return 'tns';
     if (forme === 'sas') return 'salarie';
@@ -123,6 +132,7 @@ export function simuler(entree) {
     netMensuel,
     statut = 'salarie',
     formeTpe,
+    activite,
     versant = 'fpt',
     ageActuel = 36,
     cadre = false,
@@ -133,7 +143,7 @@ export function simuler(entree) {
 
   if (!(netMensuel > 0)) throw new Error('netMensuel doit être positif');
 
-  const regime = entree.regime ?? regimeDuStatut(statut, formeTpe);
+  const regime = entree.regime ?? regimeDuStatut(statut, formeTpe, activite);
   if (!regime) {
     throw new Error(
       `Statut « ${statut} » sans régime résolu. Pour un patron de TPE, il faut la forme `
@@ -168,8 +178,15 @@ export function simuler(entree) {
   let tauxRemplacement;
   let pensionTns = null;
 
-  if (regime === 'tns') {
-    pensionTns = tns.pension(
+  if (regime === 'tns' || regime === 'cipav') {
+    // Les deux régimes de non-salariés calculent leur pension par les règles,
+    // faute de tout taux de remplacement publié. Mais PAS par les mêmes règles :
+    // la base d'un artisan est celle du régime général, sur ses vingt-cinq
+    // meilleures années ; celle d'un libéral CIPAV est un régime par points, sur
+    // toute la carrière. Une mauvaise année pèse chez l'un et disparaît chez
+    // l'autre : c'est une différence de structure, pas de taux.
+    const moteurPension = regime === 'cipav' ? cipav : tns;
+    pensionTns = moteurPension.pension(
       carriere.annees.map((a) => a.assiette),
       carriere.annees.map((a) => a.retraiteComplementaire),
     );
@@ -188,8 +205,11 @@ export function simuler(entree) {
     ? {
       ...pensionTns,
       brut: false,
-      note: 'pension calculée par les règles : base du régime général sur les '
-        + '25 meilleures années, plus les points du régime complémentaire',
+      note: regime === 'cipav'
+        ? 'pension calculée par les règles : points du régime de base des '
+          + 'professions libérales, plus points du régime complémentaire CIPAV'
+        : 'pension calculée par les règles : base du régime général sur les '
+          + '25 meilleures années, plus les points du régime complémentaire',
     }
     : regime === 'fonctionnaire'
     ? {
@@ -211,7 +231,7 @@ export function simuler(entree) {
   const ecart = preleve - totalRecu;
 
   return {
-    entree: { netMensuel, statut, regime, versant, ageActuel, cadre, effectif, parts, perimetre },
+    entree: { netMensuel, statut, regime, versant, activite, ageActuel, cadre, effectif, parts, perimetre },
     carriere,
     plateauGauche: {
       total: preleve,

@@ -15,19 +15,21 @@
  */
 
 import { PERIMETRE_DEFAUT, type Perimetre, type Statut } from "./moteur";
-import type { FormeTpe, Versant } from "./statuts";
+import type { Activite, FormeTpe, Versant } from "./statuts";
 
 export type Cas = {
   netMensuel: number;
   statut: Statut;
   formeTpe?: FormeTpe;
   versant: Versant;
+  activite: Activite;
   perimetre: Perimetre;
 };
 
 const STATUTS_VALIDES: Statut[] = ["salarie", "independant", "fonctionnaire", "tpe"];
 const FORMES_VALIDES: FormeTpe[] = ["sarl-majoritaire", "sas"];
 const VERSANTS_VALIDES: Versant[] = ["fpe", "fpt", "fph"];
+const ACTIVITES_VALIDES: Activite[] = ["ssi", "cipav"];
 
 /** Les quatre cases du périmètre, dans un ordre qui ne doit plus bouger. */
 const ORDRE_PERIMETRE = [
@@ -59,6 +61,10 @@ export function requeteDuCas(cas: Cas): string {
   });
   if (cas.statut === "tpe" && cas.formeTpe) q.set("f", cas.formeTpe);
   if (cas.statut === "fonctionnaire") q.set("v", cas.versant);
+  // Un libéral réglementé et un artisan n'ont ni le même prélèvement ni la même
+  // pension : sans ce paramètre, le dossier d'un architecte se rouvrirait en
+  // artisan, sous le même lien et avec un autre montant.
+  if (cas.statut === "independant" && cas.activite === "cipav") q.set("a", cas.activite);
   return `?${q.toString()}`;
 }
 
@@ -83,6 +89,10 @@ export function casDepuisRequete(recherche: string): Cas | null {
   const formeTpe =
     formeBrute && FORMES_VALIDES.includes(formeBrute) ? formeBrute : undefined;
 
+  const activiteBrute = q.get("a") as Activite | null;
+  const activite =
+    activiteBrute && ACTIVITES_VALIDES.includes(activiteBrute) ? activiteBrute : "ssi";
+
   const versantBrut = q.get("v") as Versant | null;
   const versant =
     versantBrut && VERSANTS_VALIDES.includes(versantBrut) ? versantBrut : "fpt";
@@ -95,6 +105,7 @@ export function casDepuisRequete(recherche: string): Cas | null {
     // au visiteur : il choisira lui-même sa forme.
     formeTpe: statut === "tpe" ? formeTpe : undefined,
     versant,
+    activite,
     perimetre: litPerimetre(q.get("p")) ?? PERIMETRE_DEFAUT,
   };
 }

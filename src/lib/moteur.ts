@@ -37,6 +37,12 @@ export type Entree = {
   formeTpe?: "sarl-majoritaire" | "sas";
   /** Versant de la fonction publique. Sans effet sur les autres statuts. */
   versant?: "fpe" | "fpt" | "fph";
+  /**
+   * Sous quel régime cotise un indépendant. Sans effet sur les autres statuts.
+   * Absent, il vaut la sécurité sociale des indépendants : c'est le régime de
+   * la très grande majorité, libéraux non réglementés compris depuis 2019.
+   */
+  activite?: "ssi" | "cipav";
   ageActuel?: number;
   cadre?: boolean;
   effectif?: number;
@@ -130,6 +136,7 @@ export type Simulation = {
         }
       | {
           brut: false;
+          regime: "tns";
           base: number;
           complementaire: number;
           points: number;
@@ -142,6 +149,26 @@ export type Simulation = {
             source: string;
             pourquoi: string;
           };
+        }
+      /**
+       * ⚠ La pension d'un libéral CIPAV n'a PAS la même forme que celle d'un
+       * artisan, et le type le disait faux : `ecartAvecLObserve` y était promis
+       * pour toute pension non brute, alors qu'elle n'existe que chez
+       * l'artisan. L'écran lisait donc une propriété absente et la page tombait
+       * entière. Le champ `regime` est le discriminant, on ne devine plus
+       * d'après les clés présentes.
+       */
+      | {
+          brut: false;
+          regime: "cipav";
+          base: number;
+          complementaire: number;
+          points: number;
+          pointsBase: number;
+          totale: number;
+          anneesRetenues: number;
+          note: string;
+          reserve: { quoi: string; effet: string; source: string };
         }
       | null;
   };

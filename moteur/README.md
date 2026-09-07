@@ -5,7 +5,7 @@ c'est la seule façon de rendre le résultat opposable : n'importe qui peut le
 lire, le rejouer et le contredire.
 
 ```bash
-pnpm test               # 59 tests
+pnpm test               # 66 tests
 ```
 
 Aucune dépendance, aucune étape de build. Modules ES natifs, exécutables tels
@@ -97,6 +97,29 @@ ouvrir. À corriger dès qu'on l'a, et à dire dans la page méthodologie.
 
 ---
 
+### 4. Le libéral réglementé n'est pas une nuance de l'artisan
+
+L'écart entre la CIPAV et la sécurité sociale des indépendants **change de
+signe** : à 25 000 € de revenu, un libéral réglementé paie **13 % de moins**
+qu'un artisan ; à 250 000 €, il paie **24 % de plus**. Le croisement tombe vers
+1,5 plafond de sécurité sociale d'assiette.
+
+La cause tient en deux lignes : sa retraite de base est deux fois moins chère
+(8,73 % contre 17,87 %) et sa complémentaire deux fois plus (21 % contre 9,1 %
+au-dessus d'un plafond). Aucun régime « moyen » ne peut donc servir les deux : il
+serait faux des deux côtés à la fois.
+
+Sa pension diffère aussi de STRUCTURE, pas seulement de montant. Depuis 2020 la
+base d'un artisan est celle du régime général, la moitié du revenu moyen de ses
+vingt-cinq **meilleures** années. Celle d'un libéral est un régime par points, sur
+**toute** la carrière, plafonné à 582 points par an. Une mauvaise année pèse chez
+l'un et disparaît chez l'autre.
+
+Le salaire-pivot suit : **6 681 € net** pour un libéral CIPAV, contre 5 669 €
+pour un artisan.
+
+---
+
 ## Deux points ouverts
 
 1. **Effectif ≥ 50 salariés.** Le moteur trouve 0,45 point de moins que la
@@ -107,16 +130,18 @@ ouvrir. À corriger dès qu'on l'a, et à dire dans la page méthodologie.
    `mon-entreprise.urssaf.fr` avant mise en ligne. L'application reste sur
    l'effectif < 50 en attendant.
 
-2. **Le professionnel libéral réglementé.** Il relève de la CIPAV et pas de la
-   Sécurité sociale des indépendants, et l'écart n'est pas négligeable : il
-   change de signe, de −13 % à 25 000 € de revenu à +24 % à 250 000 €. Un
-   quatrième régime se justifie. La valeur de service du point CIPAV 2026 est
-   par ailleurs **NON TROUVÉE**.
+2. **Le barème CIPAV a DEUX sources officielles qui se contredisent.** L'URSSAF
+   publie 8,73 % de retraite de base et 11 % puis 21 % de complémentaire ; la
+   fiche pratique 2026 de la CIPAV elle-même annonce 8,23 %, puis 9 % et 22 %.
+   Aucune des deux ne mentionne l'autre. On retient l'URSSAF, qui recouvre ces
+   cotisations depuis 2023 et dont les taux sont ceux du décret 2024-688. Un
+   libéral qui compare avec sa fiche verra un écart : la page méthode le dit.
 
-   ⚠ Un régime non instruit **lève** au lieu de retomber sur un autre. Servir
-   les barèmes du privé à un indépendant produirait un chiffre faux et
-   parfaitement crédible, c'est-à-dire exactement ce que ce dossier reproche à
-   la partie adverse.
+   La CIPAV publie par ailleurs, dans la même phrase, un ratio d'un point de
+   retraite de base pour 89,71 € de revenus ET un plafond de 557 points, or les
+   deux ne se réconcilient pas (le ratio ne rend que 536 points au plafond de la
+   tranche). Les deux sont appliqués tels quels ; la pension de base est minorée
+   d'environ 4 %.
 
 3. **Le président de SAS et l'assurance chômage.** Il n'y cotise pas, et le
    moteur lui applique encore le calcul complet du salarié. L'écart est de
@@ -143,7 +168,9 @@ ouvrir. À corriger dès qu'on l'a, et à dire dans la page méthodologie.
 | `index.js` | `simuler()`, `salairePivot()`, `placerSaRetraite()` |
 | `baremes-tns.js` | Les barèmes de l'indépendant, et pourquoi l'étalon change |
 | `tns.js` | Assiette unique, cotisations, pension par les règles |
-| `test.mjs` | 59 tests, dont deux étalons |
+| `baremes-cipav.js` | Le barème du libéral réglementé, et ses deux sources qui divergent |
+| `cipav.js` | Cotisations CIPAV, et une pension par POINTS dans les deux étages |
+| `test.mjs` | 66 tests, dont deux étalons |
 
 Toute modification d'un barème doit citer un texte officiel. C'est cette règle,
 et pas le ton de la page, qui rend le simulateur inattaquable.

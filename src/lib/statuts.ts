@@ -14,8 +14,9 @@ import type { Statut } from "./moteur";
  * règle de droit, elle a sa place là où elle est testée.
  */
 
-export type Regime = "salarie" | "tns" | "fonctionnaire";
+export type Regime = "salarie" | "tns" | "cipav" | "fonctionnaire";
 export type FormeTpe = "sarl-majoritaire" | "sas";
+export type Activite = "ssi" | "cipav";
 export type Versant = "fpe" | "fpt" | "fph";
 
 export const STATUTS: Array<{ id: Statut; libelle: string; precision: string }> = [
@@ -50,6 +51,33 @@ export const FORMES_TPE: Array<{
   },
 ];
 
+/**
+ * Sous quel régime cotise un indépendant.
+ *
+ * ⚠ Ce n'est pas une nuance : à 25 000 € de revenu un libéral réglementé paie
+ * 13 % de MOINS qu'un artisan, à 250 000 € il paie 24 % de PLUS. L'écart change
+ * de signe vers 1,5 plafond de sécurité sociale d'assiette, donc aucun régime
+ * « moyen » ne peut servir les deux.
+ *
+ * Le défaut est la sécurité sociale des indépendants, et c'est le bon défaut :
+ * depuis 2019 les libéraux NON réglementés en relèvent aussi, avec les artisans
+ * et les commerçants. La CIPAV ne garde que les professions réglementées de son
+ * champ (art. L640-1 CSS).
+ */
+export const ACTIVITES: Array<{ id: Activite; libelle: string; precision: string }> = [
+  {
+    id: "ssi",
+    libelle: "Artisan, commerçant, freelance",
+    precision: "y compris toute profession libérale NON réglementée",
+  },
+  {
+    id: "cipav",
+    libelle: "Profession libérale réglementée",
+    precision:
+      "architecte, géomètre, ostéopathe, psychologue, vétérinaire, moniteur de ski, guide-conférencier, expert…",
+  },
+];
+
 export const VERSANTS: Array<{ id: Versant; libelle: string; precision: string }> = [
   { id: "fpt", libelle: "Territoriale", precision: "commune, département, région" },
   { id: "fph", libelle: "Hospitalière", precision: "hôpital public, EHPAD public" },
@@ -66,10 +94,14 @@ export const VERSANTS: Array<{ id: Versant; libelle: string; precision: string }
  * dossier reproche à la partie adverse. Le moteur lève d'ailleurs plutôt que
  * de deviner ; cette liste existe pour que l'écran le dise AVANT le calcul.
  */
-export const REGIMES_DISPONIBLES: Regime[] = ["salarie", "fonctionnaire", "tns"];
+export const REGIMES_DISPONIBLES: Regime[] = ["salarie", "fonctionnaire", "tns", "cipav"];
 
-export function regimeDe(statut: Statut, forme?: FormeTpe): Regime | null {
-  return (regimeDuStatut(statut, forme) as Regime | null) ?? null;
+export function regimeDe(
+  statut: Statut,
+  forme?: FormeTpe,
+  activite?: Activite,
+): Regime | null {
+  return (regimeDuStatut(statut, forme, activite) as Regime | null) ?? null;
 }
 
 export function regimeCalculable(regime: Regime | null): boolean {
@@ -79,5 +111,6 @@ export function regimeCalculable(regime: Regime | null): boolean {
 export const NOMS_REGIME: Record<Regime, string> = {
   salarie: "salarié du privé",
   tns: "travailleur non salarié",
+  cipav: "professionnel libéral réglementé",
   fonctionnaire: "fonctionnaire",
 };
