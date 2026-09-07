@@ -83,9 +83,8 @@ export function Audition({
           <Scelle
             numero={13}
             nom="Portrait"
-            fichier="13-braqueur.png"
             ratio="3:4"
-            present={Boolean(pieces[13])}
+            fichier={pieces[13]}
           />
         </div>
         <div className="flex flex-col gap-0.5">

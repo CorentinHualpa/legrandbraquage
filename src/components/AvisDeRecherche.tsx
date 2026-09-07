@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { CarteAvis } from "./CarteAvis";
-import { EnTete, Feuille, PiecesVersees, Renvoi } from "./papier";
+import { EnTete, Feuille, PiecesVersees, Renvoi, Scelle } from "./papier";
 import type { Pieces } from "./Instruction";
 import type { Perimetre, Simulation } from "@/lib/moteur";
 import { SEUIL_ANNEES, anneesSansTravailler, objetPour } from "@/lib/objets";
@@ -60,6 +60,15 @@ export function AvisDeRecherche({
   return (
     <Feuille className="mt-10 border-t-2 border-dashed border-ligne pt-2">
       <EnTete nature="PIÈCE À PLACARDER" titre="Avis de recherche" />
+
+      <Scelle
+        numero={6}
+        nom="L'avis de recherche"
+        ratio="3:4"
+        legende="CLICHÉ 06 · LE CADRE EST RESTÉ VIDE"
+        fichier={pieces[6]}
+        className="mx-auto max-w-[240px]"
+      />
 
       <CarteAvis
         preleve={plateauGauche.total}

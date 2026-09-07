@@ -67,7 +67,20 @@ export function Instruction({ pieces }: { pieces: Pieces }) {
   }, [ouverte, calculable, statut, formeTpe, versant, perimetre]);
 
   return (
-    <main className="min-h-dvh bg-papier pb-16">
+    <main className="relative min-h-dvh bg-papier pb-16">
+      {/*
+        La pièce n° 12 sert de fond de dossier, et rien d'autre. Très faible
+        opacité et fondu multiplicatif : elle donne du grain au papier sans
+        jamais passer devant un chiffre. Si elle se voit, elle est trop forte.
+      */}
+      {pieces[12] ? (
+        <div
+          aria-hidden
+          className="pointer-events-none fixed inset-0 z-0 bg-cover bg-center opacity-[0.05] mix-blend-multiply"
+          style={{ backgroundImage: `url(/images/${pieces[12]})` }}
+        />
+      ) : null}
+      <div className="relative z-10">
       <Plainte
         pieces={pieces}
         netMensuel={netMensuel}
@@ -120,6 +133,7 @@ export function Instruction({ pieces }: { pieces: Pieces }) {
           />
         </>
       ) : null}
+      </div>
     </main>
   );
 }

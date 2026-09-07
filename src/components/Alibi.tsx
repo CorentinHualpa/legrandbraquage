@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { EnTete, Feuille, PiecesVersees, Renvoi, Tampon } from "./papier";
+import { EnTete, Feuille, PiecesVersees, Renvoi, Scelle, Tampon } from "./papier";
 import type { Pieces } from "./Instruction";
 import { euros, eurosSigne, pourcent } from "@/lib/format";
 import {
@@ -22,6 +22,7 @@ const LEGENDES = [
 ];
 
 export function Alibi({
+  pieces,
   simulation,
 }: {
   pieces: Pieces;
@@ -43,6 +44,14 @@ export function Alibi({
         nature="RAPPORT D’EXPERTISE"
         titre="L’alibi du million"
         tampon={<Tampon>CONTRADICTOIRE</Tampon>}
+      />
+
+      <Scelle
+        numero={2}
+        nom="La pièce à conviction"
+        ratio="4:3"
+        legende="CLICHÉ 02 · LA FICHE DE PAIE SOUS SCELLÉ"
+        fichier={pieces[2]}
       />
 
       <div className="flex flex-col gap-2.5">

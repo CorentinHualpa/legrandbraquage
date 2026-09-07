@@ -96,19 +96,24 @@ export function Scelle({
   fichier,
   ratio = "16:9",
   legende,
-  present,
   className = "",
 }: {
   numero: number;
   nom: string;
-  fichier: string;
+  /**
+   * Le nom de fichier RÉELLEMENT trouvé sur le disque, ou null.
+   *
+   * ⚠ Ne jamais écrire ce nom en dur à l'appel. Le dossier accepte plusieurs
+   * extensions, et un `.jpg` codé en face d'un `.webp` déposé donne un cadre
+   * qui se croit rempli et sert une image manquante : la page a l'air juste et
+   * n'affiche rien. Passer `pieces[n]`, qui vient de `piecesDeposees()`.
+   */
+  fichier: string | null;
   ratio?: keyof typeof RATIOS;
   legende?: string;
-  /** La liste des fichiers réellement déposés, calculée côté serveur. */
-  present: boolean;
   className?: string;
 }) {
-  if (present) {
+  if (fichier) {
     return (
       <figure className={`relative overflow-hidden border border-cadre-bord ${RATIOS[ratio]} ${className}`}>
         {/* eslint-disable-next-line @next/next/no-img-element */}

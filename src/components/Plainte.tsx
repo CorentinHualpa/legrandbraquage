@@ -58,10 +58,9 @@ export function Plainte({
       <Scelle
         numero={1}
         nom="La scène de crime"
-        fichier="01-scene-de-crime.jpg"
         ratio="16:9"
         legende="CLICHÉ 01 · SALON, 06 H 12"
-        present={Boolean(pieces[1])}
+        fichier={pieces[1]}
       />
 
       <div className="flex flex-col gap-3">

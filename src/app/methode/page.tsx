@@ -55,10 +55,9 @@ export default function Methode() {
         <Scelle
           numero={3}
           nom="Le tableau d'enquête"
-          fichier="03-tableau-enquete.jpg"
           ratio="16:9"
           legende="CLICHÉ 03 · LE MUR DE LIÈGE"
-          present={Boolean(pieces[3])}
+          fichier={pieces[3]}
         />
 
         <p className="text-[15.5px] leading-relaxed">

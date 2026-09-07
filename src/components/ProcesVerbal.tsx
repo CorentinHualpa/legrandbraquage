@@ -56,10 +56,9 @@ export function ProcesVerbal({
       <Scelle
         numero={9}
         nom="L'effraction"
-        fichier="09-effraction.jpg"
         ratio="4:3"
         legende="CLICHÉ 04 · LE PIED-DE-BICHE SUR LE CERFA"
-        present={Boolean(pieces[9])}
+        fichier={pieces[9]}
       />
 
       <p className="flex gap-2 font-mono text-[11px] text-encre-3">
@@ -156,6 +155,30 @@ export function ProcesVerbal({
         </ul>
 
         {/*
+          Deux pièces qui ne se versent au dossier QUE si l'on coche la ligne
+          consommation : le caddie et le terminal de paiement. Le geste
+          d'empiler un périmètre produit ses propres preuves, plutôt que de ne
+          faire bouger qu'un total.
+        */}
+        {perimetre.consommation && (pieces[5] || pieces[7]) ? (
+          <div className="grid grid-cols-[2fr_1fr] gap-2">
+            <Scelle
+              numero={5}
+              nom="La reconstitution"
+              ratio="16:9"
+              legende="CLICHÉ 05 · LE CADDIE, À LA CRAIE"
+              fichier={pieces[5]}
+            />
+            <Scelle
+              numero={7}
+              nom="Les empreintes sur le terminal"
+              ratio="1:1"
+              fichier={pieces[7]}
+            />
+          </div>
+        ) : null}
+
+        {/*
           ⚠ L'avertissement du COR voyage avec le chiffre, il ne vit pas dans
           une note de bas de page. Un employeur public cotise deux fois plus
           qu'un employeur privé, et ça ne veut PAS dire ce qu'on croit : sans
@@ -213,7 +236,15 @@ export function ProcesVerbal({
         ) : null}
 
         {/* Le convertisseur d'objets. */}
-        <div className="mt-1 border-l-[3px] border-rouge bg-papier-3 px-3 py-3">
+        <Scelle
+          numero={8}
+          nom="La table des scellés"
+          ratio="16:9"
+          legende="CLICHÉ 08 · LE BUTIN, CATALOGUÉ"
+          fichier={pieces[8]}
+          className="mt-1"
+        />
+        <div className="border-l-[3px] border-rouge bg-papier-3 px-3 py-3">
           <p className="font-mono text-[9.5px] tracking-[0.12em] text-rouge-texte">
             AVEC CE BUTIN, TU T’ACHETAIS
           </p>
@@ -252,7 +283,14 @@ export function ProcesVerbal({
       </section>
 
       {/* ─── L'heure de libération ─────────────────────────────────────────── */}
-      <section className="flex flex-col gap-2 border-2 border-encre bg-papier-2 p-4">
+      <section className="flex flex-col gap-3 border-2 border-encre bg-papier-2 p-4">
+        <Scelle
+          numero={10}
+          nom="Le distributeur sous scellés"
+          ratio="16:9"
+          legende="CLICHÉ 10 · LE GUICHET, LA NUIT"
+          fichier={pieces[10]}
+        />
         <h3 className="font-mono text-[10px] tracking-[0.13em] text-bleu">
           L’HEURE DE LIBÉRATION
         </h3>
@@ -298,9 +336,8 @@ export function ProcesVerbal({
         <Scelle
           numero={4}
           nom="Le coffre, après"
-          fichier="04-coffre.jpg"
           ratio="4:3"
-          present={Boolean(pieces[4])}
+          fichier={pieces[4]}
           className="mt-1"
         />
 

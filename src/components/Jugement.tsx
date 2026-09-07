@@ -33,10 +33,9 @@ export function Jugement({
       <Scelle
         numero={11}
         nom="Le prétoire, vide"
-        fichier="11-pretoire.jpg"
         ratio="16:9"
         legende="CLICHÉ 11 · LE JUGE, C’EST TOI"
-        present={Boolean(pieces[11])}
+        fichier={pieces[11]}
       />
 
       <div className="flex justify-center py-1">
