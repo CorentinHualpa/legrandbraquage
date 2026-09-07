@@ -42,7 +42,7 @@ export type Entree = {
    * Absent, il vaut la sécurité sociale des indépendants : c'est le régime de
    * la très grande majorité, libéraux non réglementés compris depuis 2019.
    */
-  activite?: "ssi" | "cipav";
+  activite?: "micro" | "ssi" | "cipav";
   ageActuel?: number;
   cadre?: boolean;
   effectif?: number;

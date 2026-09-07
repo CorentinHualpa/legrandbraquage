@@ -41,6 +41,11 @@ export function regimeDuStatut(statut = 'salarie', forme, activite) {
     // commerçants ET les libéraux non réglementés créés depuis 2019, soit la
     // très grande majorité. L'écran pose la question.
     if (activite === 'cipav') return 'cipav';
+    // ⚠ Le micro n'est PAS une variante du réel : assiette = chiffre d'affaires
+    // encaissé, taux forfaitaire, aucune charge déductible. Il a son propre
+    // identifiant pour que `regimeDe` LÈVE tant qu'il n'est pas instruit,
+    // plutôt que de lui servir le barème du réel.
+    if (activite === 'micro') return 'micro';
     return 'tns';
   }
   if (statut === 'tpe') {

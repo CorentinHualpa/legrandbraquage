@@ -14,9 +14,9 @@ import type { Statut } from "./moteur";
  * règle de droit, elle a sa place là où elle est testée.
  */
 
-export type Regime = "salarie" | "tns" | "cipav" | "fonctionnaire";
+export type Regime = "salarie" | "tns" | "cipav" | "micro" | "fonctionnaire";
 export type FormeTpe = "sarl-majoritaire" | "sas";
-export type Activite = "ssi" | "cipav";
+export type Activite = "micro" | "ssi" | "cipav";
 export type Versant = "fpe" | "fpt" | "fph";
 
 export const STATUTS: Array<{ id: Statut; libelle: string; precision: string }> = [
@@ -66,9 +66,18 @@ export const FORMES_TPE: Array<{
  */
 export const ACTIVITES: Array<{ id: Activite; libelle: string; precision: string }> = [
   {
+    id: "micro",
+    libelle: "Micro-entrepreneur",
+    precision:
+      "ex auto-entrepreneur : tu cotises sur ton chiffre d’affaires, à taux fixe, "
+      + "et tu ne déduis aucune charge",
+  },
+  {
     id: "ssi",
-    libelle: "Artisan, commerçant, freelance",
-    precision: "y compris toute profession libérale NON réglementée",
+    libelle: "Entreprise au réel",
+    precision:
+      "artisan, commerçant ou libéral non réglementé : tu cotises sur ton revenu, "
+      + "une fois tes charges déduites",
   },
   {
     id: "cipav",
@@ -94,6 +103,16 @@ export const VERSANTS: Array<{ id: Versant; libelle: string; precision: string }
  * dossier reproche à la partie adverse. Le moteur lève d'ailleurs plutôt que
  * de deviner ; cette liste existe pour que l'écran le dise AVANT le calcul.
  */
+/*
+ * ⚠ `micro` en est volontairement ABSENT tant que son barème n'est pas sourcé.
+ *
+ * Un micro-entrepreneur ne cotise PAS comme une entreprise au réel : son
+ * assiette est le chiffre d'affaires encaissé, à taux forfaitaire, sans
+ * déduction de charges, et son impôt peut passer par un versement libératoire.
+ * Lui servir le barème du réel produirait un chiffre faux et parfaitement
+ * crédible, c'est-à-dire exactement ce que ce dossier reproche à la partie
+ * adverse. L'écran le dit et refuse de calculer.
+ */
 export const REGIMES_DISPONIBLES: Regime[] = ["salarie", "fonctionnaire", "tns", "cipav"];
 
 export function regimeDe(
@@ -111,6 +130,7 @@ export function regimeCalculable(regime: Regime | null): boolean {
 export const NOMS_REGIME: Record<Regime, string> = {
   salarie: "salarié du privé",
   tns: "travailleur non salarié",
+  micro: "micro-entrepreneur",
   cipav: "professionnel libéral réglementé",
   fonctionnaire: "fonctionnaire",
 };
@@ -212,6 +232,28 @@ export const LIGNES_PERIMETRE: Record<Regime, LignePerimetre[]> = {
     },
     CONSOMMATION,
   ],
+  micro: [
+    {
+      cle: "salariales",
+      // ⚠ Chez lui, l'assiette est le CHIFFRE D'AFFAIRES encaissé, pas un
+      // revenu après charges : il paie même sur ce qu'il a dépensé pour
+      // travailler. C'est la différence qui justifie un régime à part.
+      geste: "Pris sur tout ce que tu encaisses, charges comprises",
+      nom: "cotisations forfaitaires, en pourcentage du chiffre d’affaires",
+    },
+    {
+      cle: "patronales",
+      geste: "Personne ne verse avant toi",
+      nom: "aucune part employeur : tu es ton propre employeur",
+      sansObjet: true,
+    },
+    {
+      cle: "impotRevenu",
+      geste: "Repris par acompte, ou prélevé avec les cotisations",
+      nom: "impôt sur le revenu, barème ou versement libératoire",
+    },
+    CONSOMMATION,
+  ],
   cipav: [
     {
       cle: "salariales",
@@ -274,5 +316,11 @@ export const OU_LIRE_SON_NET: Record<Regime, { label: string; aide: string }> = 
     aide:
       "Ton revenu professionnel une fois les cotisations payées, avant l’impôt. "
       + "Ni ton chiffre d’affaires, ni ce qui reste après les acomptes.",
+  },
+  micro: {
+    label: "CE QU’IL TE RESTE PAR MOIS, AVANT IMPÔT SUR LE REVENU",
+    aide:
+      "Ton chiffre d’affaires encaissé, moins les cotisations, avant l’impôt. "
+      + "Tes charges professionnelles ne se déduisent pas : c’est le régime.",
   },
 };

@@ -269,10 +269,26 @@ export function Plainte({
             <span className="font-semibold">
               Le régime {NOMS_REGIME[regime]} n’est pas encore instruit.
             </span>{" "}
-            Il a ses propres barèmes, et lui servir le calcul du salarié
-            donnerait un chiffre faux. On préfère le dire : c’est exactement ce
-            que ce dossier reproche à la partie adverse. Reviens, ou prends le
-            statut salarié pour voir la mécanique.
+            {regime === "micro" ? (
+              <>
+                Un micro-entrepreneur cotise sur son{" "}
+                <span className="font-semibold">chiffre d’affaires encaissé</span>,
+                à taux forfaitaire, sans déduire la moindre charge, et son impôt
+                peut passer par un versement libératoire. Rien à voir avec une
+                entreprise au réel : lui servir ce barème-là donnerait un chiffre
+                faux et parfaitement crédible, c’est-à-dire exactement ce que ce
+                dossier reproche à la partie adverse. On préfère le dire et
+                attendre d’avoir les taux, plutôt que de te sortir un montant qui
+                sonne juste.
+              </>
+            ) : (
+              <>
+                Il a ses propres barèmes, et lui servir celui d’un régime voisin
+                donnerait un chiffre faux. On préfère le dire : c’est exactement
+                ce que ce dossier reproche à la partie adverse. Reviens, ou
+                prends le statut salarié pour voir la mécanique.
+              </>
+            )}
           </p>
         ) : null}
 

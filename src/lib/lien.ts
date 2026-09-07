@@ -29,7 +29,7 @@ export type Cas = {
 const STATUTS_VALIDES: Statut[] = ["salarie", "independant", "fonctionnaire", "tpe"];
 const FORMES_VALIDES: FormeTpe[] = ["sarl-majoritaire", "sas"];
 const VERSANTS_VALIDES: Versant[] = ["fpe", "fpt", "fph"];
-const ACTIVITES_VALIDES: Activite[] = ["ssi", "cipav"];
+const ACTIVITES_VALIDES: Activite[] = ["micro", "ssi", "cipav"];
 
 /** Les quatre cases du périmètre, dans un ordre qui ne doit plus bouger. */
 const ORDRE_PERIMETRE = [
@@ -64,7 +64,7 @@ export function requeteDuCas(cas: Cas): string {
   // Un libéral réglementé et un artisan n'ont ni le même prélèvement ni la même
   // pension : sans ce paramètre, le dossier d'un architecte se rouvrirait en
   // artisan, sous le même lien et avec un autre montant.
-  if (cas.statut === "independant" && cas.activite === "cipav") q.set("a", cas.activite);
+  if (cas.statut === "independant" && cas.activite !== "ssi") q.set("a", cas.activite);
   return `?${q.toString()}`;
 }
 

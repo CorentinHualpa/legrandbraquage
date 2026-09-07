@@ -845,3 +845,19 @@ test('le point de bascule et la médiane INSEE se comparent enfin', () => {
   assert.ok(pivot > 2190, `pivot ${pivot} €, attendu au-dessus du médian INSEE`);
   assert.ok(pivot < 2600, `pivot ${pivot} €, anormalement haut`);
 });
+
+test('le micro-entrepreneur LÈVE tant qu’il n’est pas instruit', () => {
+  // ⚠ Le cas le plus fréquent des freelances, et le plus dangereux à bâcler :
+  // un micro cotise sur son CHIFFRE D'AFFAIRES encaissé, à taux forfaitaire,
+  // sans déduire la moindre charge, et son impôt peut passer par un versement
+  // libératoire. Lui servir le barème du réel donnerait un chiffre faux et
+  // parfaitement crédible. Il a donc son propre identifiant de régime, et le
+  // moteur refuse de le calculer plutôt que de deviner.
+  assert.equal(M.regimeDuStatut('independant', undefined, 'micro'), 'micro');
+  assert.throws(
+    () => M.simuler({ netMensuel: 2500, statut: 'independant', activite: 'micro' }),
+    /non instruit/,
+  );
+  // Et surtout : il ne retombe JAMAIS sur le réel.
+  assert.notEqual(M.regimeDuStatut('independant', undefined, 'micro'), 'tns');
+});
