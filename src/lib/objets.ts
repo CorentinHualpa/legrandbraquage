@@ -119,17 +119,6 @@ export type Palier = {
 
 export const ECHELLE: Palier[] = [
   {
-    id: "autoroute",
-    image: "autoroute",
-    seuil: 3_800_000,
-    nom: "Un kilomètre d’autoroute",
-    pointe: "Un seul. Et il faudra encore payer le péage pour rouler dessus.",
-    provenance: "reconstitue",
-    source:
-      "bas de la fourchette publique de l’A69 : 200 à 500 M€ pour 53 km, "
-      + "Autorité de régulation des transports, avis n° 2022-007",
-  },
-  {
     id: "commune",
     image: "commune",
     seuil: 1_229_000,
@@ -179,15 +168,6 @@ export const ECHELLE: Palier[] = [
     source: "médiane des ventes de maisons avec terrain dans le Var, DVF 2025",
   },
   {
-    id: "piste-cyclable",
-    image: "piste-cyclable",
-    seuil: 400_000,
-    nom: "Un kilomètre de piste cyclable",
-    pointe: "Avec le séparateur en béton. Celui qui vous garde en vie.",
-    provenance: "releve",
-    source: "création d’une piste avec séparateur, Club des villes et territoires cyclables, avec l’ADEME et le Cerema, 2020",
-  },
-  {
     id: "maison",
     image: "maison",
     seuil: 205_000,
@@ -215,15 +195,6 @@ export const ECHELLE: Palier[] = [
     pointe: "Avec un balcon, si le braquage s’est bien passé.",
     provenance: "mediane",
     source: "médiane des ventes de trois-pièces, DVF 2025",
-  },
-  {
-    id: "logement-social",
-    image: "logement-social",
-    seuil: 169_200,
-    nom: "Un logement social, construit et livré",
-    pointe: "Un. Habité par quelqu’un d’autre, évidemment.",
-    provenance: "mediane",
-    source: "prix de revient moyen d’un logement social en 2023, Banque des Territoires, Éclairages n° 33",
   },
   {
     id: "studio",

@@ -40,7 +40,7 @@ import { partsFiscales, regimeCalculable, regimeDe } from "@/lib/statuts";
  * chômage : la question ne lui est pas posée.
  */
 const ECRANS = [
-  "couverture", "deposition", "cafe", "pris", "butin", "temoin", "liberation", "aparte",
+  "couverture", "deposition", "tabac", "carburant", "alcool", "pris", "butin", "temoin", "liberation", "aparte",
   "ecole", "sante", "chomage", "rendu", "bourse", "verdict", "avis",
 ] as const;
 type Ecran = (typeof ECRANS)[number];
@@ -56,8 +56,15 @@ type Ecran = (typeof ECRANS)[number];
  * interrogatoire, avec des images immersives »).
  */
 export function Parcours({ pieces }: { pieces: Pieces }) {
+  /*
+   * ⚠ Le montant part à ZÉRO, donc vide à l'écran, et le bouton reste bloqué
+   * tant qu'il n'est pas saisi (Coq, 08/09/2026 : « par défaut il doit être
+   * vide, je dois le remplir avant de porter plainte »). Un montant
+   * pré-rempli faisait signer une déposition qui n'était pas la sienne, et
+   * le chiffre du procès-verbal était alors celui d'un inconnu.
+   */
   const [etat, setEtat] = useState<EtatSaisie>({
-    netMensuel: 2190,
+    netMensuel: 0,
     statut: "salarie",
     formeTpe: undefined,
     versant: "fpt",
@@ -169,7 +176,24 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
     return salairePivot({ ...reste, parts, perimetre, paliers, placement, habitudes });
   }, [simulation, ecran, etat, parts, perimetre, paliers, placement, habitudes]);
 
-  const aller = (e: Ecran) => setEcran(e);
+  const aller = (e: Ecran) => {
+    type Transition = { finished?: Promise<unknown>; ready?: Promise<unknown>; updateCallbackDone?: Promise<unknown> };
+    type AvecTransition = Document & { startViewTransition?: (f: () => void) => Transition };
+    const doc = document as AvecTransition;
+    if (typeof doc.startViewTransition === "function"
+        && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      // Une transition interrompue (deux clics rapides, un retour arrière)
+      // REJETTE ses promesses. Non capturées, elles remontent en erreur dans
+      // la console alors que l'écran, lui, a parfaitement changé.
+      const transition = doc.startViewTransition(() => setEcran(e));
+      const tais = () => {};
+      transition?.finished?.catch(tais);
+      transition?.ready?.catch(tais);
+      transition?.updateCallbackDone?.catch(tais);
+      return;
+    }
+    setEcran(e);
+  };
   const suivant = () => aller(ecrans[Math.min(ecrans.length - 1, indexEcran + 1)]);
   const retour = () => aller(ecrans[Math.max(0, indexEcran - 1)]);
   const choisirPalier = (poste: PosteDuPlateau, id: string) =>
@@ -196,7 +220,7 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
           changer={changer}
           regime={regime}
           calculable={calculable}
-          signer={() => aller("cafe")}
+          signer={() => aller("tabac")}
           retour={() => aller("couverture")}
           numero={1}
           total={total}
@@ -215,8 +239,8 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
 
   return (
     <main className="min-h-dvh bg-nuit">
-      {ecran === "cafe" ? (
-        <Cafe {...commun} simulation={simulation} habitudes={habitudes} choisir={choisirHabitude} />
+      {ecran === "tabac" || ecran === "carburant" || ecran === "alcool" ? (
+        <Cafe {...commun} poste={ecran} simulation={simulation} habitudes={habitudes} choisir={choisirHabitude} />
       ) : ecran === "pris" ? (
         <Pris {...commun} simulation={simulation} perimetre={perimetre} setPerimetre={setPerimetre} />
       ) : ecran === "butin" ? (

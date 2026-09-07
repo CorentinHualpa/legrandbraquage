@@ -63,6 +63,8 @@ export function Deposition({
   total: number;
 }) {
   const [foyerOuvert, setFoyerOuvert] = useState(false);
+  /* Tant que la ligne est vide, elle bat, et rien d'autre ne peut se faire. */
+  const vide = !(etat.netMensuel > 0);
   const ouLire = OU_LIRE_SON_NET[regime ?? "salarie"];
   const micro = etat.statut === "independant" && etat.activite === "micro";
   const pret = calculable && etat.netMensuel > 0;
@@ -74,28 +76,45 @@ export function Deposition({
       nature="Déposition"
       retour={retour}
       photo={{ numero: 18, pieces, hauteur: 250, legende: "CLICHÉ 18 · LE COMMISSARIAT, 23 H 40" }}
-      action={{ libelle: "Signer la déposition", onClick: signer, disabled: !pret }}
+      action={{
+        libelle: vide ? "Le montant, d’abord" : "Signer la déposition",
+        onClick: signer,
+        disabled: !pret,
+      }}
     >
       <Commissaire>
-        « Asseyez-vous. Nom, prénom… non, laissez tomber. Ce qui m’intéresse, c’est combien vous palpez par mois. »
+        {vide ? (
+          <>« Asseyez-vous. Nom, prénom… non, laissez tomber. Ce qui m’intéresse, c’est combien vous palpez par mois. Écrivez-le là, sur le procès-verbal. »</>
+        ) : (
+          <>« Voilà. {euros(etat.netMensuel)} € par mois. On va pouvoir travailler. »</>
+        )}
       </Commissaire>
 
       <Papier rotation={0.6} className="flex flex-col gap-1.5 px-4 py-3">
-        <Kicker couleur="encre">Procès-verbal de déposition · ligne 1</Kicker>
-        <div className="flex items-baseline gap-2 border-b-[1.5px] border-encre pb-1">
+        <div className="flex items-baseline justify-between gap-2">
+          <Kicker couleur="encre">Procès-verbal de déposition · ligne 1</Kicker>
+          {vide ? (
+            <span className="font-mono text-[9.5px] tracking-[0.14em] text-rouge-texte uppercase">À remplir</span>
+          ) : null}
+        </div>
+        <div className={`flex items-baseline gap-2 border-b-[1.5px] border-encre pb-1 ${vide ? "ligne-a-remplir" : ""}`}>
           <input
             id="net"
             type="text"
             inputMode="numeric"
-            value={euros(etat.netMensuel)}
+            value={etat.netMensuel > 0 ? euros(etat.netMensuel) : ""}
             onChange={(e) => {
               const n = Number(e.target.value.replace(/[^\d]/g, ""));
               changer({ netMensuel: Number.isFinite(n) ? n : 0 });
             }}
             aria-label={ouLire.label}
             aria-describedby="net-aide"
-            className="chiffres w-full min-w-0 bg-transparent font-mono text-[42px] font-semibold tracking-[-0.03em] text-encre outline-none focus:text-rouge-texte"
+            className="chiffres w-full min-w-0 bg-transparent font-mono text-[42px] font-semibold tracking-[-0.03em] text-encre outline-none placeholder:text-cadre-bord focus:text-rouge-texte"
+            placeholder="0000"
           />
+          {vide ? (
+            <span aria-hidden className="curseur-attente -ml-[100%] h-[38px] w-[3px] shrink-0 bg-rouge" />
+          ) : null}
           <span className="shrink-0 font-mono text-[11px] tracking-[0.1em] whitespace-nowrap text-encre-3">
             {micro ? "€ DE CA PAR MOIS" : "€ NET, AVANT IMPÔT"}
           </span>
