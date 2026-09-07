@@ -1163,3 +1163,20 @@ test('paliers : bac+5 dans le privé compte comme le bac, bac+5 public compte ci
   assert.equal(M.montantSante('tuile'), Math.round(213_377 * 1.5));
   assert.equal(M.montantChomage('longue'), 48 * 1040);
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// L'échelle du butin : les seuils décroissent, et chaque palier est atteignable.
+test('l’échelle du butin est strictement décroissante et sourcée', async () => {
+  const { ECHELLE, objetPour } = await import('../src/lib/objets.ts');
+  assert.ok(ECHELLE.length >= 18, `${ECHELLE.length} paliers`);
+  for (let i = 1; i < ECHELLE.length; i += 1) {
+    assert.ok(ECHELLE[i].seuil < ECHELLE[i - 1].seuil,
+      `${ECHELLE[i - 1].id} (${ECHELLE[i - 1].seuil}) puis ${ECHELLE[i].id} (${ECHELLE[i].seuil})`);
+  }
+  for (const p of ECHELLE) {
+    assert.ok(p.source && p.source.length > 10, `source manquante : ${p.id}`);
+    assert.ok(p.pointe && p.pointe.length > 5, `pointe manquante : ${p.id}`);
+    // Chaque palier est SERVI par son propre seuil : sinon il est inatteignable.
+    assert.equal(objetPour(p.seuil).id, p.id);
+  }
+});

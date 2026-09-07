@@ -119,6 +119,26 @@ export type Palier = {
 
 export const ECHELLE: Palier[] = [
   {
+    id: "autoroute",
+    image: "autoroute",
+    seuil: 3_800_000,
+    nom: "Un kilomètre d’autoroute",
+    pointe: "Un seul. Et il faudra encore payer le péage pour rouler dessus.",
+    provenance: "reconstitue",
+    source:
+      "bas de la fourchette publique de l’A69 : 200 à 500 M€ pour 53 km, "
+      + "Autorité de régulation des transports, avis n° 2022-007",
+  },
+  {
+    id: "commune",
+    image: "commune",
+    seuil: 1_229_000,
+    nom: "Une commune de mille habitants, pendant un an",
+    pointe: "L’école, la mairie, la voirie, les fleurs du rond-point. Une année entière, sur vos seules épaules.",
+    provenance: "mediane",
+    source: "dépenses totales moyennes des communes de 1 000 habitants, DGCL, Les finances des communes en 2024",
+  },
+  {
     id: "grande-maison",
     image: "grande-maison",
     seuil: 1_128_000,
@@ -126,6 +146,28 @@ export const ECHELLE: Palier[] = [
     pointe: "Il restera des pièces où vous n’entrerez jamais.",
     provenance: "mediane",
     source: "médiane des ventes de maisons de 500 m² et plus, DVF 2025",
+  },
+  {
+    id: "rond-point",
+    image: "rond-point",
+    seuil: 1_000_000,
+    nom: "Un rond-point, le beau modèle",
+    pointe: "Haut de la fourchette. Avec la sculpture au milieu, on ne sait pas : personne ne publie ce prix-là.",
+    provenance: "reconstitue",
+    source:
+      "« de quelques centaines de milliers d’euros à un million », réponse du gouvernement à la "
+      + "question écrite n° 6835, Assemblée nationale, JO du 28/03/2023",
+  },
+  {
+    id: "cabinet",
+    image: "cabinet",
+    seuil: 740_000,
+    nom: "Une année de cabinet ministériel",
+    pointe: "Les indemnités des conseillers, rien de plus. Le coût complet, l’État a cessé de le publier.",
+    provenance: "reconstitue",
+    source:
+      "25,89 M€ d’indemnités de sujétion pour 35 cabinets, jaune budgétaire PLF 2025 : "
+      + "740 000 € en moyenne, l’Intérieur seul en pèse 7,35 M€",
   },
   {
     id: "maison-var",
@@ -137,6 +179,15 @@ export const ECHELLE: Palier[] = [
     source: "médiane des ventes de maisons avec terrain dans le Var, DVF 2025",
   },
   {
+    id: "piste-cyclable",
+    image: "piste-cyclable",
+    seuil: 400_000,
+    nom: "Un kilomètre de piste cyclable",
+    pointe: "Avec le séparateur en béton. Celui qui vous garde en vie.",
+    provenance: "releve",
+    source: "création d’une piste avec séparateur, Club des villes et territoires cyclables, avec l’ADEME et le Cerema, 2020",
+  },
+  {
     id: "maison",
     image: "maison",
     seuil: 205_000,
@@ -144,6 +195,17 @@ export const ECHELLE: Palier[] = [
     pointe: "2 158 € le mètre carré. C’est la France médiane, sans le décor.",
     provenance: "mediane",
     source: "médiane nationale des ventes de maisons, DVF 2025",
+  },
+  {
+    id: "classe",
+    image: "classe",
+    seuil: 190_800,
+    nom: "Une classe de primaire, pendant un an",
+    pointe: "Vingt et un enfants, une maîtresse, une année. C’est peut-être là que tout a commencé.",
+    provenance: "reconstitue",
+    source:
+      "9 130 € par élève et par an (DEPP, L’état de l’École 2025) × 20,9 élèves par classe "
+      + "(DEPP, Note d’Information n° 25.01)",
   },
   {
     id: "t3",
@@ -155,6 +217,15 @@ export const ECHELLE: Palier[] = [
     source: "médiane des ventes de trois-pièces, DVF 2025",
   },
   {
+    id: "logement-social",
+    image: "logement-social",
+    seuil: 169_200,
+    nom: "Un logement social, construit et livré",
+    pointe: "Un. Habité par quelqu’un d’autre, évidemment.",
+    provenance: "mediane",
+    source: "prix de revient moyen d’un logement social en 2023, Banque des Territoires, Éclairages n° 33",
+  },
+  {
     id: "studio",
     image: "studio",
     seuil: 98_000,
@@ -162,6 +233,42 @@ export const ECHELLE: Palier[] = [
     pointe: "Le lit se replie. C’est prévu pour.",
     provenance: "mediane",
     source: "médiane des ventes de studios, DVF 2025",
+  },
+  {
+    id: "senateur",
+    image: "senateur",
+    seuil: 68_113,
+    nom: "Une année d’indemnité de sénateur",
+    pointe: "Une seule. Un mandat en compte six.",
+    provenance: "releve",
+    source: "indemnité parlementaire nette d’un sénateur, 5 676,12 € par mois, Sénat, 2024",
+  },
+  {
+    id: "hec",
+    image: "hec",
+    seuil: 58_900,
+    nom: "Deux ans de grande école de commerce",
+    pointe: "Scolarité seule. Le réseau, lui, ne se facture pas.",
+    provenance: "releve",
+    source: "frais de scolarité du programme Grande École, 29 450 € par an, tarif publié par HEC Paris",
+  },
+  {
+    id: "tesla",
+    image: "tesla",
+    seuil: 36_990,
+    nom: "Une Tesla Model 3",
+    pointe: "Silencieuse. Comme le prélèvement.",
+    provenance: "releve",
+    source: "tarif catalogue de la Model 3 Propulsion relevé par L’argus, le constructeur ne publiant pas de tarif accessible",
+  },
+  {
+    id: "ehpad",
+    image: "ehpad",
+    seuil: 25_968,
+    nom: "Une année en maison de retraite",
+    pointe: "2 164 € par mois, chambre habilitée à l’aide sociale. La vôtre arrive.",
+    provenance: "mediane",
+    source: "tarif hébergement médian d’une place habilitée à l’aide sociale, CNSA, Repères statistiques n° 27, 2024",
   },
   {
     id: "twingo",
