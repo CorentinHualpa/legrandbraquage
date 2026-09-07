@@ -17,6 +17,9 @@ const mono = IBM_Plex_Mono({
   display: "swap",
 });
 
+const DESCRIPTION =
+  "Chaque mois, quelqu'un passe chez toi avant toi. On chiffre ce qu'il emporte, ce qu'il repose, et lequel des deux pèse le plus lourd. Barèmes officiels, moteur de calcul public.";
+
 /**
  * L'image de partage, rendue une fois par `node scripts/og/rendre.mjs`.
  *
@@ -40,8 +43,7 @@ export const metadata: Metadata = {
     default: "Le Grand Braquage",
     template: "%s · Le Grand Braquage",
   },
-  description:
-    "Chaque mois, quelqu'un passe chez toi avant toi. On chiffre ce qu'il emporte, ce qu'il repose, et lequel des deux pèse le plus lourd. Barèmes officiels, moteur de calcul public.",
+  description: DESCRIPTION,
   openGraph: {
     type: "website",
     locale: "fr_FR",
@@ -54,7 +56,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Le Grand Braquage",
-    description: PARTAGE.alt,
+    description: DESCRIPTION,
     images: [PARTAGE.url],
   },
   robots: { index: true, follow: true },
