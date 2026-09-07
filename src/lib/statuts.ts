@@ -232,3 +232,47 @@ export const LIGNES_PERIMETRE: Record<Regime, LignePerimetre[]> = {
     CONSOMMATION,
   ],
 };
+
+/**
+ * Où lire le chiffre qu'on demande, DANS SON PROPRE DOCUMENT.
+ *
+ * ⚠ On demande le net AVANT impôt sur le revenu, et pas ce qui arrive sur le
+ * compte. Trois raisons, dans cet ordre :
+ *
+ * 1. C'est la seule ligne que la personne peut lire sans hésiter. « Net à payer
+ *    avant impôt sur le revenu » est imprimé en gros sur toute fiche de paie
+ *    française depuis 2019.
+ * 2. L'impôt devient alors un prélèvement qu'on AJOUTE et qu'on voit arriver,
+ *    au lieu d'une somme déjà retranchée que le moteur devait retrouver à
+ *    rebours. C'est tout l'objet de la page.
+ * 3. Le salaire médian de l'INSEE, auquel on compare le point de bascule, est
+ *    lui aussi un net avant impôt. Comparer un pivot après impôt à une médiane
+ *    avant impôt était une erreur de dénominateur, exactement celle que ce
+ *    dossier reproche à la partie adverse.
+ */
+export const OU_LIRE_SON_NET: Record<Regime, { label: string; aide: string }> = {
+  salarie: {
+    label: "TON NET MENSUEL, AVANT IMPÔT SUR LE REVENU",
+    aide:
+      "La ligne « net à payer avant impôt sur le revenu » de ta fiche de paie, "
+      + "en gros caractères. Pas le virement reçu : l’impôt, on le compte ici.",
+  },
+  fonctionnaire: {
+    label: "TON NET MENSUEL, AVANT IMPÔT SUR LE REVENU",
+    aide:
+      "La ligne « net à payer avant impôt sur le revenu » de ton bulletin de paie. "
+      + "Pas le virement reçu : l’impôt, on le compte ici.",
+  },
+  tns: {
+    label: "CE QU’IL TE RESTE PAR MOIS, AVANT IMPÔT SUR LE REVENU",
+    aide:
+      "Ton revenu professionnel une fois les cotisations payées, avant l’impôt. "
+      + "Ni ton chiffre d’affaires, ni ce qui reste après les acomptes.",
+  },
+  cipav: {
+    label: "CE QU’IL TE RESTE PAR MOIS, AVANT IMPÔT SUR LE REVENU",
+    aide:
+      "Ton revenu professionnel une fois les cotisations payées, avant l’impôt. "
+      + "Ni ton chiffre d’affaires, ni ce qui reste après les acomptes.",
+  },
+};

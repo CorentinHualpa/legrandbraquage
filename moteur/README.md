@@ -5,7 +5,7 @@ c'est la seule façon de rendre le résultat opposable : n'importe qui peut le
 lire, le rejouer et le contredire.
 
 ```bash
-pnpm test               # 69 tests
+pnpm test               # 71 tests
 ```
 
 Aucune dépendance, aucune étape de build. Modules ES natifs, exécutables tels
@@ -33,12 +33,21 @@ jour, c'est le moteur qui a tort, pas l'URSSAF.
 
 ### 1. Le salaire-pivot est le salaire médian
 
-**2 219 € net par mois**, périmètre complet. Le salaire net médian du privé
-français est de **2 190 €** (INSEE 2024).
+**2 337 € net avant impôt par mois**, périmètre complet. Le salaire net médian
+du privé français est de **2 190 €** (INSEE 2024), lui aussi net avant impôt.
 
-Autrement dit : **la moitié des salariés français reçoivent plus qu'ils ne
-versent, l'autre moitié l'inverse.** Le point de bascule tombe à trente euros
-du médian. Ce n'est pas un cadrage, c'est ce que rendent les barèmes.
+Autrement dit : **plus de la moitié des salariés français reçoivent plus qu'ils
+ne versent.** Le point de bascule tombe 147 € AU-DESSUS du médian, soit 6,7 %.
+Ce n'est pas un cadrage, c'est ce que rendent les barèmes.
+
+⚠ Ce chiffre valait 2 219 € jusqu'au 07/09/2026, et la page le comparait aux
+2 190 € de l'INSEE en concluant « à trente euros du médian ». Les deux ne se
+comparaient PAS : le pivot était alors exprimé en net APRÈS impôt, la médiane
+INSEE est un net AVANT impôt. C'est exactement l'erreur de dénominateur que ce
+dossier reproche à la partie adverse, et notre propre rapport de recherche la
+signalait déjà à propos de son simulateur. L'entrée du site est désormais un net
+avant impôt : les deux chiffres se comparent, et la conclusion se renforce au
+lieu de s'affaiblir.
 
 Personne ne publie ce chiffre. C'est la ligne de la page.
 
@@ -60,21 +69,24 @@ elle, à elle seule, qui fabrique le point de bascule.
 ## Résultats par salaire
 
 Salarié du privé, non-cadre, effectif < 50, célibataire, carrière de 22 à
-64 ans, en euros d'aujourd'hui.
+64 ans, en euros d'aujourd'hui. **Le net est celui d'AVANT impôt sur le revenu**,
+comme la ligne de la fiche de paie et comme la médiane de l'INSEE.
 
 | Net/mois | Salariales | Patronales | IR | Conso | **Total prélevé** | Reçu | Verdict |
 |---|---|---|---|---|---|---|---|
-| 1 450 € | 215 k€ | 159 k€ | 13 k€ | 96 k€ | **483 k€** | 873 k€ | relaxe, +390 k€ |
-| 1 800 € | 273 k€ | 343 k€ | 40 k€ | 110 k€ | **766 k€** | 990 k€ | relaxe, +224 k€ |
-| 2 190 € (médian) | 343 k€ | 550 k€ | 89 k€ | 120 k€ | **1 103 k€** | 1 120 k€ | relaxe, +17 k€ |
-| 2 500 € | 402 k€ | 711 k€ | 143 k€ | 124 k€ | **1 379 k€** | 1 223 k€ | braquage, 156 k€ |
-| 3 000 € | 498 k€ | 966 k€ | 241 k€ | 123 k€ | **1 827 k€** | 1 389 k€ | braquage, 437 k€ |
-| 4 000 € | 688 k€ | 1 424 k€ | 449 k€ | 121 k€ | **2 682 k€** | 1 723 k€ | braquage, 959 k€ |
-| 6 000 € | 1 091 k€ | 2 319 k€ | 974 k€ | 159 k€ | **4 544 k€** | 2 389 k€ | braquage, 2 155 k€ |
+| 1 450 € | 212 k€ | 147 k€ | 11 k€ | 95 k€ | **464 k€** | 858 k€ | relaxe, +393 k€ |
+| 1 800 € | 263 k€ | 310 k€ | 34 k€ | 108 k€ | **714 k€** | 957 k€ | relaxe, +243 k€ |
+| 2 190 € (médian) | 319 k€ | 484 k€ | 68 k€ | 118 k€ | **990 k€** | 1 057 k€ | relaxe, +68 k€ |
+| **2 337 € (pivot)** | 341 k€ | 547 k€ | 85 k€ | 120 k€ | **1 093 k€** | 1 093 k€ | la bascule |
+| 2 500 € | 365 k€ | 615 k€ | 105 k€ | 123 k€ | **1 208 k€** | 1 132 k€ | braquage, 77 k€ |
+| 3 000 € | 437 k€ | 807 k€ | 175 k€ | 126 k€ | **1 545 k€** | 1 252 k€ | braquage, 293 k€ |
+| 4 000 € | 576 k€ | 1 167 k€ | 324 k€ | 119 k€ | **2 186 k€** | 1 492 k€ | braquage, 694 k€ |
+| 6 000 € | 851 k€ | 1 793 k€ | 637 k€ | 132 k€ | **3 413 k€** | 1 958 k€ | braquage, 1 455 k€ |
 
-⚠ Ces montants remplacent les valeurs d'illustration des maquettes. Le cas type
-à 2 500 € passe de 1 057 k€ à **1 379 k€** prélevés et de 1 004 k€ à
-**1 223 k€** reçus, pour un écart de **156 k€** au lieu de 53 k€.
+⚠ Cette table a été recalculée le 07/09/2026, quand l'entrée est passée du net
+APRÈS impôt au net AVANT impôt. Les montants baissent tous, et ce n'est pas le
+modèle qui a changé : à chiffre saisi égal, on décrit désormais quelqu'un de
+moins riche, puisque son impôt n'est plus déjà payé.
 
 ---
 
@@ -115,7 +127,7 @@ vingt-cinq **meilleures** années. Celle d'un libéral est un régime par points
 **toute** la carrière, plafonné à 582 points par an. Une mauvaise année pèse chez
 l'un et disparaît chez l'autre.
 
-Le salaire-pivot suit : **3 330 € net** pour un libéral CIPAV, contre 3 504 €
+Le salaire-pivot suit : **3 910 € net** pour un libéral CIPAV, contre 4 109 €
 pour un artisan. Il bascule PLUS TÔT que l'artisan, alors qu'il paie moins à bas
 revenu : sa complémentaire deux fois plus chère le rattrape avant.
 
@@ -171,7 +183,7 @@ revenu : sa complémentaire deux fois plus chère le rattrape avant.
 | `tns.js` | Assiette unique, cotisations, pension par les règles |
 | `baremes-cipav.js` | Le barème du libéral réglementé, et ses deux sources qui divergent |
 | `cipav.js` | Cotisations CIPAV, et une pension par POINTS dans les deux étages |
-| `test.mjs` | 69 tests, dont deux étalons |
+| `test.mjs` | 71 tests, dont deux étalons |
 
 Toute modification d'un barème doit citer un texte officiel. C'est cette règle,
 et pas le ton de la page, qui rend le simulateur inattaquable.
@@ -205,7 +217,7 @@ voisinage d'un plafond de sécurité sociale d'assiette, puis redescend.
 
 **Il n'y a aucune part employeur**, et cette absence n'est pas un trou : un
 indépendant voit cent pour cent de ce qu'il verse. C'est ce qui place son
-salaire pivot à **3 504 €**, au-dessus des 2 219 € du salarié.
+salaire pivot à **4 109 €**, au-dessus des 2 337 € du salarié.
 
 ⚠ Ce chiffre valait 5 669 € jusqu'au 07/09/2026, et il était faux. La projection
 de carrière reconstituait le net imposable en additionnant `csgNonDeductible` et

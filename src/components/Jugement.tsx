@@ -164,11 +164,13 @@ export function Jugement({
               patronales tombent à{" "}
               <span className="font-semibold">3,09 % du brut</span>, contre
               43,05 % à dix mille euros. Le salaire net médian du privé est de{" "}
-              <span className="font-semibold">2 190 €</span> (INSEE 2024), et le
-              point de bascule tombe à trente euros de là :{" "}
+              <span className="font-semibold">2 190 €</span> (INSEE 2024, net
+              avant impôt, comme le chiffre que tu as saisi), et le point de
+              bascule tombe{" "}
+              <span className="font-semibold">au-dessus</span> :{" "}
               <span className="font-semibold">
-                la moitié des salariés français reçoivent plus qu’ils ne versent,
-                l’autre moitié l’inverse.
+                plus de la moitié des salariés français reçoivent plus qu’ils ne
+                versent.
               </span>{" "}
               Personne ne publie ce chiffre.
             </p>

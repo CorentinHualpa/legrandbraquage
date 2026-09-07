@@ -803,3 +803,45 @@ test('cocher l’impôt AJOUTE vraiment quelque chose, dans tous les régimes', 
     assert.ok(b - a > 100_000, `${statut} : cocher l’impôt n’ajoute que ${Math.round(b - a)} €`);
   }
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+test('l’entrée est le net AVANT impôt, et l’impôt s’ajoute par-dessus', () => {
+  // ⚠ Le changement de convention le plus lourd du moteur, et il n'est pas
+  // cosmétique. On inversait depuis le net APRÈS impôt : l'impôt était une
+  // somme déjà retranchée, que le moteur retrouvait à rebours. Il devient un
+  // prélèvement qu'on ajoute et qu'on voit arriver.
+  //
+  // Conséquence vérifiable : à l'âge où le salaire est constaté, le net AVANT
+  // impôt de la carrière doit valoir EXACTEMENT ce qui a été saisi.
+  for (const [statut, extra] of [
+    ['salarie', {}], ['independant', {}], ['independant', { activite: 'cipav' }], ['fonctionnaire', {}],
+  ]) {
+    const s = M.simuler({ netMensuel: 2500, ageActuel: 36, statut, ...extra });
+    const annee = s.carriere.annees.find((a) => a.age === 36);
+    assert.ok(
+      Math.abs(annee.netAvantImpot - 2500) < 0.5,
+      `${statut} : net avant impôt à ${annee.netAvantImpot.toFixed(2)} au lieu de 2500`,
+    );
+    // Et ce qui arrive sur le compte est STRICTEMENT plus bas, de l'impôt.
+    assert.ok(annee.netApresImpot < annee.netAvantImpot, `${statut} : l’impôt n’emporte rien`);
+    assert.ok(
+      Math.abs((annee.netAvantImpot - annee.netApresImpot) * 12 - annee.impotRevenu) < 1,
+      `${statut} : l’écart annuel ne vaut pas l’impôt de l’année`,
+    );
+    assert.ok(
+      Math.abs(s.netApresImpotActuel - annee.netApresImpot) < 0.01,
+      `${statut} : netApresImpotActuel ne pointe pas sur l’année courante`,
+    );
+  }
+});
+
+test('le point de bascule et la médiane INSEE se comparent enfin', () => {
+  // Le pivot était exprimé en net APRÈS impôt et la page le comparait aux
+  // 2 190 € de l'INSEE, qui sont un net AVANT impôt. C'était une erreur de
+  // dénominateur, celle-là même que ce dossier reproche à la partie adverse.
+  // Les deux sont désormais sur la même base, et le pivot passe AU-DESSUS du
+  // médian : plus de la moitié des salariés reçoivent plus qu'ils ne versent.
+  const pivot = salairePivot();
+  assert.ok(pivot > 2190, `pivot ${pivot} €, attendu au-dessus du médian INSEE`);
+  assert.ok(pivot < 2600, `pivot ${pivot} €, anormalement haut`);
+});

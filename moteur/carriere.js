@@ -129,13 +129,24 @@ export function deroulerCarriere(netMensuelActuel, opts = {}) {
     // des salaires) se composent, en euros constants d'aujourd'hui.
     const facteurAge = indiceAge(age) / indiceReference;
     const facteurGeneration = Math.pow(1 + croissance, age - ageActuel);
-    const netApresImpot = netMensuelActuel * facteurAge * facteurGeneration;
+    /*
+     * ⚠ L'ENTRÉE EST LE NET AVANT IMPÔT SUR LE REVENU, et ce n'est pas un
+     * détail de vocabulaire.
+     *
+     * On inversait depuis le net APRÈS impôt : l'impôt était alors une donnée
+     * déjà retranchée, que le moteur devait retrouver à rebours pour l'afficher.
+     * Il devient ce qu'il est, un prélèvement qu'on AJOUTE et qu'on voit
+     * arriver. C'est tout l'objet de la page, et c'est aussi la seule ligne que
+     * l'utilisateur peut lire sans hésiter : « net à payer avant impôt sur le
+     * revenu » est imprimé sur toute fiche de paie française depuis 2019, et
+     * pour un non-salarié c'est simplement ce qui reste après cotisations.
+     *
+     * Le net après impôt n'a pas disparu, il est DÉDUIT plus bas : c'est lui
+     * qui sert de niveau de vie pour la TVA et pour la pension.
+     */
+    const netAvantImpotVise = netMensuelActuel * facteurAge * facteurGeneration;
 
-    const brut = R.brutDepuisNet(netApresImpot, {
-      ...opts,
-      cible: 'apresImpot',
-      calculerImpot: (netImposableAnnuel) => impotSurLeRevenu(netImposableAnnuel, opts),
-    });
+    const brut = R.brutDepuisNet(netAvantImpotVise, { ...opts, cible: 'avantImpot' });
 
     const sal = R.salariales(brut, opts);
     const pat = R.patronales(brut, opts);
@@ -154,11 +165,15 @@ export function deroulerCarriere(netMensuelActuel, opts = {}) {
      */
     const { netImposable } = R.netsDepuisBrut(brut, opts);
     const ir = impotSurLeRevenu(netImposable * 12, opts);
+    // Ce dont on VIT : c'est lui, et pas le net avant impôt, qui donne le
+    // niveau de vie servant à la TVA et à la pension.
+    const netApresImpot = netAvantImpot - ir / 12;
     const tva = taxesConsommationAnnuelles(netApresImpot, opts);
 
     annees.push({
       age,
       brut,
+      netAvantImpot,
       netApresImpot,
       salariales: sal.total * 12,
       patronales: pat.total * 12,

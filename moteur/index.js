@@ -158,6 +158,18 @@ export function simuler(entree) {
 
   const dernier = carriere.annees[carriere.annees.length - 1];
 
+  /*
+   * L'année qu'on vit AUJOURD'HUI, et ce qu'il en reste après impôt.
+   *
+   * L'écran demande désormais le net AVANT impôt : personne ne doit avoir à
+   * refaire la soustraction de tête pour savoir ce qui arrive vraiment sur son
+   * compte, et c'est aussi ce niveau de vie qui sert à convertir un total en
+   * années de vie sans travailler. On le calcule ici, une fois, plutôt que dans
+   * chaque écran qui en a besoin.
+   */
+  const anneeCourante =
+    carriere.annees.find((a) => a.age === ageActuel) ?? carriere.annees[0];
+
   // ⚠ Les DEUX régimes passent par un taux de remplacement NET du COR, sur la
   // même génération. C'est une contrainte de comparabilité, pas un choix de
   // confort : la formule de la pension publique est publique et calculable, et
@@ -231,7 +243,13 @@ export function simuler(entree) {
   const ecart = preleve - totalRecu;
 
   return {
-    entree: { netMensuel, statut, regime, versant, activite, ageActuel, cadre, effectif, parts, perimetre },
+    entree: {
+      /** ⚠ Net AVANT impôt sur le revenu. L'impôt s'ajoute, il n'est pas déjà retranché. */
+      netMensuel,
+      statut, regime, versant, activite, ageActuel, cadre, effectif, parts, perimetre,
+    },
+    /** Ce qui arrive réellement sur le compte cette année, impôt déduit. */
+    netApresImpotActuel: anneeCourante.netApresImpot,
     carriere,
     plateauGauche: {
       total: preleve,

@@ -75,6 +75,7 @@ export type Simulation = {
     annees: Array<{
       age: number;
       brut: number;
+      netAvantImpot: number;
       netApresImpot: number;
       salariales: number;
       patronales: number;
@@ -172,6 +173,8 @@ export type Simulation = {
         }
       | null;
   };
+  /** Ce qui arrive réellement sur le compte cette année, impôt déduit. */
+  netApresImpotActuel: number;
   verdict: {
     braquage: boolean;
     ecart: number;

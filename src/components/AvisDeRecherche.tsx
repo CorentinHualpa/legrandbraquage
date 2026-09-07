@@ -24,7 +24,16 @@ export function AvisDeRecherche({
   const [copie, setCopie] = useState(false);
   const { plateauGauche, plateauDroit, verdict } = simulation;
 
-  const annees = anneesSansTravailler(plateauGauche.total, netMensuel);
+  /*
+   * ⚠ On vit de ce qui RESTE, pas du net avant impôt qu'on a saisi. Convertir
+   * un total en années de vie sans travailler sur le chiffre saisi les
+   * raccourcirait toutes, puisque ce chiffre est plus haut que le vrai niveau
+   * de vie.
+   */
+  const annees = anneesSansTravailler(
+    plateauGauche.total,
+    simulation.netApresImpotActuel,
+  );
   const objet =
     plateauGauche.total >= SEUIL_ANNEES
       ? `${annees.toFixed(1).replace(".", ",")} années de vie sans travailler`

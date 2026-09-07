@@ -7,6 +7,7 @@ import type { Statut } from "@/lib/moteur";
 import {
   ACTIVITES,
   FORMES_TPE,
+  OU_LIRE_SON_NET,
   NOMS_REGIME,
   STATUTS,
   VERSANTS,
@@ -49,6 +50,14 @@ export function Plainte({
   ouverte: boolean;
   ouvrir: () => void;
 }) {
+  /*
+   * Le libellé du champ suit le régime : un freelance n'a pas de fiche de paie,
+   * donc lui parler de sa « ligne net à payer » ne l'aide pas. Tant qu'aucun
+   * régime n'est résolu (un patron de TPE qui n'a pas dit sa forme juridique),
+   * on sert celui du salarié, qui est le cas le plus fréquent.
+   */
+  const ouLire = OU_LIRE_SON_NET[regime ?? "salarie"];
+
   return (
     <Feuille id="plainte">
       <EnTete
@@ -92,7 +101,7 @@ export function Plainte({
             htmlFor="net"
             className="font-mono text-[10px] tracking-[0.13em] text-encre-3"
           >
-            CE QUI ARRIVE SUR TON COMPTE, CHAQUE MOIS
+            {ouLire.label}
           </label>
           <div className="flex items-baseline gap-2 border-b-2 border-encre pb-1.5">
             <input
@@ -109,10 +118,13 @@ export function Plainte({
             />
             <span className="shrink-0 text-[22px] text-encre-3">€</span>
             <span className="shrink-0 font-mono text-[10px] whitespace-nowrap text-encre-3">
-              NET, APRÈS IMPÔT
+              NET, AVANT IMPÔT
             </span>
           </div>
-          <p id="net-aide" className="text-[13px] text-encre-3 italic">
+          <p id="net-aide" className="text-[13px] leading-snug text-encre-2">
+            {ouLire.aide}
+          </p>
+          <p className="text-[13px] text-encre-3 italic">
             À l’euro près, ou à la louche. Le braqueur n’est pas regardant.
           </p>
         </div>

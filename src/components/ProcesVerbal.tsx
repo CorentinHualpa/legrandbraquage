@@ -39,7 +39,16 @@ export function ProcesVerbal({
   const liberation = heureDeLiberation(simulation);
   const objet = objetPour(plateauGauche.total);
   const comptage = comptageAbsurde(plateauGauche.total);
-  const annees = anneesSansTravailler(plateauGauche.total, netMensuel);
+  /*
+   * ⚠ On vit de ce qui RESTE, pas du net avant impôt qu'on a saisi. Convertir
+   * un total en années de vie sans travailler sur le chiffre saisi les
+   * raccourcirait toutes, puisque ce chiffre est plus haut que le vrai niveau
+   * de vie.
+   */
+  const annees = anneesSansTravailler(
+    plateauGauche.total,
+    simulation.netApresImpotActuel,
+  );
   const enAnnees = plateauGauche.total >= SEUIL_ANNEES;
   const nomStatut = STATUTS.find((s) => s.id === statut)?.libelle ?? "salarié";
   /*
@@ -70,9 +79,31 @@ export function ProcesVerbal({
       <p className="flex gap-2 font-mono text-[11px] text-encre-3">
         <span className="shrink-0">PARTIE CIVILE :</span>
         <span className="grow border-b border-encre text-encre">
-          {nomStatut.toLowerCase()}, {euros(netMensuel)} € net
+          {nomStatut.toLowerCase()}, {euros(netMensuel)} € net avant impôt
         </span>
       </p>
+
+      {/*
+        Ce que l'impôt emporte, tout de suite et en direct.
+        C'est la raison d'être de la question posée avant impôt : on ne demande
+        pas ce qui arrive sur le compte, on le CALCULE, et l'écart se voit au
+        lieu d'être déjà retranché dans le chiffre saisi.
+      */}
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-l-[3px] border-rouge bg-papier-3 px-3 py-2.5">
+        <span className="font-mono text-[9.5px] tracking-[0.12em] text-rouge-texte">
+          CE QUI ARRIVE VRAIMENT SUR TON COMPTE
+        </span>
+        <span className="chiffres font-mono text-[19px] font-semibold">
+          {euros(simulation.netApresImpotActuel)} €
+        </span>
+        <span className="text-[13px] text-encre-2">
+          l’impôt sur le revenu en emporte{" "}
+          <span className="font-semibold text-rouge-texte">
+            {euros(netMensuel - simulation.netApresImpotActuel)} € par mois
+          </span>
+          , tous les mois, avant même que tu les voies.
+        </span>
+      </div>
 
       {/* ─── Le curseur qui transforme tout en direct ─────────────────────── */}
       <div className="flex flex-col gap-1.5">
@@ -80,7 +111,7 @@ export function ProcesVerbal({
           htmlFor="curseur-salaire"
           className="font-mono text-[10px] tracking-[0.13em] text-encre-3"
         >
-          FAIS GLISSER, LE BUTIN SUIT
+          FAIS GLISSER TON NET AVANT IMPÔT, LE BUTIN SUIT
         </label>
         <input
           id="curseur-salaire"
