@@ -24,6 +24,7 @@ import * as tns from './tns.js';
 import * as cipav from './cipav.js';
 import * as micro from './micro.js';
 import { TAUX_REMPLACEMENT, VERSANTS } from './baremes-fonction-publique.js';
+import { lignesChoisies } from './paliers.js';
 
 /**
  * Le régime social derrière une qualité de victime.
@@ -72,6 +73,10 @@ export {
 } from './capitalisation.js';
 export { deroulerCarriere, totalPreleve } from './carriere.js';
 export { heureDeLiberation } from './liberation.js';
+export {
+  PALIERS, PALIERS_DEFAUT, PRIX_ECOLE, PRIX_SANTE, PRIX_CHOMAGE,
+  montantEcole, montantSante, montantChomage, santeSurUneVie, santeParAn,
+} from './paliers.js';
 export * from './salaire.js';
 export * from './impot.js';
 
@@ -102,7 +107,7 @@ function espacer(n) {
  * Conséquence assumée : le pivot d'un salarié tombe de 2 337 à 1 458 €, et un
  * fonctionnaire territorial est braqué dès 900 €.
  */
-function contreparties(pensionMensuelle, regime = 'salarie') {
+function contreparties(pensionMensuelle, regime = 'salarie', paliers = null) {
   const retraite = capitalPourRente(pensionMensuelle);
   const nonChiffre = (libelle, pourquoi) => ({
     montant: null,
@@ -136,6 +141,12 @@ function contreparties(pensionMensuelle, regime = 'salarie') {
       '91 % des carrières connaissent un épisode indemnisé, aucune n’est la tienne',
     );
   }
+  /*
+   * Quand la personne a répondu aux trois questions du second plateau, ses
+   * paliers REMPLACENT les lignes sans montant. Le prix unitaire est sourcé,
+   * le palier est le sien : c'est la seule façon de chiffrer sans inventer.
+   */
+  if (paliers) Object.assign(sortie, lignesChoisies(paliers, regime));
   return sortie;
 }
 
@@ -150,6 +161,9 @@ function contreparties(pensionMensuelle, regime = 'salarie') {
  * @param {number} [entree.effectif]
  * @param {number} [entree.parts]
  * @param {object} [entree.perimetre] quels prélèvements l'utilisateur a cochés
+ * @param {{ecole: string, sante: string, chomage: string}} [entree.paliers]
+ *   ce que la personne dit avoir reçu ; absent, école, santé et chômage restent
+ *   nommés sans montant
  */
 export function simuler(entree) {
   const {
@@ -166,6 +180,7 @@ export function simuler(entree) {
     parts = 1,
     couple = false,
     perimetre = { salariales: true, patronales: true, impotRevenu: false, consommation: false },
+    paliers = null,
   } = entree;
 
   if (!(netMensuel > 0)) throw new Error('netMensuel doit être positif');
@@ -274,7 +289,7 @@ export function simuler(entree) {
     }
     : null;
 
-  const recu = contreparties(pensionMensuelle, regime);
+  const recu = contreparties(pensionMensuelle, regime, paliers);
   // Une ligne non chiffrée ne pèse rien : c'est tout le sens du tiret.
   const totalRecu = Object.values(recu).reduce((t, c) => t + (c.montant ?? 0), 0);
 
@@ -285,7 +300,7 @@ export function simuler(entree) {
       /** ⚠ Net AVANT impôt sur le revenu. L'impôt s'ajoute, il n'est pas déjà retranché. */
       netMensuel,
       statut, regime, versant, activite, categorieMicro, versementLiberatoire,
-      ageActuel, cadre, effectif, parts, couple, perimetre,
+      ageActuel, cadre, effectif, parts, couple, perimetre, paliers,
     },
     /** Ce qui arrive réellement sur le compte cette année, impôt déduit. */
     netApresImpotActuel: anneeCourante.netApresImpot,

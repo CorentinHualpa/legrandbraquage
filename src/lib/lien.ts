@@ -14,7 +14,14 @@
  * paramètre, et la panne est silencieuse.
  */
 
-import { PERIMETRE_DEFAUT, type Perimetre, type Statut } from "./moteur";
+import {
+  PALIERS,
+  PALIERS_DEFAUT,
+  PERIMETRE_DEFAUT,
+  type Paliers,
+  type Perimetre,
+  type Statut,
+} from "./moteur";
 import type { Activite, CategorieMicro, FormeTpe, Versant } from "./statuts";
 
 export type Cas = {
@@ -28,6 +35,8 @@ export type Cas = {
   couple: boolean;
   enfants: number;
   perimetre: Perimetre;
+  /** Les trois paliers du second plateau : ils changent le verdict. */
+  paliers: Paliers;
 };
 
 const STATUTS_VALIDES: Statut[] = ["salarie", "independant", "fonctionnaire", "tpe"];
@@ -79,6 +88,11 @@ export function requeteDuCas(cas: Cas): string {
   // Le foyer divise l'impôt : un lien qui l'oublie rouvre un autre dossier.
   if (cas.couple) q.set("cp", "1");
   if (cas.enfants > 0) q.set("e", String(cas.enfants));
+  // Les paliers font basculer le verdict : un lien qui les oublie rouvre un
+  // coupable en relaxé. Ceux qui valent le défaut ne s'écrivent pas.
+  if (cas.paliers.ecole !== PALIERS_DEFAUT.ecole) q.set("pe", cas.paliers.ecole);
+  if (cas.paliers.sante !== PALIERS_DEFAUT.sante) q.set("ps", cas.paliers.sante);
+  if (cas.paliers.chomage !== PALIERS_DEFAUT.chomage) q.set("pc", cas.paliers.chomage);
   return `?${q.toString()}`;
 }
 
@@ -131,5 +145,16 @@ export function casDepuisRequete(recherche: string): Cas | null {
     couple: q.get("cp") === "1",
     enfants: Math.min(6, Math.max(0, Number(q.get("e")) || 0)),
     perimetre: litPerimetre(q.get("p")) ?? PERIMETRE_DEFAUT,
+    paliers: {
+      ecole: litPalier("ecole", q.get("pe")) as Paliers["ecole"],
+      sante: litPalier("sante", q.get("ps")) as Paliers["sante"],
+      chomage: litPalier("chomage", q.get("pc")) as Paliers["chomage"],
+    },
   };
+}
+
+/** Un palier inconnu retombe sur le défaut du poste, jamais sur une erreur. */
+function litPalier(poste: keyof Paliers, valeur: string | null): string {
+  if (valeur && PALIERS[poste].choix.some((c) => c.id === valeur)) return valeur;
+  return PALIERS_DEFAUT[poste];
 }

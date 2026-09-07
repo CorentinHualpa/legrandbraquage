@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { EnTete, Feuille, PiecesVersees, Renvoi, Scelle, Tampon } from "./papier";
-import type { Pieces } from "./Instruction";
+import type { Pieces } from "@/lib/images";
 import { euros, eurosSigne, pourcent } from "@/lib/format";
 import {
   ALIBI_INDICE_NU,

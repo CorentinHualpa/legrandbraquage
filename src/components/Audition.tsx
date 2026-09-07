@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { EnTete, Feuille, Renvoi, Scelle, Tampon } from "./papier";
-import type { Pieces } from "./Instruction";
+import type { Pieces } from "@/lib/images";
 import type { Simulation } from "@/lib/moteur";
 
 const HOTE = "https://dalevoz.revolutionagency.ai";

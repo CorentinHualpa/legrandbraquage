@@ -21,7 +21,47 @@ import {
   CRANS_FRAIS as CRANS_FRAIS_JS,
   placerSaRetraiteAuTaux as placerSaRetraiteAuTauxJs,
   PLACEMENT_DEFAUT as PLACEMENT_DEFAUT_JS,
+  PALIERS as PALIERS_JS,
+  PALIERS_DEFAUT as PALIERS_DEFAUT_JS,
+  PRIX_ECOLE as PRIX_ECOLE_JS,
+  PRIX_SANTE as PRIX_SANTE_JS,
+  PRIX_CHOMAGE as PRIX_CHOMAGE_JS,
+  montantEcole as montantEcoleJs,
+  montantSante as montantSanteJs,
+  montantChomage as montantChomageJs,
+  santeSurUneVie as santeSurUneVieJs,
 } from "@moteur/index.js";
+
+/**
+ * Le second plateau, chiffré par la personne en paliers. Les identifiants
+ * sont ceux de `moteur/paliers.js`, et un identifiant inconnu fait LEVER le
+ * moteur au lieu de compter zéro.
+ */
+export type PalierEcole = "rien" | "bac" | "etudes";
+export type PalierSante = "fer" | "normal" | "fragile";
+export type PalierChomage = "jamais" | "trou" | "deuxAns";
+export type Paliers = {
+  ecole: PalierEcole;
+  sante: PalierSante;
+  chomage: PalierChomage;
+};
+export type PosteDuPlateau = keyof Paliers;
+
+export type ChoixPalier = {
+  id: string;
+  /** À la voix de la personne. */
+  libelle: string;
+  /** Le petit repère à droite : « BAC », « ×2,5 », « 6 MOIS ». */
+  repere: string;
+  /** Ce qui est compté, en mots. */
+  regle: string;
+};
+
+export type DefinitionPalier = {
+  question: string;
+  defaut: string;
+  choix: ChoixPalier[];
+};
 
 export type Statut = "salarie" | "independant" | "fonctionnaire" | "tpe";
 
@@ -57,6 +97,8 @@ export type Entree = {
   /** Imposition commune : la décote est celle d'un couple. */
   couple?: boolean;
   perimetre?: Perimetre;
+  /** Absent, école, santé et chômage restent nommés sans montant. */
+  paliers?: Paliers;
 };
 
 export type LigneContrepartie = {
@@ -66,6 +108,9 @@ export type LigneContrepartie = {
   /** true = chiffré au centime, false = ordre de grandeur assumé. */
   calcule: boolean;
   note: string;
+  /** Le palier qui a produit le montant, quand il vient de la personne. */
+  palier?: string;
+  source?: string;
 };
 
 export type Simulation = {
@@ -79,6 +124,7 @@ export type Simulation = {
     effectif: number;
     parts: number;
     perimetre: Perimetre;
+    paliers: Paliers | null;
   };
   carriere: {
     /** Une ligne par année de carrière, en euros d'aujourd'hui. */
@@ -247,6 +293,37 @@ export function salairePivot(opts: Partial<Entree> = {}): number | null {
 }
 
 export const PALIERS_ALIBI = PALIERS_ALIBI_JS as PalierAlibi[];
+
+export const PALIERS = PALIERS_JS as Record<PosteDuPlateau, DefinitionPalier>;
+export const PALIERS_DEFAUT = PALIERS_DEFAUT_JS as Paliers;
+export const PRIX_ECOLE = PRIX_ECOLE_JS as {
+  maternelle: number; elementaire: number; college: number; lyceeGeneral: number;
+  universite: number; source: string; url: string;
+};
+export const PRIX_SANTE = PRIX_SANTE_JS as {
+  tranches: Array<[number, number, number]>; dernierAge: number; source: string; url: string;
+};
+export const PRIX_CHOMAGE = PRIX_CHOMAGE_JS as {
+  allocationNetteMensuelle: number; source: string; url: string;
+};
+export function montantEcole(id: PalierEcole): number {
+  return montantEcoleJs(id) as number;
+}
+export function montantSante(id: PalierSante): number {
+  return montantSanteJs(id) as number;
+}
+export function montantChomage(id: PalierChomage): number {
+  return montantChomageJs(id) as number;
+}
+export function santeSurUneVie(): number {
+  return santeSurUneVieJs() as number;
+}
+/** Le montant d'un palier, quel que soit le poste. */
+export function montantDuPalier(poste: PosteDuPlateau, id: string): number {
+  if (poste === "ecole") return montantEcole(id as PalierEcole);
+  if (poste === "sante") return montantSante(id as PalierSante);
+  return montantChomage(id as PalierChomage);
+}
 export const ALIBI_INDICE_NU = ALIBI_INDICE_NU_JS as number;
 
 export function capitalApresRetraits(n: number): number {

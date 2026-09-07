@@ -230,6 +230,7 @@ officielle, et le moteur présente son résultat comme calculé.
 | `baremes-fonction-publique.js` | Les barèmes publics, et l'avertissement du COR |
 | `fonction-publique.js` | Retenues, cotisations, pension d'un titulaire |
 | `liberation.js` | L'heure de libération, avec ses DEUX dénominateurs |
+| `paliers.js` | Le second plateau par paliers : école, santé, chômage, aux prix unitaires sourcés (DEPP, DREES, Unédic), palier choisi par la personne |
 | `index.js` | `simuler()`, `salairePivot()`, `placerSaRetraite()` |
 | `baremes-tns.js` | Les barèmes de l'indépendant, et pourquoi l'étalon change |
 | `tns.js` | Assiette unique, cotisations, pension par les règles |

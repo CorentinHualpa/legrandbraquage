@@ -1,19 +1,15 @@
-import { Instruction } from "@/components/Instruction";
+import { Parcours } from "@/components/Parcours";
 import { piecesDeposees } from "@/lib/images";
 
 /**
- * Le dossier d'instruction. Tout se joue sur cette page : dépôt de plainte,
- * procès-verbal, expertise contradictoire, jugement.
+ * Le parcours, en onze cartes. Une seule chose est calculée ICI, côté
+ * serveur : l'inventaire des pièces photographiques versées au dossier. Tout
+ * le reste tourne dans le navigateur de la personne, et rien n'en sort.
  *
- * Une seule chose est calculée ICI, côté serveur : l'inventaire des pièces
- * photographiques versées au dossier. Tout le reste tourne dans le navigateur
- * de la personne, et rien n'en sort.
- *
- * ⚠ Le salaire pivot, lui, ne peut PAS être calculé une fois pour toutes : il
- * dépend du régime, du versant et du périmètre coché, et il n'existe pas du
- * tout pour un fonctionnaire d'État. Le figer côté serveur reviendrait à servir
- * le seuil du salarié du privé à tout le monde.
+ * ⚠ Le seuil de bascule ne peut PAS être calculé une fois pour toutes : il
+ * dépend du régime, du périmètre coché ET des paliers choisis, et il n'existe
+ * pas du tout pour un fonctionnaire d'État.
  */
 export default function Page() {
-  return <Instruction pieces={piecesDeposees()} />;
+  return <Parcours pieces={piecesDeposees()} />;
 }

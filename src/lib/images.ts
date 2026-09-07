@@ -26,9 +26,17 @@ export const PIECES = {
   11: { fichier: "11-pretoire", nom: "Le prétoire, vide" },
   12: { fichier: "12-dossier-texture", nom: "Le dossier" },
   13: { fichier: "13-braqueur", nom: "Le portrait du suspect" },
+  // Planche 2, le parcours en cartes (08/09/2026).
+  14: { fichier: "14-mot-du-braqueur", nom: "Le mot du braqueur" },
+  15: { fichier: "15-bulletin-scelle", nom: "Le bulletin sous scellé" },
+  16: { fichier: "16-bracelet-hopital", nom: "Le bracelet d’hôpital" },
+  17: { fichier: "17-bureau-vide", nom: "Le bureau vidé" },
 } as const;
 
 export type NumeroPiece = keyof typeof PIECES;
+
+/** Pour chaque pièce, le fichier réellement présent, ou null. Ce que les écrans reçoivent. */
+export type Pieces = Record<NumeroPiece, string | null>;
 
 const EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp", ".avif"];
 

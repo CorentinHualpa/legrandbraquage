@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { EnTete, Feuille, PiecesVersees, Renvoi, Scelle, Tampon } from "@/components/papier";
 import { piecesDeposees } from "@/lib/images";
@@ -378,9 +379,9 @@ export default function Methode() {
         </Renvoi>
 
         <p className="text-[14px]">
-          <a href="/" className="font-semibold text-rouge-texte underline">
+          <Link href="/" className="font-semibold text-rouge-texte underline">
             ← Retour au dossier
-          </a>
+          </Link>
         </p>
 
         <PiecesVersees />

@@ -1014,3 +1014,84 @@ test('micro : ce qu’on saisit est le CHIFFRE D’AFFAIRES, et l’URSSAF part 
   assert.ok(Math.abs(s.cotisationsActuelles - 2803 * 0.258) < 0.05, `cotisations ${s.cotisationsActuelles}`);
   assert.ok(Math.abs(s.netAvantImpotActuel - 2803 * 0.742) < 0.05);
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Le second plateau par paliers : prix unitaires sourcés, palier choisi par la
+// personne. Sans paliers, les trois lignes restent nommées sans montant.
+test('paliers : école, du bac à la licence, aux prix DEPP 2024', () => {
+  assert.equal(M.montantEcole('rien'), 0);
+  assert.equal(M.montantEcole('bac'), 3 * 8990 + 5 * 9130 + 4 * 10450 + 3 * 13020);
+  assert.equal(M.montantEcole('bac'), 153_480);
+  assert.equal(M.montantEcole('etudes'), 153_480 + 3 * 12460);
+  assert.equal(M.montantEcole('etudes'), 190_860);
+});
+
+test('paliers : santé, cumul DREES par âge de 0 à 84 ans inclus', () => {
+  assert.equal(M.santeParAn(0), 925);
+  assert.equal(M.santeParAn(10), 925);
+  assert.equal(M.santeParAn(11), 887);
+  assert.equal(M.santeParAn(35), 1477);
+  assert.equal(M.santeParAn(84), 7858);
+  assert.equal(M.santeSurUneVie(), 213_377);
+  assert.equal(M.montantSante('normal'), 213_377);
+  assert.equal(M.montantSante('fer'), Math.round(213_377 * 0.25));
+  assert.equal(M.montantSante('fragile'), Math.round(213_377 * 2.5));
+});
+
+test('paliers : chômage, allocation nette moyenne Unédic fois les mois', () => {
+  assert.equal(M.montantChomage('jamais'), 0);
+  assert.equal(M.montantChomage('trou'), 6 * 1040);
+  assert.equal(M.montantChomage('deuxAns'), 24 * 1040);
+});
+
+test('paliers : un palier inconnu lève, il ne retombe pas sur zéro', () => {
+  assert.throws(() => M.montantEcole('master'), /Palier inconnu/);
+});
+
+test('sans paliers, école, santé et chômage restent nommés sans montant', () => {
+  const s = simuler({ netMensuel: 2190 });
+  assert.equal(s.plateauDroit.lignes.education.montant, null);
+  assert.equal(s.plateauDroit.lignes.sante.montant, null);
+  assert.equal(s.plateauDroit.lignes.chomage.montant, null);
+  assert.equal(s.plateauDroit.total, s.plateauDroit.lignes.retraite.montant);
+});
+
+test('avec paliers, le second plateau les compte et le verdict bouge', () => {
+  const sans = simuler({ netMensuel: 2190 });
+  const avec = simuler({
+    netMensuel: 2190,
+    paliers: { ecole: 'etudes', sante: 'normal', chomage: 'jamais' },
+  });
+  assert.equal(avec.plateauDroit.lignes.education.montant, 190_860);
+  assert.equal(avec.plateauDroit.lignes.sante.montant, 213_377);
+  assert.equal(avec.plateauDroit.lignes.chomage.montant, 0);
+  assert.equal(
+    avec.plateauDroit.total,
+    sans.plateauDroit.total + 190_860 + 213_377,
+  );
+  const signe = (s) => (s.verdict.braquage ? 1 : -1) * s.verdict.ecart;
+  assert.equal(signe(avec), signe(sans) - 190_860 - 213_377);
+  // Au salaire médian, deux paliers ordinaires suffisent à retourner le verdict.
+  assert.equal(sans.verdict.braquage, true);
+  assert.equal(avec.verdict.braquage, false);
+  assert.equal(avec.plateauGauche.total, sans.plateauGauche.total);
+});
+
+test('un fonctionnaire garde sa ligne chômage absente, même avec paliers', () => {
+  const s = simuler({
+    netMensuel: 2190, statut: 'fonctionnaire', versant: 'fpt',
+    paliers: { ecole: 'bac', sante: 'normal', chomage: 'deuxAns' },
+  });
+  assert.equal(s.plateauDroit.lignes.chomage, undefined);
+  assert.equal(s.plateauDroit.lignes.education.montant, 153_480);
+});
+
+test('le pivot monte quand la personne déclare avoir plus reçu', () => {
+  const perimetre = { salariales: true, patronales: true, impotRevenu: true, consommation: true };
+  const nu = salairePivot({ perimetre });
+  const peu = salairePivot({ perimetre, paliers: { ecole: 'rien', sante: 'fer', chomage: 'jamais' } });
+  const beaucoup = salairePivot({ perimetre, paliers: { ecole: 'etudes', sante: 'fragile', chomage: 'deuxAns' } });
+  assert.ok(nu !== null && peu !== null && beaucoup !== null);
+  assert.ok(peu > nu, `${peu} > ${nu}`);
+  assert.ok(beaucoup > peu, `${beaucoup} > ${peu}`);
+});

@@ -18,6 +18,10 @@ laisse le cadre de scellé numéroté à sa place, un fichier présent le rempli
 | `10-distributeur.jpg` | n° 10 | 16:9 | le compteur en direct |
 | `11-pretoire.jpg` | n° 11 | 16:9 | le jugement |
 | `12-dossier-texture.jpg` | n° 12 | 3:2 | fond de page, très faible opacité |
+| `14-mot-du-braqueur.jpg` | planche 2, n° 14 | 4:3 | l'intermède « les braqueurs étaient de bonne foi » |
+| `15-bulletin-scelle.jpg` | planche 2, n° 15 | 4:3 | l'écran École |
+| `16-bracelet-hopital.jpg` | planche 2, n° 16 | 4:3 | l'écran Santé |
+| `17-bureau-vide.jpg` | planche 2, n° 17 | 4:3 | l'écran Chômage |
 
 Plus, quand elle existera :
 
