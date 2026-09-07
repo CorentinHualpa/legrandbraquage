@@ -6,6 +6,8 @@ import { Plainte } from "./Plainte";
 import { ProcesVerbal } from "./ProcesVerbal";
 import { Alibi } from "./Alibi";
 import { Jugement } from "./Jugement";
+import { Audition } from "./Audition";
+import { AvisDeRecherche } from "./AvisDeRecherche";
 import type { NumeroPiece } from "@/lib/images";
 import {
   PERIMETRE_DEFAUT,
@@ -95,6 +97,13 @@ export function Instruction({
             pieces={pieces}
             simulation={simulation}
             pivot={pivot}
+            perimetre={perimetre}
+          />
+          <Audition pieces={pieces} simulation={simulation} />
+          <AvisDeRecherche
+            pieces={pieces}
+            simulation={simulation}
+            netMensuel={netMensuel}
             perimetre={perimetre}
           />
         </>
