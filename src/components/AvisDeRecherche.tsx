@@ -5,25 +5,21 @@ import { useState } from "react";
 import { CarteAvis } from "./CarteAvis";
 import { EnTete, Feuille, PiecesVersees, Renvoi, Scelle } from "./papier";
 import type { Pieces } from "./Instruction";
-import type { Perimetre, Simulation } from "@/lib/moteur";
+import { requeteDuCas, type Cas } from "@/lib/lien";
+import type { Simulation } from "@/lib/moteur";
 import { SEUIL_ANNEES, anneesSansTravailler, objetPour } from "@/lib/objets";
-
-function codePerimetre(p: Perimetre): string {
-  return [p.salariales, p.patronales, p.impotRevenu, p.consommation]
-    .map((b) => (b ? "1" : "0"))
-    .join("");
-}
 
 export function AvisDeRecherche({
   pieces,
   simulation,
   netMensuel,
-  perimetre,
+  cas,
 }: {
   pieces: Pieces;
   simulation: Simulation;
   netMensuel: number;
-  perimetre: Perimetre;
+  /** Tout ce que le lien doit transporter pour rouvrir CE dossier. */
+  cas: Cas;
 }) {
   const [copie, setCopie] = useState(false);
   const { plateauGauche, plateauDroit, verdict } = simulation;
@@ -34,10 +30,19 @@ export function AvisDeRecherche({
       ? `${annees.toFixed(1).replace(".", ",")} années de vie sans travailler`
       : objetPour(plateauGauche.total).nom;
 
+  /*
+   * Le lien pointe sur le dossier lui-même, avec le cas en paramètres.
+   *
+   * Il visait `/avis`, une page qui n'a jamais existé : tout lien partagé
+   * tombait en 404, et c'est exactement le lien sur lequel repose la page.
+   * Rouvrir le dossier vaut mieux qu'une carte séparée : le destinataire voit
+   * le chiffre annoncé, puis change le salaire pour le sien sans repartir de
+   * zéro.
+   */
   const lien =
     typeof window === "undefined"
       ? ""
-      : `${window.location.origin}/avis?n=${netMensuel}&p=${codePerimetre(perimetre)}`;
+      : `${window.location.origin}/${requeteDuCas(cas)}`;
 
   async function partager() {
     if (!lien) return;

@@ -1,4 +1,5 @@
 import { euros, eurosSigne } from "@/lib/format";
+import { SITE_HOTE } from "@/lib/site";
 
 /**
  * L'avis de recherche : la carte qui se partage.
@@ -111,7 +112,7 @@ export function CarteAvis({
         <div className="flex items-end justify-between gap-3 border-t-[3px] border-double border-encre pt-2.5">
           <div className="flex flex-col">
             <span className="text-[16px] font-bold text-rouge-texte">
-              legrandbraquage.fr
+              {SITE_HOTE}
             </span>
             <span className="text-[11.5px] text-encre-2 italic">
               Combien t’ont-ils braqué ? Le dossier s’ouvre en dix secondes.

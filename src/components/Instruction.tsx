@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Plainte } from "./Plainte";
 import { ProcesVerbal } from "./ProcesVerbal";
@@ -9,6 +9,7 @@ import { Jugement } from "./Jugement";
 import { Audition } from "./Audition";
 import { AvisDeRecherche } from "./AvisDeRecherche";
 import type { NumeroPiece } from "@/lib/images";
+import { casDepuisRequete } from "@/lib/lien";
 import {
   PERIMETRE_DEFAUT,
   salairePivot,
@@ -39,6 +40,29 @@ export function Instruction({ pieces }: { pieces: Pieces }) {
 
   const regime = regimeDe(statut, formeTpe);
   const calculable = regimeCalculable(regime);
+
+  /**
+   * Un dossier arrivé par un lien partagé se rouvre tel qu'il a été partagé.
+   *
+   * La lecture se fait APRÈS le montage et pas dans l'état initial : la page
+   * est prérendue en statique, donc initialiser l'état depuis l'URL ferait
+   * diverger le rendu du serveur de celui du navigateur, et React remonterait
+   * l'arbre en jetant l'hydratation. Le prix est une frame de page d'accueil
+   * avant que le dossier s'ouvre, ce qui est exactement ce que voit un
+   * visiteur ordinaire.
+   */
+  useEffect(() => {
+    const cas = casDepuisRequete(window.location.search);
+    if (!cas) return;
+    setNetMensuel(cas.netMensuel);
+    setStatut(cas.statut);
+    setFormeTpe(cas.formeTpe);
+    setVersant(cas.versant);
+    setPerimetre(cas.perimetre);
+    // Un lien de patron de TPE sans forme juridique n'a pas de régime résolu :
+    // on laisse le dossier fermé, la question est posée à l'écran.
+    if (regimeCalculable(regimeDe(cas.statut, cas.formeTpe))) setOuverte(true);
+  }, []);
 
   const simulation: Simulation | null = useMemo(() => {
     if (!ouverte || !calculable || !(netMensuel > 0)) return null;
@@ -129,7 +153,7 @@ export function Instruction({ pieces }: { pieces: Pieces }) {
             pieces={pieces}
             simulation={simulation}
             netMensuel={netMensuel}
-            perimetre={perimetre}
+            cas={{ netMensuel, statut, formeTpe, versant, perimetre }}
           />
         </>
       ) : null}
