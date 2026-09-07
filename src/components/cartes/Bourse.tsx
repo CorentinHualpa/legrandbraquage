@@ -6,18 +6,26 @@ import { euros, eurosSigne } from "@/lib/format";
 import { CRANS_FRAIS, CRANS_RENDEMENT, PALIERS_ALIBI, type Simulation } from "@/lib/moteur";
 
 /**
- * Où sont les six enveloppes sur la photo n° 25, en pour cent de l'image.
- * Deux rangées de trois, dans l'ordre des crans du moteur. La liasse part
- * du bas de la table, là où la photo ne montre que du bois.
+ * Où sont les six enveloppes, en pour cent du CADRE affiché.
+ *
+ * ⚠ La photo n° 25 est un 2:3 debout, mais les enveloppes tiennent dans sa
+ * moitié haute : affichée en entier, elle laissait une demi-page de bois vide
+ * (Coq, 08/09/2026 : « il y a beaucoup d'espace perdu, tronque-la »). Le
+ * cadre est donc un 3:2 couché et la photo est recalée en `object-position`
+ * pour ne montrer que la bande utile, de 12 % à 56,4 % de sa hauteur. Ces
+ * coordonnées-ci sont exprimées dans le cadre, PAS dans la photo : si le
+ * recadrage bouge, elles bougent avec (y_cadre = (y_photo − 12) / 44,44).
  */
 const ENVELOPPES = [
-  { x: 20, y: 26.2 }, { x: 49.8, y: 26.2 }, { x: 79.6, y: 26.2 },
-  { x: 20, y: 40.8 }, { x: 49.8, y: 40.8 }, { x: 79.6, y: 40.8 },
+  { x: 20, y: 32 }, { x: 49.8, y: 32 }, { x: 79.6, y: 32 },
+  { x: 20, y: 64.8 }, { x: 49.8, y: 64.8 }, { x: 79.6, y: 64.8 },
 ];
-const LIASSE_AU_DEPART = { x: 50, y: 75 };
+/** Hauteur de la zone tapable, en pour cent du cadre (12 % de la photo). */
+const HAUTEUR_ENVELOPPE = 27;
+const LIASSE_AU_DEPART = { x: 50, y: 92 };
 
 /** Ce qu'on écrit sur l'enveloppe : court, ça tient sur du kraft. */
-const ETIQUETTES: Record<string, string> = {
+export const ETIQUETTES: Record<string, string> = {
   "livret-a": "Livret A",
   immobilier: "Immobilier",
   "fonds-euros": "Fonds euros",
@@ -91,10 +99,10 @@ export function Bourse({
       </Commissaire>
 
       {/* La table. Les enveloppes sont des boutons posés sur la photo. */}
-      <div className="relative -mx-5 aspect-[2/3] overflow-hidden bg-nuit-2 sm:-mx-6" role="radiogroup" aria-label="Où placer la liasse">
+      <div className="relative -mx-5 aspect-[3/2] overflow-hidden bg-nuit-2 sm:-mx-6" role="radiogroup" aria-label="Où placer la liasse">
         {table ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={`/images/${table}`} alt="" className="absolute inset-0 h-full w-full object-cover" decoding="async" />
+          <img src={`/images/${table}`} alt="" className="absolute inset-0 h-full w-full object-cover object-[50%_21.6%]" decoding="async" />
         ) : null}
         {CRANS_RENDEMENT.map((c, i) => {
           const pos = ENVELOPPES[i];
@@ -108,7 +116,7 @@ export function Bourse({
               aria-label={`${c.nom}, ${taux(c.reel)} par an`}
               onClick={() => choisirPlacement(c.id)}
               className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center gap-0.5"
-              style={{ left: `${pos.x}%`, top: `${pos.y}%`, width: "27%", height: "12%" }}
+              style={{ left: `${pos.x}%`, top: `${pos.y}%`, width: "27%", height: `${HAUTEUR_ENVELOPPE}%` }}
             >
               <span className={`px-1.5 py-0.5 font-mono text-[10px] leading-tight tracking-[0.08em] uppercase ${actif ? "bg-encre text-papier" : "bg-[#2b2620] text-[#e9d9b8]"}`}>
                 {ETIQUETTES[c.id] ?? c.nom}

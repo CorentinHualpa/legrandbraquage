@@ -35,7 +35,14 @@ export function CarteAvis({
   portrait: string | null;
 }) {
   return (
-    <div className="mx-auto w-full max-w-[540px] bg-[#3f3a32] p-3">
+    /*
+      ⚠ `text-encre` est OBLIGATOIRE ici. La carte n'imposait aucune couleur :
+      rendue seule sur la page claire de l'OG elle héritait du texte sombre et
+      paraissait juste, mais posée dans le dossier sombre elle héritait du
+      crème et s'affichait crème sur beige, presque illisible (Coq,
+      08/09/2026 : « l'image de fin n'est pas terrible en fait »).
+    */
+    <div className="mx-auto w-full max-w-[540px] bg-[#3f3a32] p-3 text-encre">
       <div className="papier-regle relative flex h-full flex-col gap-3 bg-[#e9e2d2] px-5 py-5 shadow-2xl">
         <div className="border-b-[3px] border-double border-encre pb-2 text-center">
           <p className="font-mono text-[9px] tracking-[0.28em] text-encre-3">
@@ -78,7 +85,7 @@ export function CarteAvis({
               <p className="font-mono text-[8.5px] tracking-[0.14em] text-rouge-texte">
                 MONTANT EMPORTÉ SUR UNE CARRIÈRE
               </p>
-              <p className="chiffres font-mono text-[30px] leading-none font-semibold tracking-[-0.04em] sm:text-[40px]">
+              <p className="chiffres font-mono text-[26px] leading-none font-semibold tracking-[-0.04em] whitespace-nowrap sm:text-[38px]">
                 {euros(preleve)} €
               </p>
               <p className="mt-0.5 text-[11.5px] text-encre-2 italic">
@@ -87,8 +94,11 @@ export function CarteAvis({
             </div>
 
             <div className="flex flex-col gap-1 border-y border-cadre-bord py-2">
+              <p className="font-mono text-[8.5px] tracking-[0.12em] text-encre-3 uppercase">
+                Placé en {placement}
+              </p>
               <div className="flex justify-between gap-3">
-                <span className="text-[12.5px] leading-tight">Placé en {placement}, ça faisait</span>
+                <span className="text-[12.5px] leading-tight">Ça faisait</span>
                 <span className="chiffres shrink-0 font-mono text-[12.5px] font-semibold">
                   {euros(capital)} €
                 </span>
@@ -100,7 +110,7 @@ export function CarteAvis({
                 </span>
               </div>
               <div className="flex items-baseline justify-between gap-3">
-                <span className="text-[13.5px] font-bold">
+                <span className="text-[13px] leading-tight font-bold">
                   {braquage ? "Manque à gagner" : "En votre faveur"}
                 </span>
                 <span
@@ -122,18 +132,26 @@ export function CarteAvis({
           </div>
         </div>
 
-        <div className="flex items-end justify-between gap-3 border-t-[3px] border-double border-encre pt-2.5">
-          <div className="flex flex-col">
-            <span className="text-[16px] font-bold text-rouge-texte">
-              {SITE_HOTE}
-            </span>
-            <span className="text-[11.5px] text-encre-2 italic">
-              Combien vous ont-ils braqué ? La déposition prend dix secondes.
-            </span>
-          </div>
-          <span className="shrink-0 font-mono text-[8.5px] text-encre-3">
+        {/*
+          Le tampon d'abord, l'adresse ensuite. L'URL en gros et en rouge
+          faisait la promotion du site au bas d'une pièce de procédure : on
+          lisait une publicité, pas un verdict (Coq, 08/09/2026 : « le lien de
+          mon site est mal placé, faut que ce soit plus discret »).
+        */}
+        <div className="flex items-center justify-between gap-3 border-t-[3px] border-double border-encre pt-2.5">
+          <span
+            className={`shrink-0 -rotate-[7deg] border-[3px] px-3 py-1 font-mono text-[17px] font-bold tracking-[0.14em] sm:text-[21px] ${braquage ? "border-rouge-texte text-rouge-texte" : "border-bleu text-bleu"}`}
+          >
             {braquage ? "COUPABLE" : "RELAXE"}
           </span>
+          <div className="flex flex-col items-end text-right">
+            <span className="text-[11px] text-encre-2 italic">
+              Combien vous ont-ils braqué ?
+            </span>
+            <span className="font-mono text-[10.5px] tracking-[0.04em] text-encre-3">
+              {SITE_HOTE}
+            </span>
+          </div>
         </div>
       </div>
     </div>

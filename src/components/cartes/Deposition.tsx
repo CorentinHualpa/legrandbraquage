@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Carte, Commissaire, Kicker, Papier, Reponse } from "./Carte";
 import type { Pieces } from "@/lib/images";
@@ -20,6 +20,17 @@ import {
   type Regime,
   type Versant,
 } from "@/lib/statuts";
+
+/**
+ * Trois montants pour démarrer quand on ne connaît pas son net par cœur :
+ * SMIC 2026 (1 867,02 € brut), médian INSEE 2024 net avant impôt, et un
+ * repère rond de cadre. Ce sont les mêmes que le mur de l'avis de recherche.
+ */
+const REPERES = [
+  { net: 1478, libelle: "SMIC" },
+  { net: 2190, libelle: "Médian" },
+  { net: 5000, libelle: "5 000" },
+];
 
 export type EtatSaisie = {
   netMensuel: number;
@@ -63,11 +74,31 @@ export function Deposition({
   total: number;
 }) {
   const [foyerOuvert, setFoyerOuvert] = useState(false);
+  /*
+   * Le champ est GROUPÉ au repos (« 2 190 ») et BRUT pendant la saisie
+   * (« 2190 »). Reformater à chaque frappe faisait sauter le curseur dès
+   * qu'on corrigeait au milieu, et l'espace insécable se mangeait au retour
+   * arrière sans que rien ne bouge à l'écran (Coq, 08/09/2026 : « pour
+   * rentrer le chiffre au début ça bug, c'est mal designé »).
+   */
+  const [saisie, setSaisie] = useState(false);
+  const champ = useRef<HTMLInputElement>(null);
   /* Tant que la ligne est vide, elle bat, et rien d'autre ne peut se faire. */
   const vide = !(etat.netMensuel > 0);
   const ouLire = OU_LIRE_SON_NET[regime ?? "salarie"];
   const micro = etat.statut === "independant" && etat.activite === "micro";
   const pret = calculable && etat.netMensuel > 0;
+
+  /*
+   * Le clavier s'ouvre tout seul sur la ligne à remplir : c'est la seule
+   * chose à faire sur cet écran, et sur téléphone ça évite une visée.
+   * `preventScroll` garde la photo du commissariat à l'écran.
+   */
+  useEffect(() => {
+    if (vide) champ.current?.focus({ preventScroll: true });
+    // Au montage seulement : re-focaliser à chaque frappe volerait le curseur.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Carte
@@ -97,27 +128,53 @@ export function Deposition({
             <span className="font-mono text-[9.5px] tracking-[0.14em] text-rouge-texte uppercase">À remplir</span>
           ) : null}
         </div>
-        <div className={`flex items-baseline gap-2 border-b-[1.5px] border-encre pb-1 ${vide ? "ligne-a-remplir" : ""}`}>
+        {/*
+          L'unité vit SOUS la ligne, plus à côté : posée dans la même rangée,
+          elle finissait par-dessus les chiffres dès que le montant s'allongeait.
+        */}
+        <div className={`relative border-b-[2px] pb-1 ${vide ? "ligne-a-remplir border-rouge" : "border-encre"}`}>
           <input
+            ref={champ}
             id="net"
             type="text"
             inputMode="numeric"
-            value={etat.netMensuel > 0 ? euros(etat.netMensuel) : ""}
+            autoComplete="off"
+            value={saisie ? (etat.netMensuel > 0 ? String(etat.netMensuel) : "") : (etat.netMensuel > 0 ? euros(etat.netMensuel) : "")}
+            onFocus={() => setSaisie(true)}
+            onBlur={() => setSaisie(false)}
             onChange={(e) => {
-              const n = Number(e.target.value.replace(/[^\d]/g, ""));
-              changer({ netMensuel: Number.isFinite(n) ? n : 0 });
+              // Sept chiffres suffisent : au-delà, c'est une faute de frappe.
+              const chiffres = e.target.value.replace(/[^d]/g, "").slice(0, 7);
+              changer({ netMensuel: chiffres === "" ? 0 : Number(chiffres) });
             }}
             aria-label={ouLire.label}
             aria-describedby="net-aide"
-            className="chiffres w-full min-w-0 bg-transparent font-mono text-[42px] font-semibold tracking-[-0.03em] text-encre outline-none placeholder:text-cadre-bord focus:text-rouge-texte"
-            placeholder="0000"
+            className="chiffres w-full min-w-0 bg-transparent font-mono text-[46px] leading-none font-semibold tracking-[-0.03em] text-encre caret-rouge outline-none placeholder:text-cadre-bord"
+            placeholder="0 000"
           />
-          {vide ? (
-            <span aria-hidden className="curseur-attente -ml-[100%] h-[38px] w-[3px] shrink-0 bg-rouge" />
-          ) : null}
-          <span className="shrink-0 font-mono text-[11px] tracking-[0.1em] whitespace-nowrap text-encre-3">
-            {micro ? "€ DE CA PAR MOIS" : "€ NET, AVANT IMPÔT"}
+        </div>
+        <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1.5">
+          <span className="font-mono text-[11px] tracking-[0.1em] whitespace-nowrap text-encre-3">
+            {micro ? "€ DE CHIFFRE D’AFFAIRES PAR MOIS" : "€ NET PAR MOIS, AVANT IMPÔT"}
           </span>
+          {vide ? (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="font-mono text-[9.5px] tracking-[0.12em] text-encre-3 uppercase">Au pif</span>
+              {REPERES.map((r) => (
+                <button
+                  key={r.net}
+                  type="button"
+                  onClick={() => {
+                    changer({ netMensuel: r.net });
+                    champ.current?.focus({ preventScroll: true });
+                  }}
+                  className="border border-encre-3/60 px-2 py-[3px] font-mono text-[11px] text-encre-2 transition-colors hover:bg-encre hover:text-papier"
+                >
+                  {r.libelle}
+                </button>
+              ))}
+            </div>
+          ) : null}
         </div>
         <p id="net-aide" className="text-[13px] leading-snug text-encre-2">
           {ouLire.aide} On rejoue toute votre carrière avec :{" "}

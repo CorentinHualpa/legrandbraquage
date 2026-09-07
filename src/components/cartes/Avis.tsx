@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 
 import { Carte, Commissaire, Kicker, Volet } from "./Carte";
-import { taux } from "./Bourse";
+import { ETIQUETTES, taux } from "./Bourse";
 import { Audition } from "../Audition";
 import { CarteAvis } from "../CarteAvis";
 import type { Pieces } from "@/lib/images";
@@ -119,7 +119,7 @@ export function Avis({
       <div className="-mt-6 -rotate-[1.5deg]">
         <CarteAvis
           preleve={plateauGauche.total}
-          placement={`${cran.nom} à ${taux(cran.reel)}`}
+          placement={`${ETIQUETTES[cran.id] ?? cran.nom} à ${taux(cran.reel)}`}
           capital={opportunite?.capital ?? plateauGauche.total}
           recu={plateauDroit.total}
           ecart={verdict.ecart}

@@ -1,6 +1,6 @@
 "use client";
 
-import { Carte, Commissaire, Kicker, Lien, Volet } from "./Carte";
+import { Carte, Commissaire, Lien, Volet } from "./Carte";
 import type { Pieces } from "@/lib/images";
 import { euros, eurosSigne } from "@/lib/format";
 import type { Simulation } from "@/lib/moteur";
@@ -50,7 +50,23 @@ export function Butin({
       retour={retour}
       action={{ libelle: "Suivant", onClick: suivant }}
     >
-      <div className="relative -mx-5 -mt-16 h-[340px] overflow-hidden bg-papier sm:-mx-6">
+      {/*
+        L'annonce AVANT le dessin. Le dessin seul se lisait comme une
+        illustration de fond de page : on ne comprenait pas qu'il montrait
+        l'achat (Coq, 08/09/2026 : « il faudrait vraiment qu'on fasse
+        comprendre VOILÀ CE QU'ILS SE SONT ACHETÉ »).
+      */}
+      <div className="-mx-5 -mt-16 flex flex-col gap-1 bg-rouge px-5 pt-16 pb-3 sm:-mx-6 sm:px-6">
+        <span className="font-mono text-[10.5px] tracking-[0.16em] text-papier/80 uppercase">
+          Scellé n° 1 · le butin
+        </span>
+        <p className="text-[20px] leading-tight font-bold text-papier">
+          Voilà ce qu’ils se sont acheté avec vos{" "}
+          <span className="chiffres font-mono tracking-[-0.02em] whitespace-nowrap">{eurosSigne(montant)}</span>.
+        </p>
+      </div>
+
+      <div className="relative -mx-5 h-[300px] overflow-hidden bg-papier sm:-mx-6">
         {objet.image ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={`/images/butin/${objet.image}.webp`} alt={objet.nom} className="h-full w-full object-cover" decoding="async" />
@@ -62,13 +78,14 @@ export function Butin({
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0"
-          style={{ background: "linear-gradient(180deg, rgba(15,21,28,0.55) 0%, rgba(15,21,28,0) 30%, rgba(15,21,28,0) 60%, #0f151c 100%)" }}
+          style={{ background: "linear-gradient(180deg, rgba(15,21,28,0) 0%, rgba(15,21,28,0) 45%, #0f151c 100%)" }}
         />
+        <p className="absolute inset-x-5 bottom-3 text-[30px] leading-[1.05] font-bold tracking-[-0.02em] text-papier sm:inset-x-6">
+          {objet.nom}.
+        </p>
       </div>
 
-      <div className="-mt-10 flex flex-col gap-3">
-        <Kicker>Avec ça, ils se sont payé</Kicker>
-        <p className="text-[32px] leading-[1.1] font-bold tracking-[-0.02em]">{objet.nom}.</p>
+      <div className="flex flex-col gap-3">
         <Commissaire>
           {objet.seuil > 0 && reste > 1000 ? (
             <>« Cash. Et il leur reste {eurosSigne(reste)} de monnaie. Ou {euros(comptage.nombre)} {comptage.unite.pluriel}, si vous préférez compter. »</>
@@ -76,6 +93,10 @@ export function Butin({
             <>« {objet.pointe} Ou {euros(comptage.nombre)} {comptage.unite.pluriel}, si vous préférez compter. »</>
           )}
         </Commissaire>
+        {/* La pointe du palier, sauf quand le commissaire vient de la dire. */}
+        {objet.seuil > 0 && reste > 1000 ? (
+          <p className="text-[15px] leading-relaxed text-papier-2 italic">{objet.pointe}</p>
+        ) : null}
         <p className="text-[14.5px] leading-relaxed text-ligne">
           <span className="chiffres font-mono font-medium text-papier">{deputes.toFixed(1).replace(".", ",")}</span> années de salaire net d’un député.
           {montant >= SEUIL_ANNEES ? (
