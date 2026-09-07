@@ -4,16 +4,20 @@ import { SITE_HOTE } from "@/lib/site";
 /**
  * L'avis de recherche : la carte qui se partage.
  *
- * Elle remplace la carte-résultat classique et c'est le moteur de viralité du
- * dossier. Son cadre de portrait est VIDE tant que la caricature n'est pas
- * dessinée : c'est la pièce n° 6 de la planche, générée sans visage exprès.
- * Une image qui contiendrait déjà un inconnu ne servirait à rien.
+ * Elle porte le crime (le montant emporté), puis le procès tel qu'il a été
+ * jugé : ce que l'argent aurait fait, placé là où la personne l'a dit, contre
+ * ce qui a été rendu. Depuis le 08/09/2026, c'est ce coût d'opportunité qui
+ * fait le verdict, donc c'est lui que la carte annonce ; une carte qui dirait
+ * encore « préjudice net = pris moins rendu » ne correspondrait plus au
+ * tampon qu'elle affiche.
  *
  * Composant purement présentationnel : il ne calcule rien, pour pouvoir être
  * rendu aussi bien dans la page que dans l'aperçu de partage.
  */
 export function CarteAvis({
   preleve,
+  placement,
+  capital,
   recu,
   ecart,
   braquage,
@@ -21,6 +25,9 @@ export function CarteAvis({
   portrait,
 }: {
   preleve: number;
+  /** « S&P 500 à 6,8 % » : où l'argent aurait été placé, et à quel taux réel. */
+  placement: string;
+  capital: number;
   recu: number;
   ecart: number;
   braquage: boolean;
@@ -69,26 +76,32 @@ export function CarteAvis({
           <div className="flex grow flex-col gap-2.5">
             <div>
               <p className="font-mono text-[8.5px] tracking-[0.14em] text-rouge-texte">
-                MONTANT EMPORTÉ SUR LA CARRIÈRE
+                MONTANT EMPORTÉ SUR UNE CARRIÈRE
               </p>
               <p className="chiffres font-mono text-[30px] leading-none font-semibold tracking-[-0.04em] sm:text-[40px]">
                 {euros(preleve)} €
               </p>
               <p className="mt-0.5 text-[11.5px] text-encre-2 italic">
-                en monnaie d’aujourd’hui
+                43 ans, en monnaie d’aujourd’hui
               </p>
             </div>
 
             <div className="flex flex-col gap-1 border-y border-cadre-bord py-2">
               <div className="flex justify-between gap-3">
-                <span className="text-[12.5px]">Reposé sur place</span>
-                <span className="chiffres font-mono text-[12.5px] font-semibold">
+                <span className="text-[12.5px] leading-tight">Placé en {placement}, ça faisait</span>
+                <span className="chiffres shrink-0 font-mono text-[12.5px] font-semibold">
+                  {euros(capital)} €
+                </span>
+              </div>
+              <div className="flex justify-between gap-3">
+                <span className="text-[12.5px]">Rendu sur place</span>
+                <span className="chiffres shrink-0 font-mono text-[12.5px] font-semibold">
                   {euros(recu)} €
                 </span>
               </div>
               <div className="flex items-baseline justify-between gap-3">
                 <span className="text-[13.5px] font-bold">
-                  {braquage ? "Préjudice net" : "En ta faveur"}
+                  {braquage ? "Manque à gagner" : "En ta faveur"}
                 </span>
                 <span
                   className={`chiffres font-mono text-[20px] font-semibold tracking-[-0.02em] ${braquage ? "text-rouge-texte" : "text-bleu"}`}
@@ -115,7 +128,7 @@ export function CarteAvis({
               {SITE_HOTE}
             </span>
             <span className="text-[11.5px] text-encre-2 italic">
-              Combien t’ont-ils braqué ? Le dossier s’ouvre en dix secondes.
+              Combien t’ont-ils braqué ? La déposition prend dix secondes.
             </span>
           </div>
           <span className="shrink-0 font-mono text-[8.5px] text-encre-3">

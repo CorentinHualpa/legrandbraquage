@@ -62,7 +62,7 @@ export function Carte({
               </button>
             ) : null}
             <span className="font-mono text-[10px] tracking-[0.14em] text-ligne uppercase">
-              {nature} · 43 ans de carrière
+              {nature} · 43 ans
             </span>
           </div>
           <span className="font-mono text-[10px] tracking-[0.14em] text-ligne">

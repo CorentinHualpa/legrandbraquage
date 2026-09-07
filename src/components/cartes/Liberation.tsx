@@ -35,7 +35,7 @@ export function Liberation({
       total={total}
       nature="L’horaire du braquage"
       retour={retour}
-      photo={{ numero: 10, pieces, hauteur: 300, legende: "CLICHÉ 10 · LE GUICHET, LA NUIT" }}
+      photo={{ numero: 21, pieces, hauteur: 300, legende: "CLICHÉ 21 · IL REGARDE SA MONTRE" }}
       action={{ libelle: "Suivant", onClick: suivant }}
     >
       <Kicker couleur="rouge">Chaque année, tu auras travaillé pour eux jusqu’au</Kicker>

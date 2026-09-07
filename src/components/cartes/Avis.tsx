@@ -3,11 +3,12 @@
 import { useState } from "react";
 
 import { Carte, Volet } from "./Carte";
+import { taux } from "./Bourse";
 import { Audition } from "../Audition";
 import { CarteAvis } from "../CarteAvis";
 import type { Pieces } from "@/lib/images";
 import { requeteDuCas, type Cas } from "@/lib/lien";
-import type { Simulation } from "@/lib/moteur";
+import { CRANS_RENDEMENT, type Simulation } from "@/lib/moteur";
 import { SEUIL_ANNEES, anneesSansTravailler, objetPour } from "@/lib/objets";
 
 /**
@@ -34,7 +35,8 @@ export function Avis({
   recommencer: () => void;
 }) {
   const [copie, setCopie] = useState(false);
-  const { plateauGauche, plateauDroit, verdict } = simulation;
+  const { plateauGauche, plateauDroit, verdict, opportunite } = simulation;
+  const cran = CRANS_RENDEMENT.find((c) => c.id === cas.placementId) ?? CRANS_RENDEMENT[0];
 
   const annees = anneesSansTravailler(plateauGauche.total, simulation.netApresImpotActuel);
   const objet =
@@ -48,8 +50,8 @@ export function Avis({
   async function partager() {
     if (!lien) return;
     const texte = verdict.braquage
-      ? "Sur toute une carrière, ils m’auront pris plus qu’ils ne m’auront rendu. Chiffré sur les barèmes officiels."
-      : "Sur toute une carrière, ils m’auront rendu plus qu’ils ne m’auront pris. Vérifie le tien.";
+      ? `Placé en ${cran.nom}, mon argent aurait fait plus que ce qu’ils m’auront rendu. Chiffré sur les barèmes officiels.`
+      : `Placé en ${cran.nom}, mon argent aurait fait moins que ce qu’ils m’auront rendu. Vérifie le tien.`;
     try {
       if (navigator.share) {
         await navigator.share({ title: "Le Grand Braquage", text: texte, url: lien });
@@ -82,6 +84,8 @@ export function Avis({
       <div className="-mt-6 -rotate-[1.5deg]">
         <CarteAvis
           preleve={plateauGauche.total}
+          placement={`${cran.nom} à ${taux(cran.reel)}`}
+          capital={opportunite?.capital ?? plateauGauche.total}
           recu={plateauDroit.total}
           ecart={verdict.ecart}
           braquage={verdict.braquage}

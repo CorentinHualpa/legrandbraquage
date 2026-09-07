@@ -48,7 +48,7 @@ export function Verdict({
       total={total}
       nature="Tribunal des prélèvements"
       retour={retour}
-      photo={{ numero: 11, pieces, hauteur: 260, legende: "CLICHÉ 11 · LE JUGE, C’EST TOI" }}
+      photo={{ numero: 24, pieces, hauteur: 300, legende: "CLICHÉ 24 · IL SORT", position: "50% 30%" }}
       action={{ libelle: "Placarder l’avis de recherche", onClick: suivant }}
     >
       <Papier rotation={0.8} className="-mt-10 flex flex-col items-center gap-2.5 px-4 pt-4 pb-3.5 text-center">

@@ -4,7 +4,12 @@ import Link from "next/link";
 import { EnTete, Feuille, PiecesVersees, Renvoi, Scelle, Tampon } from "@/components/papier";
 import { piecesDeposees } from "@/lib/images";
 import { euros, pourcent } from "@/lib/format";
-import { PERIMETRE_COMPLET, PLACEMENTS, salairePivot } from "@/lib/moteur";
+import {
+  CRANS_RENDEMENT,
+  PALIERS_DEFAUT,
+  PERIMETRE_COMPLET,
+  salairePivot,
+} from "@/lib/moteur";
 import { aSourcer } from "@/lib/objets";
 
 export const metadata: Metadata = {
@@ -41,7 +46,18 @@ function Ligne({
 
 export default function Methode() {
   const pieces = piecesDeposees();
-  const pivot = salairePivot({ perimetre: PERIMETRE_COMPLET });
+  /*
+   * Le seuil publié : périmètre complet, réponses par défaut au commissaire
+   * (bac, santé comme tout le monde, un trou d’air), argent placé en fonds
+   * en euros sans frais. C’est le cas que l’image de partage affiche.
+   */
+  const fondsEuros = CRANS_RENDEMENT.find((c) => c.id === "fonds-euros") ?? CRANS_RENDEMENT[0];
+  const pivot = salairePivot({
+    perimetre: PERIMETRE_COMPLET,
+    paliers: PALIERS_DEFAUT,
+    placement: { rendementReel: fondsEuros.reel },
+  });
+  const pivotPensionSeule = salairePivot({ perimetre: PERIMETRE_COMPLET });
   const restant = aSourcer();
 
   return (
@@ -112,9 +128,16 @@ export default function Methode() {
             />
             {pivot ? (
               <Ligne
-                quoi="Salaire où la balance bascule, périmètre complet"
+                quoi="Salaire où le verdict bascule : périmètre complet, réponses par défaut, argent placé en fonds en euros"
                 valeur={`${euros(pivot)} €`}
                 source="calculé par dichotomie, moteur/index.js"
+              />
+            ) : null}
+            {pivotPensionSeule ? (
+              <Ligne
+                quoi="Le même seuil, pension seule en face et argent non placé"
+                valeur={`${euros(pivotPensionSeule)} €`}
+                source="l’ancien verdict, gardé pour comparaison"
               />
             ) : null}
           </ul>
@@ -186,21 +209,32 @@ export default function Methode() {
 
         <section className="flex flex-col gap-3 border-t-2 border-encre pt-5">
           <h2 className="font-mono text-[10px] tracking-[0.13em] text-rouge-texte">
-            L’ÉCHELLE DE PLACEMENT
+            LE VERDICT SE JUGE SUR LE COÛT D’OPPORTUNITÉ
           </h2>
           <p className="text-[14.5px] leading-relaxed">
-            Le curseur part au barreau le plus prudent, et c’est un choix : un
-            simulateur qui ouvre sur le rendement le plus flatteur ne mesure plus
-            rien, il vend une conclusion. Chaque barreau porte sa propre
-            hypothèse de frais, parce que c’est là que tout se joue.
+            Le tribunal ne compare pas ce qui a été pris à ce qui a été rendu :
+            il compare ce que l’argent pris <span className="font-semibold">serait devenu</span>,
+            placé là où la personne dit qu’elle l’aurait mis, à ce qui a été
+            rendu. Chaque année de carrière, le prélèvement du périmètre coché
+            est capitalisé au taux réel du placement choisi, frais compris,
+            jusqu’à 64 ans. En face : le capital équivalent à la pension jusqu’à
+            85 ans, plus l’école, les soins et le chômage aux paliers déclarés.
+          </p>
+          <p className="text-[14.5px] leading-relaxed">
+            L’enveloppe par défaut est le fonds en euros, ce que la moitié des
+            Français détient, sans frais : un simulateur qui ouvrirait sur le
+            rendement le plus flatteur ne mesurerait plus rien, il vendrait une
+            conclusion. Les taux sont RÉELS, inflation retirée, parce que tout le
+            dossier est en euros d’aujourd’hui ; le Livret A est négatif, et ce
+            n’est pas une provocation.
           </p>
           <ul className="flex flex-col border-t border-ligne">
-            {PLACEMENTS.map((p) => (
+            {CRANS_RENDEMENT.map((c) => (
               <Ligne
-                key={p.id}
-                quoi={p.nom}
-                valeur={`${pourcent(p.rendementReel, 2)} réel`}
-                source={p.source}
+                key={c.id}
+                quoi={c.nom}
+                valeur={`${pourcent(c.reel, 2)} réel`}
+                source={c.source}
               />
             ))}
           </ul>

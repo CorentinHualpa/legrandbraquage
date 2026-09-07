@@ -42,7 +42,7 @@ export function Pris({
       total={total}
       nature="Pièce à conviction"
       retour={retour}
-      photo={{ numero: 2, pieces, hauteur: 330, legende: "CLICHÉ 02 · SOUS SCELLÉ" }}
+      photo={{ numero: 19, pieces, hauteur: 330, legende: "CLICHÉ 19 · LA PIÈCE À CONVICTION", position: "50% 35%" }}
       action={{ libelle: "Suivant", onClick: suivant }}
     >
       <Kicker couleur="rouge">D’ici la fin de ta carrière, ils t’auront pris</Kicker>

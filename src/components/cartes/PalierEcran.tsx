@@ -15,7 +15,7 @@ import {
 } from "@/lib/moteur";
 
 const PIECE: Record<PosteDuPlateau, { numero: NumeroPiece; legende: string }> = {
-  ecole: { numero: 15, legende: "CLICHÉ 15 · LE PUPITRE" },
+  ecole: { numero: 23, legende: "CLICHÉ 23 · L’INTERROGATOIRE COMMENCE" },
   sante: { numero: 16, legende: "CLICHÉ 16 · SALLE D’EXAMEN" },
   chomage: { numero: 17, legende: "CLICHÉ 17 · L’OPEN SPACE, 18 H" },
 };
