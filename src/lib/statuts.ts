@@ -171,109 +171,43 @@ export type LignePerimetre = {
   sansObjet?: boolean;
 };
 
-/** Poste de consommation : le seul qui se dise pareil pour tout le monde. */
-const CONSOMMATION: LignePerimetre = {
-  cle: "consommation",
-  geste: "Repris à chaque caddie, sans reçu",
-  nom: "TVA et taxes de consommation",
-};
-
 export const LIGNES_PERIMETRE: Record<Regime, LignePerimetre[]> = {
+  /*
+   * ⚠ Le libellé principal dit CE QUE C'EST, en mots de tous les jours. La
+   * métaphore du dossier (« pris avant ta paie, sans te le dire ») passe en
+   * sous-titre : mise en titre, elle obligeait à deviner de quoi on parlait.
+   * Retour de Coq, 07/09/2026 : « je ne comprends pas les options, rien n'est
+   * clair ». Un ado doit pouvoir lire chaque ligne sans rien savoir.
+   */
   salarie: [
-    {
-      cle: "salariales",
-      geste: "Pris sur ta paie, sous tes yeux",
-      nom: "cotisations salariales",
-    },
-    {
-      cle: "patronales",
-      geste: "Pris avant ta paie, sans te le dire",
-      nom: "cotisations patronales, jamais imprimées sur ton net",
-    },
-    {
-      cle: "impotRevenu",
-      geste: "Repris sur chaque virement, à la source",
-      nom: "impôt sur le revenu",
-    },
-    CONSOMMATION,
+    { cle: "salariales", geste: "Les cotisations sur ta paie", nom: "la ligne que tu vois sur ta fiche, entre le brut et le net" },
+    { cle: "patronales", geste: "Ce que ton employeur verse en plus", nom: "pour toi, avant même ta paie : tu ne le vois jamais" },
+    { cle: "impotRevenu", geste: "L’impôt sur le revenu", nom: "prélevé à la source sur chaque virement" },
+    { cle: "consommation", geste: "La TVA sur tout ce que tu achètes", nom: "et les taxes sur l’essence, l’alcool, le tabac" },
   ],
   fonctionnaire: [
-    {
-      cle: "salariales",
-      geste: "Retenu sur ton traitement, chaque mois",
-      nom: "retenue pour pension, CSG-CRDS et régime additionnel",
-    },
-    {
-      cle: "patronales",
-      geste: "Versé par ton employeur public à ton propre régime",
-      nom: "contribution employeur, 37,65 % à la CNRACL et 82,28 % pour l’État",
-    },
-    {
-      cle: "impotRevenu",
-      geste: "Repris sur chaque virement, à la source",
-      nom: "impôt sur le revenu",
-    },
-    CONSOMMATION,
+    { cle: "salariales", geste: "Les retenues sur ton traitement", nom: "pension, CSG-CRDS et régime additionnel, chaque mois" },
+    { cle: "patronales", geste: "Ce que ton employeur public verse en plus", nom: "à ton propre régime de retraite : tu ne le vois jamais" },
+    { cle: "impotRevenu", geste: "L’impôt sur le revenu", nom: "prélevé à la source sur chaque virement" },
+    { cle: "consommation", geste: "La TVA sur tout ce que tu achètes", nom: "et les taxes sur l’essence, l’alcool, le tabac" },
   ],
   tns: [
-    {
-      cle: "salariales",
-      geste: "Pris sur ce que tu factures, avant de te payer",
-      nom: "cotisations et contributions sociales, sur ton revenu professionnel",
-    },
-    {
-      cle: "patronales",
-      geste: "Personne ne verse avant toi",
-      nom: "aucune part employeur : tu es ton propre employeur",
-      sansObjet: true,
-    },
-    {
-      cle: "impotRevenu",
-      geste: "Repris par acompte, tous les mois ou tous les trimestres",
-      nom: "impôt sur le revenu",
-    },
-    CONSOMMATION,
+    { cle: "salariales", geste: "Les cotisations URSSAF", nom: "sur ton revenu, une fois tes charges déduites" },
+    { cle: "patronales", geste: "Part employeur", nom: "aucune : tu es ton propre employeur", sansObjet: true },
+    { cle: "impotRevenu", geste: "L’impôt sur le revenu", nom: "payé par acomptes, tous les mois ou tous les trimestres" },
+    { cle: "consommation", geste: "La TVA sur tout ce que tu achètes", nom: "et les taxes sur l’essence, l’alcool, le tabac" },
   ],
   micro: [
-    {
-      cle: "salariales",
-      // ⚠ Chez lui, l'assiette est le CHIFFRE D'AFFAIRES encaissé, pas un
-      // revenu après charges : il paie même sur ce qu'il a dépensé pour
-      // travailler. C'est la différence qui justifie un régime à part.
-      geste: "Pris sur tout ce que tu encaisses, charges comprises",
-      nom: "cotisations forfaitaires, en pourcentage du chiffre d’affaires",
-    },
-    {
-      cle: "patronales",
-      geste: "Personne ne verse avant toi",
-      nom: "aucune part employeur : tu es ton propre employeur",
-      sansObjet: true,
-    },
-    {
-      cle: "impotRevenu",
-      geste: "Repris par acompte, ou prélevé avec les cotisations",
-      nom: "impôt sur le revenu, barème ou versement libératoire",
-    },
-    CONSOMMATION,
+    { cle: "salariales", geste: "Les cotisations URSSAF", nom: "en pourcentage de tout ce que tu encaisses, charges comprises" },
+    { cle: "patronales", geste: "Part employeur", nom: "aucune : tu es ton propre employeur", sansObjet: true },
+    { cle: "impotRevenu", geste: "L’impôt sur le revenu", nom: "au barème, ou en versement libératoire avec tes cotisations" },
+    { cle: "consommation", geste: "La TVA sur tout ce que tu achètes", nom: "et les taxes sur l’essence, l’alcool, le tabac" },
   ],
   cipav: [
-    {
-      cle: "salariales",
-      geste: "Pris sur ce que tu factures, avant de te payer",
-      nom: "cotisations CIPAV et contributions sociales",
-    },
-    {
-      cle: "patronales",
-      geste: "Personne ne verse avant toi",
-      nom: "aucune part employeur : tu es ton propre employeur",
-      sansObjet: true,
-    },
-    {
-      cle: "impotRevenu",
-      geste: "Repris par acompte, tous les mois ou tous les trimestres",
-      nom: "impôt sur le revenu",
-    },
-    CONSOMMATION,
+    { cle: "salariales", geste: "Les cotisations URSSAF et CIPAV", nom: "sur ton revenu, une fois tes charges déduites" },
+    { cle: "patronales", geste: "Part employeur", nom: "aucune : tu es ton propre employeur", sansObjet: true },
+    { cle: "impotRevenu", geste: "L’impôt sur le revenu", nom: "payé par acomptes, tous les mois ou tous les trimestres" },
+    { cle: "consommation", geste: "La TVA sur tout ce que tu achètes", nom: "et les taxes sur l’essence, l’alcool, le tabac" },
   ],
 };
 

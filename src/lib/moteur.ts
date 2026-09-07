@@ -205,11 +205,18 @@ export type PalierAlibi = {
 };
 
 /** Le périmètre de départ : ce qu'on voit sur sa fiche de paie, rien de plus. */
+/*
+ * ⚠ Tout coché à l'ouverture. Le gros chiffre doit être le VRAI total, impôt et
+ * TVA compris : deux cases éteintes par défaut faisaient afficher un braquage
+ * amputé de sa moitié, et un lecteur qui ne comprenait pas les cases repartait
+ * avec ce chiffre-là. Décocher reste possible, pour voir le procès poste par
+ * poste.
+ */
 export const PERIMETRE_DEFAUT: Perimetre = {
   salariales: true,
   patronales: true,
-  impotRevenu: false,
-  consommation: false,
+  impotRevenu: true,
+  consommation: true,
 };
 
 /** Le périmètre complet, celui qui sert à publier le salaire-pivot. */
