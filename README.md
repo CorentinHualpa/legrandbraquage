@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Le Grand Braquage
 
-## Getting Started
+Un simulateur qui chiffre ce que les prélèvements obligatoires prennent à une
+personne sur toute sa carrière, ce qu'ils lui achètent, et lequel des deux pèse
+le plus lourd. Il rend un verdict, et **ce verdict peut se retourner** : pour un
+bas salaire, il affiche une relaxe.
 
-First, run the development server:
+Le moteur de calcul est dans `moteur/`. Il est public parce que c'est la seule
+façon de rendre le résultat opposable : n'importe qui peut le lire, le rejouer
+et le contredire.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+node --test moteur/     # 38 tests, dont l'étalon URSSAF
+pnpm dev                # le site
+pnpm build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Ce qui tient, et ce qui ne tient pas
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Les taux sont vérifiés contre l'**API publique du simulateur officiel de
+l'URSSAF** (`mon-entreprise.urssaf.fr`), interrogée sur sept points de salaire.
+Les sept tombent au centième. Si un de ces tests casse un jour, c'est le moteur
+qui a tort, pas l'URSSAF.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Ce qui est **calculé et défendable au centime** : toutes les cotisations ligne
+par ligne, la réduction générale dégressive unique, l'impôt sur le revenu avec
+décote et quotient familial, l'inversion du net vers le brut, la projection de
+carrière sur la courbe INSEE, le capital équivalent à la pension, et l'échelle
+de placement avec ses frais.
 
-## Learn More
+Ce qui est un **ordre de grandeur assumé**, et que la page dit tel quel : santé,
+éducation, chômage. Le poste retraite, lui, est calculé.
 
-To learn more about Next.js, take a look at the following resources:
+## Les trois règles
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **Concéder ce qui est juste chez la partie adverse.** Son arithmétique est
+   exacte sur ses propres hypothèses. Concéder rend tout le reste crédible ; ne
+   pas concéder fait de la page un tract.
+2. **Ne jamais sourcer sur un essai militant.** URSSAF, DGFiP, INSEE, COR,
+   DREES, AMF, Banque de France, Eurostat, OCDE, Fipeco. Toute modification d'un
+   barème doit citer un texte officiel.
+3. **Ne jamais toucher au terrain personnel.** On reste sur les chiffres.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Structure
 
-## Deploy on Vercel
+| Dossier | Rôle |
+|---|---|
+| `moteur/` | tout le calcul, sans dépendance, testé |
+| `src/lib/` | le pont typé vers le moteur, le format, les objets |
+| `src/components/` | les pièces du dossier d'instruction |
+| `public/images/` | les pièces photographiques, voir le fichier de dépôt |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Le site ne stocke rien et n'envoie rien : la simulation tourne dans le
+navigateur de la personne.

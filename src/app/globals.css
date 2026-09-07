@@ -1,26 +1,111 @@
 @import "tailwindcss";
 
+/*
+ * Le Grand Braquage : dossier d'instruction.
+ * Papier, encre, tampon rouge, bleu de greffe. Une seule palette pour tout.
+ *
+ * Les valeurs viennent des maquettes validées. Les trois gris de texte ont
+ * été remontés pour passer AA sur le papier : #6d7784 mesurait 3,75 contre le
+ * fond, il est devenu #525c6b (5,60). Rien de lisible ne descend en dessous.
+ */
+@theme {
+  --color-papier: #efe9dc;
+  --color-papier-2: #e7e0cf;
+  --color-papier-3: #e2dac7;
+  --color-cadre: #d9d2c1;
+  --color-cadre-bord: #b3ab97;
+  --color-ligne: #c9c0ad;
+
+  --color-encre: #1b2430;
+  --color-encre-2: #3d4854;
+  --color-encre-3: #525c6b;
+
+  --color-rouge: #b8342a;
+  --color-rouge-sombre: #8e2620;
+  --color-rouge-texte: #9c2b22;
+  --color-bleu: #2c4a6e;
+
+  --font-serif: var(--police-serif), Georgia, "Times New Roman", serif;
+  --font-mono: var(--police-mono), ui-monospace, "Courier New", monospace;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+html {
+  scroll-behavior: smooth;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-papier);
+  color: var(--color-encre);
+  font-family: var(--font-serif);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Le réglage du papier : lignes horizontales et marge rouge du greffier. */
+.papier-regle {
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent 0 27px,
+    rgba(44, 74, 110, 0.05) 27px 28px
+  );
+}
+
+.marge-greffe::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 28px;
+  width: 1px;
+  background: rgba(184, 52, 42, 0.22);
+  pointer-events: none;
+}
+
+@media (min-width: 640px) {
+  .marge-greffe::before {
+    left: 46px;
+  }
+}
+
+/* Le tampon : posé de travers, comme un vrai. */
+.tampon {
+  transform: rotate(-3.5deg);
+}
+.tampon-droite {
+  transform: rotate(4deg);
+}
+.tampon-gauche {
+  transform: rotate(-7deg);
+}
+
+/* Les chiffres s'alignent en colonne dans les tableaux de compte. */
+.chiffres {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Un montant qui change ne doit pas faire sauter la ligne qui le porte. */
+.montant-anime {
+  transition: color 240ms ease;
+}
+
+/* Le voile d'attente d'une image qui n'est pas encore déposée. */
+.cadre-scelle {
+  background: var(--color-cadre);
+  border: 1px solid var(--color-cadre-bord);
 }
