@@ -2,6 +2,7 @@
 
 import { Carte, Chiffre, Commissaire, Kicker, Ligne, Reponse, Volet } from "./Carte";
 import type { Pieces } from "@/lib/images";
+import { ETIQUETTES_PLACEMENT as ETIQUETTES } from "@/lib/placements";
 import { euros, eurosSigne } from "@/lib/format";
 import { CRANS_FRAIS, CRANS_RENDEMENT, PALIERS_ALIBI, type Simulation } from "@/lib/moteur";
 
@@ -23,16 +24,6 @@ const ENVELOPPES = [
 /** Hauteur de la zone tapable, en pour cent du cadre (12 % de la photo). */
 const HAUTEUR_ENVELOPPE = 27;
 const LIASSE_AU_DEPART = { x: 50, y: 92 };
-
-/** Ce qu'on écrit sur l'enveloppe : court, ça tient sur du kraft. */
-export const ETIQUETTES: Record<string, string> = {
-  "livret-a": "Livret A",
-  immobilier: "Immobilier",
-  "fonds-euros": "Fonds euros",
-  "msci-world": "MSCI World",
-  sp500: "S&P 500",
-  cac40: "CAC 40",
-};
 
 /** 0,0677 → « 6,8 % », −0,0024 → « −0,2 % ». Le taux RÉEL, inflation retirée. */
 export function taux(reel: number): string {

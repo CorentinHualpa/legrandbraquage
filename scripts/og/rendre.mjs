@@ -1,94 +1,42 @@
 /**
- * Rend l'image de partage à partir de `carte.html`, en 1200 × 630.
+ * Rend l'image de partage par DÉFAUT, `public/og.png`, en 1200 × 630.
  *
- * On passe par le navigateur du poste en mode headless plutôt que par
- * `next/og` : la carte est un fichier posé une fois dans `public/`, donc elle
- * ne coûte rien au serveur, ne dépend d'aucune police téléchargée à chaud, et
- * ne peut pas casser en production un jour où Google Fonts répond mal.
+ * Depuis le 08/09/2026, la une est fabriquée par la route `/api/avis` : un
+ * lien partagé porte tout le dossier dans sa requête, donc son aperçu porte
+ * les chiffres de celui qui partage. Ce fichier-ci ne sert plus qu'à UN cas,
+ * l'adresse nue, sans requête : celui qui tombe sur `braquage.revolutionagency.ai`
+ * sans paramètre voit le salarié médian.
  *
- *   node scripts/og/rendre.mjs
+ * Il a d'abord été rendu depuis un `carte.html` par le navigateur du poste en
+ * mode headless. Deux mises en page à tenir à jour pour la même une, c'est une
+ * de trop : elles ont divergé au premier changement. On appelle donc la route,
+ * qui est la seule à savoir dessiner la une.
+ *
+ *   pnpm dev            (ou tout serveur du projet)
+ *   node scripts/og/rendre.mjs [http://localhost:4471]
  *
  * Le rendu écrit `public/og.png`. Le commiter : c'est un livrable, pas un
- * artefact de build.
+ * artefact de build. À refaire dès qu'un barème ou la mise en page bouge.
  */
-import { execFile } from 'node:child_process';
-import { mkdtemp, rm, readFile } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join, resolve, dirname } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
-import { promisify } from 'node:util';
+import { writeFile } from 'node:fs/promises';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const execFileP = promisify(execFile);
 const ici = dirname(fileURLToPath(import.meta.url));
 const racine = resolve(ici, '..', '..');
+const hote = process.argv[2] ?? 'http://localhost:4471';
 
-const LARGEUR = 1200;
-const HAUTEUR = 630;
-
-/** Les navigateurs candidats, dans l'ordre. Le premier trouvé gagne. */
-const CANDIDATS = [
-  'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
-  'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
-  'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
-  'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
-];
-
-function trouverNavigateur() {
-  const surMesure = process.env.NAVIGATEUR_HEADLESS;
-  if (surMesure) {
-    if (!existsSync(surMesure)) throw new Error(`NAVIGATEUR_HEADLESS introuvable : ${surMesure}`);
-    return surMesure;
-  }
-  const trouve = CANDIDATS.find((c) => existsSync(c));
-  if (!trouve) {
-    throw new Error(
-      'Aucun navigateur headless trouvé. Poser le chemin dans NAVIGATEUR_HEADLESS.',
-    );
-  }
-  return trouve;
-}
-
-const navigateur = trouverNavigateur();
-const source = join(ici, 'carte.html');
-const sortie = resolve(racine, 'public', 'og.png');
-
-// Chrome et Edge refusent d'écrire dans un profil existant : on leur en donne
-// un jetable, sinon le rendu échoue en silence sur un poste où le navigateur
-// est déjà ouvert.
-const profil = await mkdtemp(join(tmpdir(), 'og-'));
-
-try {
-  await execFileP(
-    navigateur,
-    [
-      '--headless=new',
-      '--disable-gpu',
-      '--hide-scrollbars',
-      '--force-device-scale-factor=1',
-      '--default-background-color=00000000',
-      // laisse le temps aux polices distantes d'arriver ET d'être appliquées
-      '--virtual-time-budget=10000',
-      `--user-data-dir=${profil}`,
-      `--window-size=${LARGEUR},${HAUTEUR}`,
-      `--screenshot=${sortie}`,
-      pathToFileURL(source).href,
-    ],
-    { timeout: 90_000 },
+const reponse = await fetch(`${hote}/api/avis`);
+if (!reponse.ok) {
+  throw new Error(
+    `${hote}/api/avis a répondu ${reponse.status}. Le serveur de dev tourne-t-il ?`,
   );
-} finally {
-  await rm(profil, { recursive: true, force: true }).catch(() => {});
+}
+const type = reponse.headers.get('content-type') ?? '';
+if (!type.startsWith('image/png')) {
+  throw new Error(`Réponse inattendue (${type}) : on attend une image PNG.`);
 }
 
-const png = await readFile(sortie);
-if (png.length < 10_000) throw new Error(`Rendu suspect : ${png.length} octets.`);
-
-// Le PNG porte ses dimensions en clair : on les relit plutôt que de faire
-// confiance à --window-size, qui rate d'un pixel selon la mise à l'échelle.
-const largeur = png.readUInt32BE(16);
-const hauteur = png.readUInt32BE(20);
-if (largeur !== LARGEUR || hauteur !== HAUTEUR) {
-  throw new Error(`Attendu ${LARGEUR}×${HAUTEUR}, obtenu ${largeur}×${hauteur}.`);
-}
-
-console.log(`public/og.png · ${largeur}×${hauteur} · ${(png.length / 1024).toFixed(0)} Ko`);
+const sortie = join(racine, 'public', 'og.png');
+await writeFile(sortie, Buffer.from(await reponse.arrayBuffer()));
+console.log(`Écrit : ${sortie}`);

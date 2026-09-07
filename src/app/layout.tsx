@@ -22,18 +22,20 @@ const DESCRIPTION =
   "Chaque mois, quelqu'un passe chez toi avant toi. On chiffre ce qu'il emporte, ce qu'il repose, et lequel des deux pèse le plus lourd. Barèmes officiels, moteur de calcul public.";
 
 /**
- * L'image de partage, rendue une fois par `node scripts/og/rendre.mjs`.
+ * L'image de partage par DÉFAUT, pour l'adresse nue.
  *
- * C'est un fichier posé dans `public/`, pas une image générée à la demande :
- * elle ne coûte rien au serveur et ne peut pas casser en production le jour où
- * une police distante répond mal. Les chiffres qu'elle affiche sortent du
- * moteur ; si un barème bouge, il faut la re-rendre.
+ * ⚠ Ce n'est plus l'image de tout le monde. Un lien partagé porte le dossier
+ * dans sa requête, et `generateMetadata` de la page pointe alors sur
+ * `/api/avis?…`, qui refabrique la une aux chiffres de celui qui partage.
+ * `og.png` ne sert qu'à celui qui arrive sans paramètre : il montre le
+ * salarié médian. On le refait avec `node scripts/og/rendre.mjs`, qui appelle
+ * la même route ; il n'y a plus deux mises en page à tenir d'accord.
  */
 const PARTAGE = {
   url: "/og.png",
   width: 1200,
   height: 630,
-  alt: "Dépôt de plainte : Le Grand Braquage. Sur une carrière au salaire médian, 2 190 € net avant impôt par mois, 989 502 € prélevés. Placés en fonds en euros, ils auraient fait 1 127 504 €, contre 1 040 463 € rendus. Coupable, et le verdict bascule à 2 038 € net.",
+  alt: "La Gazette des Prélèvements : braqué de 1 017 844 € sur une carrière au salaire médian, 2 190 € net avant impôt par mois. Placés en fonds euros à 0,7 %, ils auraient fait 1 160 777 €, contre 1 040 463 € rendus. Manque à gagner : 120 314 €. Coupable.",
 } as const;
 
 export const metadata: Metadata = {

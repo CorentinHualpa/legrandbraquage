@@ -3,7 +3,8 @@
 import { useMemo, useState } from "react";
 
 import { Carte, Commissaire, Kicker, Volet } from "./Carte";
-import { ETIQUETTES, taux } from "./Bourse";
+import { taux } from "./Bourse";
+import { ETIQUETTES_PLACEMENT as ETIQUETTES } from "@/lib/placements";
 import { Audition } from "../Audition";
 import { CarteAvis } from "../CarteAvis";
 import type { Pieces } from "@/lib/images";
@@ -79,8 +80,17 @@ export function Avis({
     });
   }, [cas, cran]);
 
+  const requete = requeteDuCas(cas);
   const lien =
-    typeof window === "undefined" ? "" : `${window.location.origin}/${requeteDuCas(cas)}#verdict`;
+    typeof window === "undefined" ? "" : `${window.location.origin}/${requete}#verdict`;
+  /*
+   * L'image, pour les endroits où un lien ne sert à rien : Instagram et TikTok
+   * n'affichent aucun aperçu et ne rendent pas les liens cliquables. On ouvre
+   * le PNG dans un onglet plutôt que de forcer un téléchargement : sur iOS
+   * l'attribut `download` ne fait rien, alors qu'un appui long sur l'image
+   * enregistre dans la pellicule.
+   */
+  const image = `/api/avis${requete}`;
 
   async function partager() {
     if (!lien) return;
@@ -104,16 +114,27 @@ export function Avis({
     <Carte
       numero={numero}
       total={total}
-      nature="Pièce à placarder"
+      nature="L’édition de demain"
       retour={retour}
       photo={{ numero: 6, pieces, hauteur: 220 }}
       action={{ libelle: copie ? "Lien copié" : "Partager", onClick: partager }}
       actionSecondaire={{ libelle: "Refaire la déposition", onClick: recommencer }}
       pied={
-        <p className="text-center text-[12.5px] text-ligne">
-          Le lien porte votre salaire, votre statut, vos réponses et votre enveloppe, rien d’autre.{" "}
-          <a href="/methode" className="underline underline-offset-2">Comment c’est calculé.</a>
-        </p>
+        <div className="flex flex-col gap-2">
+          <a
+            href={image}
+            target="_blank"
+            rel="noopener"
+            className="flex items-center justify-center border border-papier/30 px-4 py-2.5 text-center text-[14.5px] text-papier-2 transition-colors hover:bg-papier/10"
+          >
+            Enregistrer la une en image
+            <span className="ml-2 font-mono text-[10px] tracking-[0.12em] text-ligne uppercase">Pour Instagram</span>
+          </a>
+          <p className="text-center text-[12.5px] text-ligne">
+            Le lien porte votre salaire, votre statut, vos réponses et votre enveloppe, rien d’autre.{" "}
+            <a href="/methode" className="underline underline-offset-2">Comment c’est calculé.</a>
+          </p>
+        </div>
       }
     >
       <div className="-mt-6 -rotate-[1.5deg]">
@@ -129,17 +150,17 @@ export function Avis({
         />
       </div>
 
-      {/* Le mur : les avis déjà collés, à côté du tien. */}
+      {/* Les brèves de la même page : trois autres cas, mêmes réponses. */}
       <div className="flex flex-col gap-2">
-        <Kicker>Déjà sur le mur, mêmes réponses, même enveloppe</Kicker>
+        <Kicker>Dans la même affaire · mêmes réponses, même enveloppe</Kicker>
         <div className="grid grid-cols-3 gap-2">
           {mur.map((m, i) => (
             <div
               key={m.id}
-              className="papier-regle flex flex-col gap-1 bg-[#e9e2d2] px-2 py-2 text-encre shadow-[0_10px_20px_rgba(0,0,0,0.5)]"
+              className="flex flex-col gap-1 bg-[#ece5d5] px-2 py-2 text-encre shadow-[0_10px_20px_rgba(0,0,0,0.5)]"
               style={{ transform: `rotate(${[-2, 1.5, -1][i]}deg)` }}
             >
-              <span className="font-mono text-[7.5px] tracking-[0.12em] text-encre-3 uppercase">Avis de recherche</span>
+              <span className="border-b border-cadre-bord pb-0.5 font-mono text-[7.5px] tracking-[0.12em] text-encre-3 uppercase">En bref</span>
               <span className="text-[12px] leading-tight font-semibold">{m.nom}</span>
               <span className="chiffres font-mono text-[12px] leading-none font-semibold text-rouge-texte">{euros(m.pris)} €</span>
               <span className={`font-mono text-[7.5px] tracking-[0.1em] ${m.braquage ? "text-rouge-texte" : "text-bleu"}`}>
