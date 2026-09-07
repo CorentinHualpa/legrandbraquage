@@ -63,7 +63,7 @@ export function AvisDeRecherche({
   }
 
   return (
-    <Feuille className="mt-10 border-t-2 border-dashed border-ligne pt-2">
+    <Feuille id="avis-de-recherche" className="mt-10 border-t-2 border-dashed border-ligne pt-2">
       <EnTete nature="PIÈCE À PLACARDER" titre="Avis de recherche" />
 
       <Scelle

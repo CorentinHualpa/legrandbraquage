@@ -49,6 +49,48 @@ export function Instruction({ pieces }: { pieces: Pieces }) {
   const calculable = regimeCalculable(regime);
 
   /**
+   * Faire descendre vers une pièce du dossier, APRÈS que React l'ait posée.
+   *
+   * ⚠ Un bouton qui révèle huit mille pixels de contenu sous la ligne de
+   * flottaison sans bouger l'écran ne montre RIEN : sur un téléphone, « Ouvrir
+   * l'instruction » est le dernier élément visible, donc après le clic la vue
+   * affiche exactement ce qu'elle affichait avant. Le libellé passait même à
+   * « Descendre au procès-verbal » sans jamais descendre.
+   *
+   * On ne peut pas défiler dans le gestionnaire de clic : au moment où il
+   * s'exécute, la section n'existe pas encore dans le document. On enregistre
+   * donc une DEMANDE, et l'effet la sert une fois le rendu validé. Le jeton
+   * rend la demande unique, sinon deux clics de suite sur la même cible ne
+   * relanceraient rien.
+   *
+   * Un CLIC glisse, une ARRIVÉE saute. Un clic déplace de quelques écrans et le
+   * mouvement dit d'où l'on vient ; arriver sur une ancre à sept mille pixels
+   * du haut déclencherait un vol animé à travers tout le dossier, ce qu'aucun
+   * navigateur ne fait sur une ancre native.
+   *
+   * Le glissement ne force jamais `behavior: "smooth"` : `html` porte
+   * `scroll-behavior: smooth`, que la feuille de style repasse à `auto` sous
+   * `prefers-reduced-motion`. Le forcer ici passerait outre ce réglage.
+   */
+  const [demandeDefilement, setDemandeDefilement] = useState<{
+    id: string;
+    instantane: boolean;
+    jeton: number;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!demandeDefilement) return;
+    document.getElementById(demandeDefilement.id)?.scrollIntoView(
+      demandeDefilement.instantane
+        ? { block: "start", behavior: "instant" }
+        : { block: "start" },
+    );
+  }, [demandeDefilement]);
+
+  const descendreVers = (id: string, instantane = false) =>
+    setDemandeDefilement({ id, instantane, jeton: Date.now() });
+
+  /**
    * Un dossier arrivé par un lien partagé se rouvre tel qu'il a été partagé.
    *
    * La lecture se fait APRÈS le montage et pas dans l'état initial : la page
@@ -69,7 +111,22 @@ export function Instruction({ pieces }: { pieces: Pieces }) {
     setPerimetre(cas.perimetre);
     // Un lien de patron de TPE sans forme juridique n'a pas de régime résolu :
     // on laisse le dossier fermé, la question est posée à l'écran.
-    if (regimeCalculable(regimeDe(cas.statut, cas.formeTpe, cas.activite))) setOuverte(true);
+    const ouvrable = regimeCalculable(regimeDe(cas.statut, cas.formeTpe, cas.activite));
+    if (ouvrable) setOuverte(true);
+
+    /*
+     * Une ancre dans l'adresse doit mener quelque part.
+     *
+     * Le navigateur applique le `#` au chargement, à un moment où la pièce visée
+     * n'existe pas encore : le dossier ne s'ouvre qu'ici. Sans ce relais, les
+     * identifiants de section seraient des ancres pour de faux, et un lien vers
+     * le jugement déposerait le lecteur en haut de la page sans rien dire.
+     *
+     * Sans ancre, on ne bouge PAS : un lien partagé doit poser le visiteur au
+     * début du dossier, pas au milieu d'un site qu'il ne connaît pas.
+     */
+    const ancre = window.location.hash.slice(1);
+    if (ouvrable && ancre) descendreVers(ancre, true);
   }, []);
 
   const simulation: Simulation | null = useMemo(() => {
@@ -132,7 +189,10 @@ export function Instruction({ pieces }: { pieces: Pieces }) {
         regime={regime}
         calculable={calculable}
         ouverte={ouverte}
-        ouvrir={() => setOuverte(true)}
+        ouvrir={() => {
+          setOuverte(true);
+          descendreVers("proces-verbal");
+        }}
       />
 
       {simulation ? (
@@ -159,7 +219,11 @@ export function Instruction({ pieces }: { pieces: Pieces }) {
             pivot={pivot}
             perimetre={perimetre}
           />
-          <Audition pieces={pieces} simulation={simulation} />
+          <Audition
+            pieces={pieces}
+            simulation={simulation}
+            ouvrirAudition={() => descendreVers("audition-cadre")}
+          />
           <AvisDeRecherche
             pieces={pieces}
             simulation={simulation}

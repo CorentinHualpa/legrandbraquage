@@ -27,7 +27,7 @@ export function Jugement({
   const fonctionnaire = simulation.entree.regime === "fonctionnaire";
 
   return (
-    <Feuille className="mt-10 border-t-2 border-dashed border-ligne pt-2">
+    <Feuille id="jugement" className="mt-10 border-t-2 border-dashed border-ligne pt-2">
       <EnTete nature="JUGEMENT · RENDU CE JOUR" titre="Le Grand Braquage" />
 
       <Scelle

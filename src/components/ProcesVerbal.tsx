@@ -46,7 +46,7 @@ export function ProcesVerbal({
   const detail = plateauDroit.detailPension;
 
   return (
-    <Feuille className="mt-10 border-t-2 border-dashed border-ligne pt-2">
+    <Feuille id="proces-verbal" className="mt-10 border-t-2 border-dashed border-ligne pt-2">
       <EnTete
         nature="PROCÈS-VERBAL DE CONSTAT"
         titre="Le Grand Braquage"

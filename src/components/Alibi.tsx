@@ -39,7 +39,7 @@ export function Alibi({
   const fourchette = simulation.plateauDroit.fourchetteRetraite;
 
   return (
-    <Feuille className="mt-10 border-t-2 border-dashed border-ligne pt-2">
+    <Feuille id="alibi" className="mt-10 border-t-2 border-dashed border-ligne pt-2">
       <EnTete
         nature="RAPPORT D’EXPERTISE"
         titre="L’alibi du million"

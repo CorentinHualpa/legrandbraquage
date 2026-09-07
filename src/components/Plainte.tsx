@@ -50,7 +50,7 @@ export function Plainte({
   ouvrir: () => void;
 }) {
   return (
-    <Feuille>
+    <Feuille id="plainte">
       <EnTete
         nature="DÉPÔT DE PLAINTE"
         titre="Le Grand Braquage"

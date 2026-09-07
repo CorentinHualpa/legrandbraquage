@@ -8,17 +8,26 @@
 
 import type { ReactNode } from "react";
 
-/** La feuille réglée, avec la marge du greffier. */
+/**
+ * La feuille réglée, avec la marge du greffier.
+ *
+ * L'`id` est l'ancre de la pièce dans le dossier : c'est vers elle que les
+ * boutons font descendre, et elle sert aussi de lien profond. `scroll-mt-4`
+ * laisse respirer le titre au lieu de le coller au bord haut de l'écran.
+ */
 export function Feuille({
   children,
   className = "",
+  id,
 }: {
   children: ReactNode;
   className?: string;
+  id?: string;
 }) {
   return (
     <div
-      className={`papier-regle marge-greffe relative mx-auto w-full max-w-[620px] bg-papier ${className}`}
+      id={id}
+      className={`papier-regle marge-greffe relative mx-auto w-full max-w-[620px] scroll-mt-4 bg-papier ${className}`}
     >
       <div className="relative flex flex-col gap-5 py-6 pr-5 pl-10 sm:gap-6 sm:pr-8 sm:pl-16">
         {children}

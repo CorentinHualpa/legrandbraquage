@@ -28,9 +28,12 @@ const AGENT = "le-braqueur";
 export function Audition({
   pieces,
   simulation,
+  ouvrirAudition,
 }: {
   pieces: Pieces;
   simulation: Simulation;
+  /** Fait descendre jusqu'au cadre, sinon le widget se monte hors de l'écran. */
+  ouvrirAudition: () => void;
 }) {
   const [ouverte, setOuverte] = useState(false);
   const monte = useRef(false);
@@ -71,7 +74,7 @@ export function Audition({
   }, [ouverte, cle]);
 
   return (
-    <Feuille className="mt-10 border-t-2 border-dashed border-ligne pt-2">
+    <Feuille id="audition" className="mt-10 border-t-2 border-dashed border-ligne pt-2">
       <EnTete
         nature="PROCÈS-VERBAL D’AUDITION"
         titre="Le suspect parle"
@@ -125,7 +128,10 @@ export function Audition({
       ) : !ouverte ? (
         <button
           type="button"
-          onClick={() => setOuverte(true)}
+          onClick={() => {
+            setOuverte(true);
+            ouvrirAudition();
+          }}
           className="bg-encre px-4 py-3.5 text-center text-[16px] font-semibold text-papier transition-colors hover:bg-bleu"
         >
           Ouvrir l’audition
@@ -135,7 +141,7 @@ export function Audition({
       {/* Le cadre où le widget se monte. Il garde sa place avant l'ouverture. */}
       <div
         id="audition-cadre"
-        className={`${ouverte ? "min-h-[520px]" : "hidden"} border-2 border-encre bg-papier-2`}
+        className={`${ouverte ? "min-h-[520px]" : "hidden"} scroll-mt-4 border-2 border-encre bg-papier-2`}
       />
 
       <Renvoi>
