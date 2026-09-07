@@ -170,10 +170,20 @@ export function Photo({
 }
 
 /** Ce que dit le commissaire. Il vouvoie, l'interface tutoie. */
-export function Commissaire({ qui = "Le commissaire", children }: { qui?: string; children: ReactNode }) {
+export function Commissaire({
+  qui = "Le commissaire",
+  couleur = "rouge",
+  children,
+}: {
+  qui?: string;
+  /** Le commissaire parle en rouge, l'avocat du Braqueur en bleu. */
+  couleur?: "rouge" | "bleu";
+  children: ReactNode;
+}) {
+  const c = couleur === "bleu" ? "border-[#7fa3cf] text-[#7fa3cf]" : "border-rouge-clair text-rouge-clair";
   return (
-    <div className="flex flex-col gap-1 border-l-2 border-rouge-clair pl-3">
-      <span className="font-mono text-[9.5px] tracking-[0.16em] text-rouge-clair uppercase">{qui}</span>
+    <div className={`flex flex-col gap-1 border-l-2 pl-3 ${c}`}>
+      <span className="font-mono text-[9.5px] tracking-[0.16em] uppercase">{qui}</span>
       <p className="text-[17px] leading-[1.4] text-papier italic">{children}</p>
     </div>
   );

@@ -151,11 +151,16 @@ export function Bourse({
 
       <div className="grow" />
 
-      <Volet titre="Sauf que… la contre-expertise">
-        <p className="text-[14px] leading-relaxed text-ligne">
-          Personne ne place quarante-trois ans sans y toucher, et rien n’est gratuit. Le million de la
-          défense tient à trois hypothèses ; ce qu’il en reste quand on les retire :
-        </p>
+      <Volet titre="Sauf que… l’avocat du Braqueur demande la parole">
+        {pieces[28] ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={`/images/${pieces[28]}`} alt="L’avocat du Braqueur, dans le couloir" className="-mx-5 aspect-[16/9] w-[calc(100%+2.5rem)] max-w-none object-cover object-[50%_30%] saturate-[0.8] sm:-mx-6 sm:w-[calc(100%+3rem)]" decoding="async" />
+        ) : null}
+        <Commissaire qui="L’avocat du Braqueur" couleur="bleu">
+          « Objection. Mon client vous a pris cet argent, soit. Mais qui place quarante-trois ans sans
+          jamais y toucher ? Qui n’a pas de frais ? Qui n’a pas paniqué en 2008 ? Le million de
+          l’accusation tient à trois hypothèses. Regardez ce qu’il en reste quand on les retire. »
+        </Commissaire>
         <ul className="flex flex-col">
           {PALIERS_ALIBI.map((palier) => (
             <li key={palier.id}>
@@ -164,6 +169,9 @@ export function Bourse({
           ))}
         </ul>
         <div className="flex flex-col gap-2">
+          <Commissaire qui="L’avocat du Braqueur" couleur="bleu">
+            « Et les frais, monsieur le commissaire. Personne ne parle jamais des frais. »
+          </Commissaire>
           <Kicker>Les frais, qui comptent dans le verdict</Kicker>
           {CRANS_FRAIS.map((f) => (
             <Reponse

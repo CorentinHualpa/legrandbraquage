@@ -44,7 +44,7 @@ export function Rendu({
       total={total}
       nature="Ce qu’ils ont laissé"
       retour={retour}
-      photo={{ numero: 4, pieces, hauteur: 300, legende: "CLICHÉ 04 · LE COFFRE, APRÈS" }}
+      photo={{ numero: 14, pieces, hauteur: 300, legende: "CLICHÉ 14 · LE MOT DU BRAQUEUR" }}
       action={{ libelle: "Une dernière question", onClick: suivant }}
     >
       <Kicker couleur="bleu">Et sur toute ta vie, ils t’auront rendu</Kicker>

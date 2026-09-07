@@ -4,7 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 
 import { Couverture } from "./cartes/Couverture";
 import { Deposition, type EtatSaisie } from "./cartes/Deposition";
+import { Cafe } from "./cartes/Cafe";
 import { Pris } from "./cartes/Pris";
+import { Temoin } from "./cartes/Temoin";
 import { Butin } from "./cartes/Butin";
 import { Bourse } from "./cartes/Bourse";
 import { Liberation } from "./cartes/Liberation";
@@ -35,7 +37,7 @@ import { partsFiscales, regimeCalculable, regimeDe } from "@/lib/statuts";
  * chômage : la question ne lui est pas posée.
  */
 const ECRANS = [
-  "couverture", "deposition", "pris", "butin", "liberation", "aparte",
+  "couverture", "deposition", "cafe", "pris", "butin", "temoin", "liberation", "aparte",
   "ecole", "sante", "chomage", "rendu", "bourse", "verdict", "avis",
 ] as const;
 type Ecran = (typeof ECRANS)[number];
@@ -134,6 +136,26 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
     return simuler({ ...etat, parts, perimetre, paliers, placement });
   }, [calculable, etat, parts, perimetre, paliers, placement]);
 
+  /**
+   * Le témoin : la même personne, même net avant impôt, dans l'autre statut.
+   * Un salarié voit un indépendant au réel, tout le monde d'autre voit un
+   * salarié. Calculé seulement sur son écran.
+   */
+  const temoin = useMemo<Simulation | null>(() => {
+    if (!simulation || ecran !== "temoin") return null;
+    const salarie = simulation.entree.regime === "salarie";
+    try {
+      return simuler({
+        netMensuel: simulation.netAvantImpotActuel,
+        statut: salarie ? "independant" : "salarie",
+        activite: salarie ? "ssi" : undefined,
+        parts, couple: etat.couple, perimetre, paliers, placement,
+      });
+    } catch {
+      return null;
+    }
+  }, [simulation, ecran, etat.couple, parts, perimetre, paliers, placement]);
+
   /** Le seuil, pour CE régime, CE périmètre et CES réponses. Quarante simulations, donc seulement au verdict. */
   const pivot = useMemo(() => {
     if (!simulation || ecran !== "verdict") return null;
@@ -167,7 +189,7 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
           changer={changer}
           regime={regime}
           calculable={calculable}
-          signer={() => aller("pris")}
+          signer={() => aller("cafe")}
           retour={() => aller("couverture")}
           numero={1}
           total={total}
@@ -186,10 +208,14 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
 
   return (
     <main className="min-h-dvh bg-nuit">
-      {ecran === "pris" ? (
+      {ecran === "cafe" ? (
+        <Cafe {...commun} simulation={simulation} />
+      ) : ecran === "pris" ? (
         <Pris {...commun} simulation={simulation} perimetre={perimetre} setPerimetre={setPerimetre} />
       ) : ecran === "butin" ? (
         <Butin {...commun} simulation={simulation} />
+      ) : ecran === "temoin" ? (
+        <Temoin {...commun} simulation={simulation} temoin={temoin} />
       ) : ecran === "bourse" ? (
         <Bourse
           {...commun}
