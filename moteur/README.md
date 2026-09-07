@@ -230,6 +230,7 @@ officielle, et le moteur présente son résultat comme calculé.
 | `baremes-fonction-publique.js` | Les barèmes publics, et l'avertissement du COR |
 | `fonction-publique.js` | Retenues, cotisations, pension d'un titulaire |
 | `liberation.js` | L'heure de libération, avec ses DEUX dénominateurs |
+| `consommation.js` | Les accises déclarées : tabac (paquet à 13 € dont 82,5 % de taxes), carburant (TICPE et TVA du plein), alcool en ordre de grandeur ; ajoutées à la TVA quand `entree.habitudes` est donné |
 | `paliers.js` | Le second plateau par paliers : école, santé, chômage, aux prix unitaires sourcés (DEPP, DREES, Unédic), palier choisi par la personne |
 | `index.js` | `simuler()`, `salairePivot()`, `placerSaRetraite()` |
 | `baremes-tns.js` | Les barèmes de l'indépendant, et pourquoi l'étalon change |
