@@ -4,7 +4,6 @@ import { EnTete, Feuille, Renvoi, Scelle, Tampon } from "./papier";
 import type { Pieces } from "./Instruction";
 import { euros, eurosSigne, nombre, pourcent } from "@/lib/format";
 import {
-  LIGNES_PERIMETRE,
   heureDeLiberation,
   type Perimetre,
   type Simulation,
@@ -17,7 +16,7 @@ import {
   enAnneesDeDepute,
   objetPour,
 } from "@/lib/objets";
-import { STATUTS } from "@/lib/statuts";
+import { LIGNES_PERIMETRE, STATUTS, type Regime } from "@/lib/statuts";
 
 export function ProcesVerbal({
   pieces,
@@ -43,6 +42,13 @@ export function ProcesVerbal({
   const annees = anneesSansTravailler(plateauGauche.total, netMensuel);
   const enAnnees = plateauGauche.total >= SEUIL_ANNEES;
   const nomStatut = STATUTS.find((s) => s.id === statut)?.libelle ?? "salarié";
+  /*
+   * Les libellés des quatre postes viennent du RÉGIME, pas d'un jeu unique.
+   * Un freelance n'a pas de paie : ce qui lui est pris l'est sur ce qu'il
+   * facture, et la ligne « part employeur » n'existe pas chez lui. Le régime
+   * est déjà dans la simulation, inutile de le repasser en propriété.
+   */
+  const lignesPerimetre = LIGNES_PERIMETRE[simulation.entree.regime as Regime];
   const detail = plateauDroit.detailPension;
 
   return (
@@ -110,9 +116,36 @@ export function ProcesVerbal({
 
         {/* Les interrupteurs de périmètre : c'est l'utilisateur qui empile. */}
         <ul className="mt-1 flex flex-col border-t border-ligne">
-          {LIGNES_PERIMETRE.map((ligne) => {
+          {lignesPerimetre.map((ligne) => {
             const actif = perimetre[ligne.cle];
             const montant = plateauGauche.lignes[ligne.cle];
+
+            /*
+             * Un poste qui n'existe pas dans ce régime s'affiche, mais ne se
+             * coche pas. Son absence est un résultat qui se compare aux autres
+             * régimes ; en faire une case à cocher qui ne change rien serait
+             * une panne aux yeux de celui qui clique dessus.
+             */
+            if (ligne.sansObjet) {
+              return (
+                <li key={ligne.cle} className="border-b border-ligne">
+                  <div className="flex w-full items-center gap-3 py-2.5">
+                    <span
+                      className="flex h-4 w-4 shrink-0 items-center justify-center border-[1.6px] border-dashed border-cadre-bord"
+                      aria-hidden
+                    />
+                    <span className="flex grow flex-col">
+                      <span className="text-[14px] text-encre-2">{ligne.geste}</span>
+                      <span className="text-[12px] text-encre-3">{ligne.nom}</span>
+                    </span>
+                    <span className="chiffres shrink-0 font-mono text-[13px] text-encre-3">
+                      —
+                    </span>
+                  </div>
+                </li>
+              );
+            }
+
             return (
               <li key={ligne.cle} className="border-b border-ligne">
                 <button
@@ -185,16 +218,22 @@ export function ProcesVerbal({
           cette phrase, la ligne « cotisations patronales » du fonctionnaire se
           lit comme un privilège alors qu'elle mesure une démographie.
         */}
-        {simulation.entree.regime === "tns" && perimetre.patronales ? (
+        {/*
+          ⚠ Plus conditionné à la case « part employeur » : chez un non-salarié
+          elle ne se coche pas, donc l'explication serait devenue inatteignable
+          en même temps que la case. Elle vaut aussi pour le libéral réglementé,
+          qui n'a pas plus d'employeur qu'un artisan.
+        */}
+        {simulation.entree.regime === "tns" || simulation.entree.regime === "cipav" ? (
           <div className="border-l-[3px] border-bleu bg-papier-3 px-3 py-3">
             <p className="font-mono text-[9.5px] tracking-[0.12em] text-bleu">
-              LA LIGNE À ZÉRO N’EST PAS UN TROU
+              LA LIGNE ABSENTE N’EST PAS UN TROU
             </p>
             <p className="mt-1 text-[13.5px] leading-relaxed">
-              Tu n’as pas d’employeur, donc il n’y a rien à prendre avant ta
-              paie. Tu vois{" "}
+              Tu n’as pas d’employeur : personne ne verse avant que tu te paies,
+              et il n’y a rien entre ton client et toi. Tu vois{" "}
               <span className="font-semibold">cent pour cent de ce que tu verses</span>
-              , ce qui fait de ta fiche la plus honnête des trois, et de ton
+              , ce qui fait de ta fiche la plus honnête des quatre, et de ton
               total le plus bas à revenu net égal.
             </p>
             <p className="mt-2 text-[13.5px] leading-relaxed">

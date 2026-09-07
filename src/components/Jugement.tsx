@@ -25,6 +25,11 @@ export function Jugement({
     perimetre.impotRevenu &&
     perimetre.consommation;
   const fonctionnaire = simulation.entree.regime === "fonctionnaire";
+  // Un indépendant et un libéral réglementé n'ont pas de part employeur : le
+  // renvoi qui parle de « ce qui est prélevé avant la paie » ne les concerne
+  // pas, et leur écrire « aucun salarié n'est perdant net » ne leur dit rien.
+  const sansEmployeur =
+    simulation.entree.regime === "tns" || simulation.entree.regime === "cipav";
 
   return (
     <Feuille id="jugement" className="mt-10 border-t-2 border-dashed border-ligne pt-2">
@@ -216,6 +221,17 @@ export function Jugement({
             <span className="font-semibold">73,8 % contre 74,8 %</span> pour la
             génération 1950 à carrière complète. Les deux chiffres sont vrais et
             ne mesurent pas la même chose.
+          </>
+        ) : sansEmployeur ? (
+          <>
+            Tu vois cent pour cent de ce que tu verses : rien n’est prélevé
+            avant que tu te paies, il n’y a personne entre ton client et toi.
+            C’est la fiche la plus honnête des quatre, et c’est aussi ce qui
+            rend le procès plus difficile à instruire{" "}
+            <span className="font-semibold">
+              que celui d’un salarié, à qui l’on cache la moitié du prélèvement
+            </span>
+            . Chez toi, tout est déjà sur la table.
           </>
         ) : (
           <>

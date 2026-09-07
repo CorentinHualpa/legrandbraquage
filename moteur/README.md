@@ -5,7 +5,7 @@ c'est la seule façon de rendre le résultat opposable : n'importe qui peut le
 lire, le rejouer et le contredire.
 
 ```bash
-pnpm test               # 66 tests
+pnpm test               # 69 tests
 ```
 
 Aucune dépendance, aucune étape de build. Modules ES natifs, exécutables tels
@@ -115,8 +115,9 @@ vingt-cinq **meilleures** années. Celle d'un libéral est un régime par points
 **toute** la carrière, plafonné à 582 points par an. Une mauvaise année pèse chez
 l'un et disparaît chez l'autre.
 
-Le salaire-pivot suit : **6 681 € net** pour un libéral CIPAV, contre 5 669 €
-pour un artisan.
+Le salaire-pivot suit : **3 330 € net** pour un libéral CIPAV, contre 3 504 €
+pour un artisan. Il bascule PLUS TÔT que l'artisan, alors qu'il paie moins à bas
+revenu : sa complémentaire deux fois plus chère le rattrape avant.
 
 ---
 
@@ -170,7 +171,7 @@ pour un artisan.
 | `tns.js` | Assiette unique, cotisations, pension par les règles |
 | `baremes-cipav.js` | Le barème du libéral réglementé, et ses deux sources qui divergent |
 | `cipav.js` | Cotisations CIPAV, et une pension par POINTS dans les deux étages |
-| `test.mjs` | 66 tests, dont deux étalons |
+| `test.mjs` | 69 tests, dont deux étalons |
 
 Toute modification d'un barème doit citer un texte officiel. C'est cette règle,
 et pas le ton de la page, qui rend le simulateur inattaquable.
@@ -202,9 +203,17 @@ Deux résultats à connaître :
 **Le taux effectif dessine une cloche**, pas une droite. Il culmine à 31,98 % au
 voisinage d'un plafond de sécurité sociale d'assiette, puis redescend.
 
-**Il n'y a aucune part employeur**, et ce zéro n'est pas un trou : un
+**Il n'y a aucune part employeur**, et cette absence n'est pas un trou : un
 indépendant voit cent pour cent de ce qu'il verse. C'est ce qui place son
-salaire pivot à **5 669 €**, très au-dessus des 2 219 € du salarié.
+salaire pivot à **3 504 €**, au-dessus des 2 219 € du salarié.
+
+⚠ Ce chiffre valait 5 669 € jusqu'au 07/09/2026, et il était faux. La projection
+de carrière reconstituait le net imposable en additionnant `csgNonDeductible` et
+`crds` ; un indépendant n'a pas de ligne `crds`, sa CSG-CRDS étant une seule
+contribution de 9,70 %. La clé absente valait `undefined`, la somme valait NaN,
+et l'impôt sur le revenu rendait **ZÉRO sur quarante-trois ans**, sans que rien
+ne le signale. Le net imposable se demande désormais au régime, et un net
+imposable non chiffrable LÈVE au lieu de valoir zéro d'impôt.
 
 ⚠ Sa pension se **calcule** par les règles, faute de taux de remplacement
 publié : la DREES exclut explicitement les non-salariés de son champ, parce que

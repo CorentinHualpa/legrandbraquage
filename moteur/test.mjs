@@ -748,3 +748,58 @@ test('CIPAV : inversion du disponible vers le revenu brut social', () => {
     );
   }
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+test('l’impôt sur le revenu est chiffré dans TOUS les régimes', () => {
+  // ⚠ Ce test verrouille un bug qui a vécu dans le moteur sans qu'aucun des
+  // 66 tests précédents ne le voie : la projection de carrière reconstituait le
+  // net imposable en additionnant `csgNonDeductible` et `crds`. Un indépendant
+  // n'a PAS de ligne `crds` — sa CSG-CRDS est une seule contribution de 9,70 %.
+  // La clé absente valait `undefined`, la somme valait NaN, et l'impôt rendait
+  // ZÉRO. Un indépendant affichait donc 0 € d'impôt sur quarante-trois ans,
+  // chiffre parfaitement crédible et parfaitement faux.
+  //
+  // À net après impôt égal, l'impôt doit être du même ordre dans les quatre
+  // régimes : c'est le MÊME barème appliqué à des revenus nets identiques.
+  const cas = [
+    ['salarie', {}],
+    ['independant', {}],
+    ['independant', { activite: 'cipav' }],
+    ['fonctionnaire', {}],
+  ];
+  const impots = cas.map(([statut, extra]) => {
+    const s = M.simuler({ netMensuel: 2500, statut, ...extra });
+    const ir = s.carriere.totaux.impotRevenu;
+    assert.ok(Number.isFinite(ir), `${statut} : impôt non chiffrable (${ir})`);
+    assert.ok(ir > 100_000, `${statut} : impôt de ${Math.round(ir)} €, anormalement bas`);
+    return ir;
+  });
+  const ecartMax = (Math.max(...impots) - Math.min(...impots)) / Math.max(...impots);
+  assert.ok(ecartMax < 0.05, `écart d’impôt entre régimes : ${(ecartMax * 100).toFixed(1)} %`);
+});
+
+test('un net imposable non chiffrable LÈVE, il ne vaut pas zéro d’impôt', () => {
+  // Le garde-fou qui aurait attrapé le bug ci-dessus. Une donnée manquante doit
+  // casser bruyamment : rendre 0 € d'impôt sur une entrée absurde fabrique un
+  // chiffre faux et crédible, exactement ce que ce dossier reproche à la
+  // partie adverse.
+  assert.throws(() => impotSurLeRevenu(NaN), /non chiffrable/);
+  assert.throws(() => impotSurLeRevenu(undefined), /non chiffrable/);
+  assert.throws(() => impotSurLeRevenu(Infinity), /non chiffrable/);
+  // Un revenu réellement nul, lui, reste un revenu : zéro d'impôt, sans lever.
+  assert.equal(impotSurLeRevenu(0), 0);
+});
+
+test('cocher l’impôt AJOUTE vraiment quelque chose, dans tous les régimes', () => {
+  // Le symptôme visible du bug : la case « impôt sur le revenu » affichait 0
+  // pour un indépendant, donc la cocher ne changeait pas le verdict.
+  const sans = { salariales: true, patronales: true, impotRevenu: false, consommation: false };
+  const avec = { ...sans, impotRevenu: true };
+  for (const [statut, extra] of [
+    ['salarie', {}], ['independant', {}], ['independant', { activite: 'cipav' }], ['fonctionnaire', {}],
+  ]) {
+    const a = M.simuler({ netMensuel: 2500, statut, ...extra, perimetre: sans }).plateauGauche.total;
+    const b = M.simuler({ netMensuel: 2500, statut, ...extra, perimetre: avec }).plateauGauche.total;
+    assert.ok(b - a > 100_000, `${statut} : cocher l’impôt n’ajoute que ${Math.round(b - a)} €`);
+  }
+});

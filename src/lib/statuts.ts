@@ -114,3 +114,121 @@ export const NOMS_REGIME: Record<Regime, string> = {
   cipav: "professionnel libéral réglementé",
   fonctionnaire: "fonctionnaire",
 };
+
+/**
+ * Les quatre postes que l'utilisateur empile, DITS DANS SA LANGUE À LUI.
+ *
+ * ⚠ Un seul jeu de libellés pour tout le monde ment à trois personnes sur
+ * quatre. « Pris sur ta paie, sous tes yeux » n'a aucun sens pour un freelance,
+ * qui n'a pas de paie : ce qui lui est pris l'est sur ce qu'il facture. Et
+ * « Pris avant ta paie, sans te le dire » lui affichait zéro euro en face d'une
+ * case à cocher, ce qui ressemble à un trou dans le calcul alors que c'est LE
+ * résultat de son régime : personne ne verse avant lui.
+ *
+ * Le geste change donc avec le régime, et une ligne qui n'existe pas dans un
+ * régime le DIT au lieu de s'afficher à zéro.
+ *
+ * ⚠ « Repris une fois par an, par courrier » était faux pour tout le monde
+ * depuis 2019 : l'impôt est prélevé à la source pour un salarié comme pour un
+ * agent public, et par acompte mensuel ou trimestriel pour un indépendant.
+ */
+export type ClePerimetre = "salariales" | "patronales" | "impotRevenu" | "consommation";
+
+export type LignePerimetre = {
+  cle: ClePerimetre;
+  /** Le geste, du point de vue de la victime. */
+  geste: string;
+  /** Le nom technique du poste, sous le geste. */
+  nom: string;
+  /**
+   * true = ce poste N'EXISTE PAS dans ce régime. La ligne s'affiche quand même,
+   * parce que son absence est un résultat qui se compare, mais elle ne se coche
+   * pas : une case qui ne change rien quand on clique dessus est une panne aux
+   * yeux de celui qui clique.
+   */
+  sansObjet?: boolean;
+};
+
+/** Poste de consommation : le seul qui se dise pareil pour tout le monde. */
+const CONSOMMATION: LignePerimetre = {
+  cle: "consommation",
+  geste: "Repris à chaque caddie, sans reçu",
+  nom: "TVA et taxes de consommation",
+};
+
+export const LIGNES_PERIMETRE: Record<Regime, LignePerimetre[]> = {
+  salarie: [
+    {
+      cle: "salariales",
+      geste: "Pris sur ta paie, sous tes yeux",
+      nom: "cotisations salariales",
+    },
+    {
+      cle: "patronales",
+      geste: "Pris avant ta paie, sans te le dire",
+      nom: "cotisations patronales, jamais imprimées sur ton net",
+    },
+    {
+      cle: "impotRevenu",
+      geste: "Repris sur chaque virement, à la source",
+      nom: "impôt sur le revenu",
+    },
+    CONSOMMATION,
+  ],
+  fonctionnaire: [
+    {
+      cle: "salariales",
+      geste: "Retenu sur ton traitement, chaque mois",
+      nom: "retenue pour pension, CSG-CRDS et régime additionnel",
+    },
+    {
+      cle: "patronales",
+      geste: "Versé par ton employeur public à ton propre régime",
+      nom: "contribution employeur, 37,65 % à la CNRACL et 82,28 % pour l’État",
+    },
+    {
+      cle: "impotRevenu",
+      geste: "Repris sur chaque virement, à la source",
+      nom: "impôt sur le revenu",
+    },
+    CONSOMMATION,
+  ],
+  tns: [
+    {
+      cle: "salariales",
+      geste: "Pris sur ce que tu factures, avant de te payer",
+      nom: "cotisations et contributions sociales, sur ton revenu professionnel",
+    },
+    {
+      cle: "patronales",
+      geste: "Personne ne verse avant toi",
+      nom: "aucune part employeur : tu es ton propre employeur",
+      sansObjet: true,
+    },
+    {
+      cle: "impotRevenu",
+      geste: "Repris par acompte, tous les mois ou tous les trimestres",
+      nom: "impôt sur le revenu",
+    },
+    CONSOMMATION,
+  ],
+  cipav: [
+    {
+      cle: "salariales",
+      geste: "Pris sur ce que tu factures, avant de te payer",
+      nom: "cotisations CIPAV et contributions sociales",
+    },
+    {
+      cle: "patronales",
+      geste: "Personne ne verse avant toi",
+      nom: "aucune part employeur : tu es ton propre employeur",
+      sansObjet: true,
+    },
+    {
+      cle: "impotRevenu",
+      geste: "Repris par acompte, tous les mois ou tous les trimestres",
+      nom: "impôt sur le revenu",
+    },
+    CONSOMMATION,
+  ],
+};

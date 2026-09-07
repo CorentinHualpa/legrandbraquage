@@ -9,7 +9,9 @@
  */
 
 import { COURBE_AGE, CARRIERE } from './baremes-2026.js';
-import { brutDepuisNet, cotisationsSalariales, cotisationsPatronales } from './salaire.js';
+import {
+  brutDepuisNet, cotisationsSalariales, cotisationsPatronales, netsDepuisBrut,
+} from './salaire.js';
 import * as fp from './fonction-publique.js';
 import * as tns from './tns.js';
 import * as cipav from './cipav.js';
@@ -31,6 +33,7 @@ import { impotSurLeRevenu, taxesConsommationAnnuelles } from './impot.js';
 const REGIMES = {
   salarie: {
     brutDepuisNet,
+    netsDepuisBrut,
     salariales: cotisationsSalariales,
     patronales: cotisationsPatronales,
     vieillesse: (sal, pat) =>
@@ -43,6 +46,7 @@ const REGIMES = {
   },
   tns: {
     brutDepuisNet: tns.brutDepuisNet,
+    netsDepuisBrut: tns.netsDepuisBrut,
     salariales: tns.retenuesSalariales,
     patronales: tns.cotisationsPatronales,
     // Un indépendant n'a pas d'employeur : tout ce qui finance sa vieillesse
@@ -51,6 +55,7 @@ const REGIMES = {
   },
   cipav: {
     brutDepuisNet: cipav.brutDepuisNet,
+    netsDepuisBrut: cipav.netsDepuisBrut,
     salariales: cipav.retenuesSalariales,
     patronales: cipav.cotisationsPatronales,
     // Pas d'employeur non plus : le libéral voit cent pour cent de ce qu'il verse.
@@ -58,6 +63,7 @@ const REGIMES = {
   },
   fonctionnaire: {
     brutDepuisNet: fp.brutDepuisNet,
+    netsDepuisBrut: fp.netsDepuisBrut,
     salariales: fp.retenuesSalariales,
     patronales: fp.cotisationsPatronales,
     // Côté public, la contribution employeur au régime de pension EST la
@@ -134,7 +140,19 @@ export function deroulerCarriere(netMensuelActuel, opts = {}) {
     const sal = R.salariales(brut, opts);
     const pat = R.patronales(brut, opts);
     const netAvantImpot = brut - sal.total;
-    const netImposable = netAvantImpot + sal.lignes.csgNonDeductible + sal.lignes.crds;
+    /*
+     * ⚠ Le net imposable se DEMANDE au régime, il ne se rebricole pas ici.
+     *
+     * Cette ligne additionnait `sal.lignes.csgNonDeductible + sal.lignes.crds`.
+     * Un indépendant n'a PAS de ligne `crds` : sa CSG-CRDS est une seule
+     * contribution de 9,70 %, coupée en déductible et non déductible. La clé
+     * absente valait `undefined`, la somme valait `NaN`, et l'impôt rendait
+     * ZÉRO sans lever quoi que ce soit. Résultat : un indépendant affichait
+     * 0 € d'impôt sur toute sa carrière, là où un salarié au même net en
+     * affichait 142 836. Le régime avait déjà la bonne réponse dans
+     * `netsDepuisBrut`, personne ne la lui demandait.
+     */
+    const { netImposable } = R.netsDepuisBrut(brut, opts);
     const ir = impotSurLeRevenu(netImposable * 12, opts);
     const tva = taxesConsommationAnnuelles(netApresImpot, opts);
 

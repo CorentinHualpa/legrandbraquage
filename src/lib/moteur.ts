@@ -203,28 +203,6 @@ export const PERIMETRE_COMPLET: Perimetre = {
   consommation: true,
 };
 
-export const LIGNES_PERIMETRE = [
-  {
-    cle: "salariales" as const,
-    geste: "Pris sur ta paie, sous tes yeux",
-    nom: "cotisations salariales",
-  },
-  {
-    cle: "patronales" as const,
-    geste: "Pris avant ta paie, sans te le dire",
-    nom: "cotisations patronales",
-  },
-  {
-    cle: "impotRevenu" as const,
-    geste: "Repris une fois par an, par courrier",
-    nom: "impôt sur le revenu",
-  },
-  {
-    cle: "consommation" as const,
-    geste: "Repris à chaque caddie, sans reçu",
-    nom: "TVA et taxes de consommation",
-  },
-];
 
 export function simuler(entree: Entree): Simulation {
   return simulerJs(entree) as Simulation;

@@ -32,6 +32,20 @@ function impotParPart(revenuParPart) {
  */
 export function impotSurLeRevenu(netImposableAnnuel, opts = {}) {
   const { parts = 1, couple = false } = opts;
+  /*
+   * ⚠ Un net imposable qui n'est pas un nombre est une PANNE, pas un revenu nul.
+   *
+   * Sans ce refus, `NaN` traversait tout le calcul et ressortait en 0 € d'impôt,
+   * ce qui est un chiffre parfaitement crédible et parfaitement faux. C'est
+   * exactement ce qui est arrivé au régime de l'indépendant, et rien ne l'a
+   * signalé. Une donnée manquante doit casser bruyamment.
+   */
+  if (!Number.isFinite(netImposableAnnuel)) {
+    throw new Error(
+      `Net imposable non chiffrable (${netImposableAnnuel}). Un régime ne rend pas `
+      + 'son net imposable : c’est un contrat manquant, pas un revenu nul.',
+    );
+  }
   const revenuNetGlobal = netImposableAnnuel - abattementFraisPro(netImposableAnnuel);
   if (revenuNetGlobal <= 0) return 0;
 
