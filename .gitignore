@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# les pistes de la caricature : des brouillons, pas un livrable
+scripts/braqueur/pistes/
