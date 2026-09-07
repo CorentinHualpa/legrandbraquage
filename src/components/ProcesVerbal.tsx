@@ -22,7 +22,6 @@ export function ProcesVerbal({
   pieces,
   simulation,
   netMensuel,
-  setNetMensuel,
   perimetre,
   setPerimetre,
   statut,
@@ -30,7 +29,6 @@ export function ProcesVerbal({
   pieces: Pieces;
   simulation: Simulation;
   netMensuel: number;
-  setNetMensuel: (n: number) => void;
   perimetre: Perimetre;
   setPerimetre: (p: Perimetre) => void;
   statut: Statut;
@@ -134,32 +132,6 @@ export function ProcesVerbal({
             </dd>
           </div>
         </dl>
-      </div>
-
-      {/* ─── Le curseur qui transforme tout en direct ─────────────────────── */}
-      <div className="flex flex-col gap-1.5">
-        <label
-          htmlFor="curseur-salaire"
-          className="font-mono text-[10px] tracking-[0.13em] text-encre-3"
-        >
-          {simulation.saisieEstLeBrut
-            ? "FAIS GLISSER TON CHIFFRE D’AFFAIRES, LE BUTIN SUIT"
-            : "FAIS GLISSER TON NET AVANT IMPÔT, LE BUTIN SUIT"}
-        </label>
-        <input
-          id="curseur-salaire"
-          type="range"
-          min={1200}
-          max={10000}
-          step={10}
-          value={Math.min(10000, Math.max(1200, netMensuel))}
-          onChange={(e) => setNetMensuel(Number(e.target.value))}
-          className="h-1.5 w-full cursor-pointer appearance-none rounded-none bg-ligne accent-rouge"
-        />
-        <div className="flex justify-between font-mono text-[10px] text-encre-3">
-          <span>1 200 €</span>
-          <span>10 000 €</span>
-        </div>
       </div>
 
       {/* ─── I. Le butin ───────────────────────────────────────────────────── */}

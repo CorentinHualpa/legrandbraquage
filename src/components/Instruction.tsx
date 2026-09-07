@@ -233,7 +233,6 @@ export function Instruction({ pieces }: { pieces: Pieces }) {
             pieces={pieces}
             simulation={simulation}
             netMensuel={netMensuel}
-            setNetMensuel={setNetMensuel}
             perimetre={perimetre}
             setPerimetre={setPerimetre}
             statut={statut}
