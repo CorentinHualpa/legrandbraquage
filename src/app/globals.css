@@ -24,6 +24,9 @@
   --color-rouge-sombre: #8e2620;
   --color-rouge-texte: #9c2b22;
   --color-bleu: #2c4a6e;
+  /* Le vert de ce qu'ils ont laissé : assez sombre pour tenir sur le papier
+     (6,3 de contraste sur #ece5d5), et il ne se confond pas avec le bleu. */
+  --color-vert: #24663f;
 
   /* La nuit du commissariat : le fond des cartes, et le rouge qui se lit dessus. */
   --color-nuit: #0f151c;

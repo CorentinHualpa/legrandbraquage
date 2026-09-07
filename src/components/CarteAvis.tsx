@@ -105,8 +105,9 @@ export function CarteAvis({
               <span className="text-[12px] leading-tight">Ça faisait</span>
               <span className="chiffres shrink-0 font-mono text-[12px] font-semibold">{euros(capital)} €</span>
             </div>
-            <div className="flex justify-between gap-2">
-              <span className="text-[12px] leading-tight">Rendu sur place</span>
+            {/* En vert : c'est la seule ligne de la une qui joue pour la victime. */}
+            <div className="flex justify-between gap-2 text-vert">
+              <span className="text-[12px] leading-tight">Oublié sur place</span>
               <span className="chiffres shrink-0 font-mono text-[12px] font-semibold">{euros(recu)} €</span>
             </div>
             <div className="mt-0.5 flex items-baseline justify-between gap-2 border-t border-encre pt-1">

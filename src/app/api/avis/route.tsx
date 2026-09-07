@@ -44,6 +44,7 @@ const ENCRE_3 = "#6b7885";
 const PAPIER = "#ece5d5";
 const ROUGE = "#b3341f";
 const BLEU = "#2c4a6e";
+const VERT = "#24663f";
 const CARTON = "#3f3a32";
 
 function police(fichier: string) {
@@ -180,8 +181,9 @@ function Journal({ une, visage }: { une: Une; visage: string | null }) {
                 <span style={{ fontSize: 19 }}>Ça faisait</span>
                 <span style={{ fontFamily: "Plex", fontSize: 19, fontWeight: 600 }}>{une.capital}</span>
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between", paddingTop: 2 }}>
-                <span style={{ fontSize: 19 }}>Rendu sur place</span>
+              {/* En vert : la seule ligne de la une qui joue pour la victime. */}
+              <div style={{ display: "flex", justifyContent: "space-between", paddingTop: 2, color: VERT }}>
+                <span style={{ fontSize: 19 }}>Oublié sur place</span>
                 <span style={{ fontFamily: "Plex", fontSize: 19, fontWeight: 600 }}>{une.recu}</span>
               </div>
               <div
