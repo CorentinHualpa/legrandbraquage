@@ -11,6 +11,23 @@
  * un commissaire qui le relit devient une légende de capture d'écran. Il
  * commente, il ne récite pas.
  *
+ * ⚠⚠ LE REGISTRE EST PARLÉ, pas écrit. Refonte du 09/09/2026 : la première
+ * version sonnait « traduite de l'anglais » (Coq), et elle l'était par la forme
+ * même si elle avait été écrite en français. Ce qui la trahissait : des phrases
+ * complètes et bien construites, des négations en « ne... pas » entières, des
+ * tournures qu'on écrit et qu'on ne dit pas (« Ce qui m'intéresse, c'est ce
+ * qu'il y a dedans qui ne vous appartient pas »).
+ *
+ * Ce qui marche, c'est un flic qui CHARRIE : phrases courtes, « ne » qui saute,
+ * « hein » et « du coup », une question directe, et une vanne par réplique. Le
+ * modèle de référence est la ligne écrite par Coq lui-même :
+ *
+ *     « Et la caisse ? Plutôt écolo ou à frimer avec votre BM ? »
+ *
+ * ⚠ La vanne vise les braqueurs ou la situation, JAMAIS la personne assise en
+ * face. Un trait d'humour sur un petit salaire se prend de travers et on perd
+ * la personne pour les quinze cartes qui restent.
+ *
  * ⚠ La VOIX et le DÉBIT sont figés ici (Stéphane Martineau, Eleven v3, ×1.15,
  * validés à l'oreille le 08/09/2026 après comparaison de six prises). Les
  * balises entre crochets ne se prononcent pas : elles disent COMMENT dire, et
@@ -53,71 +70,70 @@ export const REPLIQUES = {
     + "[sarcastic] Ce qui m'intéresse, MOI, c'est combien vous palpez par mois. "
     + "[whispers] Écrivez-le là. [dry] Sur le procès-verbal.",
 
-  /* Les trois habitudes : il note, il ne juge pas. C'est ça qui met mal à l'aise. */
+  /* Les trois habitudes : il note, il ne juge pas, il taquine. */
   tabac:
-    "[dry] Vous fumez. [pause] Je ne vous fais pas la morale, ça ne m'intéresse pas. "
-    + "[flat] Ce qui m'intéresse, c'est ce qu'il y a dedans qui ne vous appartient pas.",
+    "[dry] Vous fumez. [scoffs] Vous en faites pas, la morale c'est pas mon service. "
+    + "[flat] Combien de paquets ? Et comptez ceux que vous taxez aux collègues.",
   carburant:
-    "[tired] Le plein. [pause] Vous croyez payer de l'essence. "
-    + "[dry] Regardez ce que vous payez vraiment, et à qui.",
+    "[tired] Et la caisse ? [scoffs] Plutôt écolo, ou à frimer avec votre BM ? "
+    + "[dry] Dites-moi juste combien de pleins.",
   alcool:
-    "[dry] Un verre. [scoffs] Même chose. "
-    + "[flat] À chaque fois que vous vous faites plaisir, quelqu'un passe à la caisse avec vous.",
+    "[dry] Et à boire ? [scoffs] Mentez pas, on est au commissariat, pas à un mariage. "
+    + "[flat] Combien de verres dans la semaine ?",
 
   /* La pièce à conviction : le mécanisme. Il explique, il ne s'emporte pas. */
   pris:
-    "[tired] Bon. [pause] Vous allez me demander comment on vous l'a pris. "
-    + "[dry] Quatre lignes. Quatre. Et vous n'en voyez qu'une sur votre fiche de paie.",
+    "[tired] Bon. [pause] Vous voulez savoir comment ils s'y prennent ? "
+    + "[dry] Quatre lignes. Quatre. [scoffs] Et sur votre fiche de paie, vous en voyez une.",
   butin:
-    "[flat] Voilà le butin. [pause] Ce n'est pas moi qui fixe les prix, "
-    + "[dry] c'est le marché. Moi je compte.",
+    "[flat] Voilà le butin. [scoffs] C'est pas moi qui fixe les prix, hein. "
+    + "[dry] Moi je compte. [sarcastic] Et y'avait de quoi voir venir.",
 
   /* Le témoin : le voisin. Registre d'interrogatoire, pas de démonstration. */
   temoin:
-    "[dry] On a un témoin. [pause] Votre voisin. Même salaire que vous, "
-    + "[sarcastic] et pas du tout le même traitement. [flat] Regardez.",
+    "[dry] On a un témoin. [pause] Votre voisin. Même salaire que vous. "
+    + "[sarcastic] Et pas du tout le même traitement. [scoffs] Regardez-moi ça.",
 
   /* L'horaire : le moment où il devient presque bavard. */
   liberation:
-    "[tired] Regardez votre montre. [pause] Vous, vous bossez depuis janvier. "
-    + "[dry] Eux, ils encaissent depuis janvier. Et ils s'arrêtent pile à cette heure-là, "
-    + "chaque année. [flat] Réglés comme une horloge.",
+    "[tired] Regardez votre montre. [pause] Vous, vous bossez depuis janvier. Eux aussi. "
+    + "[dry] Sauf qu'eux, ils s'arrêtent pile là. [flat] Tous les ans, à la minute près.",
 
   /* L'aparté : il se penche. C'est la réplique la plus basse du parcours. */
   aparte:
-    "[whispers] Entre nous. [pause] Éteignez rien, ça ne s'enregistre pas. "
-    + "[tired] J'ai des questions qui ne sont pas dans le formulaire.",
+    "[whispers] Entre nous. [pause] Le magnéto tourne pas, vous inquiétez pas. "
+    + "[tired] J'ai deux, trois questions qui sont pas dans le formulaire.",
 
   /* Les trois interrogatoires : école, santé, chômage. Ce qu'on a reçu en face. */
   ecole:
-    "[dry] L'école. [pause] Vous n'avez rien payé, vous croyez. "
-    + "[flat] Mettez un prix dessus. On verra après si le compte y est.",
+    "[dry] L'école. [scoffs] Gratuite, hein ? C'est ce qu'on dit. "
+    + "[flat] Mettez un prix dessus, on verra bien.",
   sante:
-    "[tired] La santé. [pause] Là aussi, personne ne vous a présenté la note. "
-    + "[dry] Faites-le. Ça compte dans l'autre plateau.",
+    "[tired] La santé. [pause] Là non plus, personne vous a présenté la note. "
+    + "[dry] Allez-y, chiffrez. Ça compte dans l'autre plateau.",
   chomage:
-    "[flat] Le chômage. [pause] Vous n'en avez peut-être jamais eu besoin. "
-    + "[dry] Ça reste quelque chose qu'on vous a vendu. Chiffrez-le.",
+    "[flat] Le chômage. [pause] Vous y avez peut-être jamais touché. "
+    + "[scoffs] Ça vous a pas empêché de le payer. [dry] Combien, à votre avis ?",
 
   /* Le rendu : il concède. Un commissaire honnête, c'est ce qui rend le reste crédible. */
   rendu:
-    "[tired] Alors, soyons justes. [pause] Ils ne vous ont pas tout pris pour rien. "
-    + "[dry] Voilà ce qu'ils ont laissé. Je vous l'ai dit, ils ne sont pas si mauvais.",
+    "[tired] Bon, soyons honnêtes. [pause] Ils vous ont pas tout pris pour rien. "
+    + "[dry] Voilà ce qu'ils ont laissé. [scoffs] Ils sont pas si mauvais, je vous dis.",
 
   /* La bourse : l'avocat du Braqueur demande la parole. Il s'agace un peu. */
   bourse:
-    "[dry] Dernière question. [pause] Si vous aviez eu le choix, ce pognon, vous l'auriez mis où ? "
-    + "[scoffs] Et ne me sortez pas que vous n'y auriez pas touché.",
+    "[dry] Dernière question. [pause] Ce pognon, vous l'auriez mis où ? "
+    + "[scoffs] Et me dites pas que vous y auriez pas touché, hein.",
 
   /* Le verdict : le tampon vient de tomber. Il ne triomphe pas, il constate. */
   verdict:
-    "[flat] Voilà. [pause] Le tampon est mis. "
-    + "[dry] Je ne commente pas les verdicts. [tired] Mais celui-là, vous voulez savoir d'où il sort.",
+    "[flat] Voilà. [pause] Tampon. [dry] Je commente pas les verdicts. "
+    + "[tired] Mais celui-là, vous voulez savoir d'où il sort.",
 
   /* L'édition de demain : la sortie. C'est la dernière chose qu'on entend. */
   avis:
-    "[tired] C'est fini pour ce soir. [pause] Si vous voulez porter plainte pour de vrai, "
-    + "[dry] c'est pas ici. [flat] C'est tous les cinq ans. Même guichet.",
+    "[tired] C'est fini pour ce soir. [pause] Vous voulez porter plainte pour de vrai ? "
+    + "[dry] C'est pas ici. [scoffs] C'est tous les cinq ans. Même guichet.",
 };
 
 /**
@@ -143,21 +159,27 @@ export const REPLIQUES = {
  * salaire médian. La borne haute est éditoriale, elle ne prétend rien mesurer.
  */
 export const REACTIONS = {
-  /* Sous le SMIC : il ne prend pas de pincettes, il ne plaint pas non plus. */
+  /*
+   * Sous le SMIC : il ne prend pas de pincettes, mais il ne blague pas non plus
+   * SUR la personne. La vanne vise toujours les braqueurs, jamais celui qui est
+   * assis en face : à ce niveau de salaire, un trait d'humour se prend de
+   * travers, et on perd la personne pour le reste du parcours.
+   */
   "signature-sous-smic":
-    "[tired] D'accord. Installez-vous. [dry] Parce que même là-dessus, ils ont trouvé de quoi se servir.",
+    "[tired] D'accord. Installez-vous. [dry] Même là-dedans, ils ont trouvé à se servir. [scoffs] Faut le faire.",
 
   /* Du SMIC au médian : le cas ordinaire, donc le ton le plus plat. */
   "signature-jusqu-au-median":
-    "[flat] Bon. Un salaire comme il en passe trente par jour ici. [dry] Et trente fois, le même montage.",
+    "[flat] Bon. Le salaire de tout le monde. [scoffs] Et le braquage de tout le monde, du coup.",
 
-  /* Au-dessus du médian : il se réveille un peu. */
+  /* Au-dessus du médian. Formulation de Coq, gardée telle quelle. */
   "signature-au-dessus":
-    "[scoffs] Ah. Pas mal. [sarcastic] Ce qu'on vous prend est bon aussi.",
+    "[scoffs] Ah. Pas mal. [sarcastic] Les braqueurs ont dû se régaler. [laughs]",
 
   /* Le haut du panier : la seule fois où il se penche vraiment. */
   "signature-tres-haut":
-    "[whispers] Oh. Alors là. [tired] J'ai vu des braquages rapporter moins que ça. [dry] Avec une arme.",
+    "[whispers] Oh. [scoffs] Alors là. [tired] J'ai vu des braquages à main armée rapporter moins. "
+    + "[dry] Et eux, ils ont pris vingt ans.",
 };
 
 export const TOUTES = { ...REPLIQUES, ...REACTIONS };
