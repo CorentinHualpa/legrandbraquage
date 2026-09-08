@@ -338,6 +338,12 @@ export function objetPour(montant: number): Palier {
  * Le comptage absurde : on choisit l'unité qui donne un nombre à cinq ou six
  * chiffres. En dessous, ça ne frappe pas ; au-dessus, ça ne se lit plus.
  */
+/**
+ * ⚠ Plus AFFICHÉ nulle part depuis le 08/09/2026 : « ou 193 579 baguettes, si
+ * vous préférez compter » a été retiré de la réplique du commissaire (Coq :
+ * « c'est pas drôle »). Gardé parce que les prix unitaires restent sourcés et
+ * qu'un autre écran peut vouloir compter, mais ne pas le remettre sur le butin.
+ */
 export function comptageAbsurde(montant: number): { nombre: number; unite: Unite } {
   const candidates = UNITES.map((u) => ({ unite: u, nombre: Math.round(montant / u.prix) }));
   const bon =

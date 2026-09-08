@@ -2,16 +2,9 @@
 
 import { Carte, Commissaire, Lien, Volet } from "./Carte";
 import type { Pieces } from "@/lib/images";
-import { euros, eurosSigne } from "@/lib/format";
+import { eurosSigne } from "@/lib/format";
 import type { Simulation } from "@/lib/moteur";
-import {
-  SEUIL_ANNEES,
-  UNITES,
-  anneesSansTravailler,
-  comptageAbsurde,
-  enAnneesDeDepute,
-  objetPour,
-} from "@/lib/objets";
+import { SEUIL_ANNEES, anneesSansTravailler, enAnneesDeDepute, objetPour } from "@/lib/objets";
 
 /**
  * Écran 4 : le butin. Avec ça, ils se sont payé…
@@ -36,7 +29,6 @@ export function Butin({
 }) {
   const montant = simulation.plateauGauche.total;
   const objet = objetPour(montant);
-  const comptage = comptageAbsurde(montant);
   const reste = montant - objet.seuil;
   const annees = anneesSansTravailler(montant, simulation.netApresImpotActuel);
   const deputes = enAnneesDeDepute(montant);
@@ -88,9 +80,9 @@ export function Butin({
       <div className="flex flex-col gap-3">
         <Commissaire>
           {objet.seuil > 0 && reste > 1000 ? (
-            <>« Cash. Et il leur reste {eurosSigne(reste)} de monnaie. Ou {euros(comptage.nombre)} {comptage.unite.pluriel}, si vous préférez compter. »</>
+            <>« Cash. Et il leur reste {eurosSigne(reste)} de monnaie. »</>
           ) : (
-            <>« {objet.pointe} Ou {euros(comptage.nombre)} {comptage.unite.pluriel}, si vous préférez compter. »</>
+            <>« {objet.pointe} »</>
           )}
         </Commissaire>
         {/* La pointe du palier, sauf quand le commissaire vient de la dire. */}
@@ -113,13 +105,6 @@ export function Butin({
         <p className="text-[14px] leading-relaxed text-ligne">
           <span className="font-medium text-papier">{objet.nom}</span> : {objet.source}.
         </p>
-        <ul className="flex flex-col gap-1 text-[13.5px] leading-relaxed text-ligne">
-          {UNITES.map((u) => (
-            <li key={u.id}>
-              <span className="font-medium text-papier">{u.pluriel}</span>, {eurosSigne(u.prix)} l’unité : {u.source}
-            </li>
-          ))}
-        </ul>
         <p className="text-[13.5px] leading-relaxed text-ligne">
           Le député : 71 440,08 € nets par an, tels que l’Assemblée nationale les publie. Sans l’avance
           de frais de mandat, qui n’existe plus depuis le 1er janvier 2026.
