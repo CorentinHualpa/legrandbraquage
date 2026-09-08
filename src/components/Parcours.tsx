@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Couverture } from "./cartes/Couverture";
 import { Deposition, type EtatSaisie } from "./cartes/Deposition";
@@ -17,6 +17,7 @@ import { Verdict } from "./cartes/Verdict";
 import { Avis } from "./cartes/Avis";
 import type { Pieces } from "@/lib/images";
 import type { Cadeau } from "@/lib/lien";
+import { contexte, evenement } from "@/lib/dalevoz";
 import { jouer, reglerSons, type Son } from "@/lib/sons";
 import { FRAIS_DEFAUT_ID, PLACEMENT_DEFAUT_ID, casDepuisRequete } from "@/lib/lien";
 import {
@@ -180,6 +181,58 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
     void _net;
     return salairePivot({ ...reste, parts, perimetre, paliers, placement, habitudes });
   }, [simulation, ecran, etat, parts, perimetre, paliers, placement, habitudes]);
+
+  /**
+   * CE QUE LA PAGE DIT AU COMMISSAIRE, à chaque changement d'état.
+   *
+   * `contexte()` fusionne et s'écrase : l'appeler à chaque rendu est sans
+   * conséquence, et `null` efface une valeur devenue fausse. Le commissaire lit
+   * ce bloc à chaque tour, donc il arrête de demander le salaire : il l'a.
+   *
+   * ⚠ Ce qui n'est PAS ici est volontaire. Le verdict et le manque à gagner
+   * sont la chute du parcours : les envoyer en continu depuis la déposition
+   * permettrait au commissaire de les lâcher avant que le visiteur ne les
+   * découvre. Ils partent avec l'événement `verdict_rendu`, au moment exact où
+   * l'écran les montre, et pas une seconde avant.
+   */
+  useEffect(() => {
+    contexte({
+      ecran,
+      net_mensuel: etat.netMensuel > 0 ? etat.netMensuel : null,
+      statut: etat.statut,
+      placement: placementId,
+      cadeau: cadeau ?? null,
+      montant_pris: simulation ? Math.round(simulation.plateauGauche.total) : null,
+    });
+  }, [ecran, etat.netMensuel, etat.statut, placementId, cadeau, simulation]);
+
+  /**
+   * Le verdict vient de tomber : le commissaire le commente, une seule fois.
+   *
+   * ⚠ Le garde-fou d'un événement PARLANT vit côté serveur (un délai entre deux
+   * prises de parole, un plafond par conversation), pas ici : une page ne doit
+   * pas pouvoir le contourner. Ce `ref` ne protège que du double montage du
+   * mode strict de React, qui ferait partir l'événement deux fois en
+   * développement.
+   */
+  const verdictAnnonce = useRef(false);
+  useEffect(() => {
+    if (ecran !== "verdict" || !simulation || verdictAnnonce.current) return;
+    verdictAnnonce.current = true;
+    evenement("verdict_rendu", {
+      verdict: simulation.verdict.braquage ? "braquage" : "relaxe",
+      manque_a_gagner: Math.round(simulation.verdict.ecart),
+    });
+  }, [ecran, simulation]);
+
+  /* L'enveloppe choisie. Silencieux : il n'a rien à dire là-dessus, il a juste
+     besoin de savoir sur quoi la balance a été pesée quand on l'interrogera. */
+  const bourseVue = useRef<string | null>(null);
+  useEffect(() => {
+    if (ecran !== "bourse" || bourseVue.current === placementId) return;
+    bourseVue.current = placementId;
+    evenement("bourse_choisie", { placement: placementId });
+  }, [ecran, placementId]);
 
   /**
    * Ce qu'on entend en ARRIVANT sur un écran. Le reste tourne la page.

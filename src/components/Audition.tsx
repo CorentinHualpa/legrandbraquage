@@ -20,13 +20,16 @@ const AGENT = "le-braqueur";
  * la conversation fait partie de la pièce. C'est l'implémentation de référence
  * de la plateforme, on porte son mécanisme plutôt que d'en réécrire un.
  *
- * ⚠ MESURÉ, et à ne pas re-tenter : le widget ne transporte AUCUN contexte
- * jusqu'à l'agent. Ni variables, ni accueil : `data-greeting` est ignoré dès que
- * l'agent en a un configuré, et c'est celui du serveur qui s'affiche. Le cas du
- * visiteur ne lui parvient donc que s'il le dit lui-même, et le prompt du
- * commissaire est écrit pour le DEMANDER avant d'annoncer le moindre verdict.
- * C'est aussi la bonne façon de faire : la balance penche des deux côtés, et
- * annoncer un sens avant de connaître le salaire serait faux une fois sur deux.
+ * ⚠ CE COMMENTAIRE DISAIT L'INVERSE JUSQU'AU 08/09/2026, et c'était vrai à
+ * l'époque : le widget ne transportait AUCUN contexte. La plateforme a gagné
+ * `window.dalevoz.contexte()` depuis, et `Parcours.tsx` l'appelle à chaque
+ * changement d'écran. Le commissaire a donc le dossier sous les yeux, et son
+ * prompt lui interdit de redemander ce qu'il a déjà.
+ *
+ * Ce qui reste vrai : `data-greeting` est ignoré dès que l'agent a un accueil
+ * configuré, c'est celui du serveur qui s'affiche. Et il ne CHIFFRE rien tant
+ * que le salaire manque du dossier, parce que la balance penche des deux côtés
+ * et qu'annoncer un sens avant de le connaître serait faux une fois sur deux.
  */
 export function Audition({
   pieces,
@@ -111,13 +114,12 @@ export function Audition({
       </p>
 
       <p className="text-[13.5px] leading-relaxed text-encre-2">
-        Il ne voit pas votre écran. Donnez-lui votre net mensuel quand il le
-        demande : sans lui, il refuse d’annoncer un sens à la balance, et il a
-        raison de le refuser. Le vôtre est de{" "}
+        Il a votre procès-verbal sous les yeux : votre net mensuel, votre
+        statut, ce qui vous a été pris, et votre verdict, qui est de{" "}
         <span className="font-semibold text-encre">
           {verdict.braquage ? "braquage" : "relaxe"}
         </span>
-        .
+        . Ne les lui redonnez pas, demandez-lui pourquoi.
       </p>
 
       {!cle ? (
