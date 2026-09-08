@@ -17,6 +17,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, existsSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -147,6 +148,28 @@ test("chaque réplique annoncée existe vraiment sur le disque", () => {
   for (const ecran of ecrits) {
     assert.ok(annonces.includes(ecran), `« ${ecran} » est écrit mais jamais joué : absent de AVEC_REPLIQUE`);
   }
+});
+
+test("aucun fichier de voix ne date d'une version précédente du texte", async () => {
+  /*
+   * LE défaut qu'aucun autre contrôle n'attrape. Un mp3 qui date de la réécriture
+   * d'avant est un fichier parfaitement valide : il joue, il dure le bon nombre
+   * de secondes, il a la bonne voix. Il dit simplement autre chose que ce qui est
+   * écrit dans `repliques.mjs`, et ça ne se remarque qu'en écoutant les vingt à
+   * la suite, c'est-à-dire jamais.
+   *
+   * Le générateur écrit l'empreinte du texte qu'il a réellement synthétisé ; on
+   * la compare ici au texte courant. Une divergence dit exactement quoi
+   * régénérer, au lieu de tout refaire par précaution.
+   */
+  const { TOUTES } = await import("../voix/repliques.mjs");
+  const manifeste = JSON.parse(readFileSync(join(ici, "..", "..", "public", "voix", "_textes.json"), "utf8"));
+  const empreinte = (t) => createHash("sha256").update(t).digest("hex").slice(0, 12);
+
+  const perimes = Object.entries(TOUTES)
+    .filter(([nom, texte]) => manifeste[nom] !== empreinte(texte))
+    .map(([nom]) => nom);
+  assert.deepEqual(perimes, [], `à régénérer : node scripts/voix/repliques.mjs ${perimes.join(" ")}`);
 });
 
 test("les quatre réactions à la signature sont atteignables et enregistrées", () => {

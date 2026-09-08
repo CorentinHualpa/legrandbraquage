@@ -43,7 +43,8 @@
 import { mkdir, writeFile, rm } from "node:fs/promises";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -52,6 +53,8 @@ const ici = dirname(fileURLToPath(import.meta.url));
 const racine = join(ici, "..", "..");
 const SORTIE = process.env.SORTIE ?? join(racine, "public", "voix");
 const TAMPON = join(SORTIE, "_brut");
+/** L'empreinte du texte réellement synthétisé dans chaque fichier. Voir plus bas. */
+const MANIFESTE = join(SORTIE, "_textes.json");
 
 const VAULT = "C:/Users/msi/.secrets/api-keys.env";
 
@@ -201,6 +204,21 @@ const demandes = process.argv.slice(2).length ? process.argv.slice(2) : Object.k
 await mkdir(SORTIE, { recursive: true });
 await mkdir(TAMPON, { recursive: true });
 
+/*
+ * L'EMPREINTE DE CHAQUE TEXTE, écrite à côté des fichiers.
+ *
+ * ⚠ Sans elle, « est-ce que tout a bien été régénéré ? » n'a aucune réponse
+ * vérifiable : un mp3 qui date de la version d'avant est un fichier parfaitement
+ * valide, il joue, il dure le bon nombre de secondes, et il dit autre chose que
+ * ce qui est écrit dans ce fichier. Le seul moment où ça se voit, c'est en
+ * écoutant les vingt à la suite, donc trop tard.
+ *
+ * Le test `scripts/sons/test-vie.mjs` compare cette empreinte au texte courant
+ * et refuse toute divergence.
+ */
+const empreintes = existsSync(MANIFESTE) ? JSON.parse(readFileSync(MANIFESTE, "utf8")) : {};
+const empreinte = (t) => createHash("sha256").update(t).digest("hex").slice(0, 12);
+
 for (const nom of demandes) {
   const texte = TOUTES[nom];
   if (!texte) {
@@ -238,8 +256,10 @@ for (const nom of demandes) {
   const { stdout } = await run("ffprobe", [
     "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", cible,
   ]);
+  empreintes[nom] = empreinte(texte);
   console.log(`${nom.padEnd(14)} ${Number(stdout).toFixed(1).padStart(5)} s  ${cible}`);
 }
 
 await rm(TAMPON, { recursive: true, force: true });
+await writeFile(MANIFESTE, `${JSON.stringify(empreintes, null, 2)}\n`, "utf8");
 }
