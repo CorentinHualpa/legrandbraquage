@@ -18,7 +18,7 @@ import { Avis } from "./cartes/Avis";
 import type { Pieces } from "@/lib/images";
 import type { Cadeau } from "@/lib/lien";
 import { contexte, evenement } from "@/lib/dalevoz";
-import { jouer, parler, poserDecor, reglerSons, type Acte, type Son } from "@/lib/sons";
+import { jouer, parler, poserDecor, reagir, reglerSons, type Acte, type Son } from "@/lib/sons";
 import { FRAIS_DEFAUT_ID, PLACEMENT_DEFAUT_ID, casDepuisRequete } from "@/lib/lien";
 import {
   CRANS_FRAIS,
@@ -47,6 +47,35 @@ const ECRANS = [
   "ecole", "sante", "chomage", "rendu", "bourse", "verdict", "avis",
 ] as const;
 type Ecran = (typeof ECRANS)[number];
+
+/**
+ * Ce que le commissaire répond quand on signe la déposition.
+ *
+ * Quatre registres, pas quatre chiffres : la réplique ne prononce jamais le
+ * montant (il est déjà en gros sur le procès-verbal), elle change de TON.
+ *
+ * Les deux premières bornes sont celles que le site montre déjà ailleurs, sous
+ * le champ de saisie et sur le mur de l'avis de recherche : le net mensuel du
+ * SMIC 2026 et le salaire médian. La troisième est éditoriale et ne prétend
+ * mesurer rien du tout, elle marque juste le moment où la somme prélevée cesse
+ * d'être ordinaire.
+ *
+ * ⚠ Le seuil se compare à un NET, or un micro-entrepreneur a saisi son chiffre
+ * d'affaires : le comparer tel quel classerait un artisan à trois mille euros
+ * de CA « au-dessus du médian » alors qu'il vit sous le SMIC. On prend donc le
+ * net que le moteur calcule quand il existe, et la saisie brute sinon (pour un
+ * salarié, les deux sont le même nombre).
+ */
+const SMIC_NET = 1478;
+const MEDIAN_NET = 2190;
+const HAUT_DE_LECHELLE = 5000;
+
+function reactionSignature(net: number): string {
+  if (net < SMIC_NET) return "signature-sous-smic";
+  if (net < MEDIAN_NET) return "signature-jusqu-au-median";
+  if (net < HAUT_DE_LECHELLE) return "signature-au-dessus";
+  return "signature-tres-haut";
+}
 
 /**
  * Où se passe chaque écran. Le son suit le LIEU, pas le numéro de carte : on
@@ -340,7 +369,10 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
           changer={changer}
           regime={regime}
           calculable={calculable}
-          signer={() => aller("tabac")}
+          signer={() => {
+            reagir(reactionSignature(simulation?.netAvantImpotActuel ?? etat.netMensuel));
+            aller("tabac");
+          }}
           retour={() => aller("couverture")}
           numero={1}
           total={total}

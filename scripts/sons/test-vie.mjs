@@ -149,6 +149,31 @@ test("chaque réplique annoncée existe vraiment sur le disque", () => {
   }
 });
 
+test("les quatre réactions à la signature sont atteignables et enregistrées", () => {
+  /*
+   * Trois choses doivent rester d'accord, et aucune ne fait de bruit en cassant :
+   * les noms que `reactionSignature` peut rendre, la liste des répliques que le
+   * moteur accepte de jouer, et les fichiers. Un nom qui diverge ne lève rien,
+   * il rend juste un commissaire muet au moment le plus visible du parcours.
+   */
+  const parcours = readFileSync(join(ici, "..", "..", "src", "components", "Parcours.tsx"), "utf8");
+  const bloc = parcours.slice(parcours.indexOf("function reactionSignature"));
+  const noms = [...bloc.slice(0, bloc.indexOf("}")).matchAll(/"(signature-[a-z-]+)"/g)].map((m) => m[1]);
+  assert.equal(noms.length, 4, `${noms.length} réactions lues au lieu de quatre`);
+
+  for (const nom of noms) {
+    assert.ok(source.includes(`"${nom}"`), `« ${nom} » n'est pas dans AVEC_REPLIQUE : il ne sera jamais joué`);
+    assert.ok(existsSync(join(ici, "..", "..", "public", "voix", `${nom}.mp3`)), `public/voix/${nom}.mp3 manque`);
+  }
+
+  // Les seuils montent, sinon une tranche devient inatteignable sans rien casser.
+  const seuils = ["SMIC_NET", "MEDIAN_NET", "HAUT_DE_LECHELLE"]
+    .map((n) => Number(parcours.match(new RegExp(`const ${n} = (\\d+)`))[1]));
+  for (let i = 1; i < seuils.length; i++) {
+    assert.ok(seuils[i] > seuils[i - 1], `les seuils ne montent pas : ${seuils.join(" puis ")}`);
+  }
+});
+
 test("la répartition suit les poids", () => {
   // Mille tirages : le clavier court (poids le plus haut) doit sortir plus
   // souvent que le téléphone (poids 1). Sans dernier joué, pour ne pas biaiser.

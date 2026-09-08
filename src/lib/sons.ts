@@ -328,6 +328,10 @@ function tirerUnBruitDeVie() {
  */
 let voixEnCours: HTMLAudioElement | null = null;
 let minuterieVoix: ReturnType<typeof setTimeout> | null = null;
+/** Vrai pendant une réaction : elle ne se fait pas couper par la carte suivante. */
+let protegee = false;
+/** La réplique d'arrivée qui attend la fin d'une réaction. Une seule place. */
+let enAttente: string | null = null;
 let ducking = false;
 
 /** De combien on baisse le décor pendant qu'il parle. */
@@ -346,6 +350,9 @@ const AVEC_REPLIQUE = new Set([
   "deposition", "tabac", "carburant", "alcool", "pris", "butin", "temoin",
   "liberation", "aparte", "ecole", "sante", "chomage", "rendu", "bourse",
   "verdict", "avis",
+  // Les quatre réactions à la signature (cf. `REACTIONS` de repliques.mjs).
+  "signature-sous-smic", "signature-jusqu-au-median", "signature-au-dessus",
+  "signature-tres-haut",
 ]);
 
 /**
@@ -373,28 +380,64 @@ function duckerLesNappes(baisser: boolean) {
  * Fait parler le commissaire. Sans effet si la personne a gardé le silence :
  * la voix suit le même interrupteur que le reste, elle n'a pas de régime à part.
  */
-export function parler(ecran: string): void {
-  if (typeof window === "undefined") return;
-  // On coupe TOUJOURS, même sur un écran sans réplique : sinon il finit sa
-  // phrase de la carte précédente par-dessus la nouvelle.
-  taire();
-  if (!actif || !AVEC_REPLIQUE.has(ecran)) return;
-
+function lancerLaVoix(nom: string, delaiMs: number) {
   minuterieVoix = setTimeout(() => {
     minuterieVoix = null;
-    const el = new Audio(`/voix/${ecran}.mp3`);
+    const el = new Audio(`/voix/${nom}.mp3`);
     voixEnCours = el;
     duckerLesNappes(true);
     const fini = () => {
-      if (voixEnCours === el) voixEnCours = null;
-      duckerLesNappes(false);
+      if (voixEnCours !== el) return;
+      voixEnCours = null;
+      protegee = false;
+      // Ce qui attendait derrière une réaction part maintenant, sans délai :
+      // il a déjà attendu, en rajouter donnerait un commissaire qui traîne.
+      const suite = enAttente;
+      enAttente = null;
+      if (suite) lancerLaVoix(suite, 0);
+      else duckerLesNappes(false);
     };
     el.addEventListener("ended", fini);
     // Un fichier manquant ne doit pas laisser le décor baissé pour toujours :
     // c'est le genre de panne qu'on met une heure à relier à sa cause.
     el.addEventListener("error", fini);
     void el.play().catch(fini);
-  }, AVANT_DE_PARLER_MS);
+  }, delaiMs);
+}
+
+export function parler(ecran: string): void {
+  if (typeof window === "undefined") return;
+  /*
+   * Une réplique d'arrivée ne coupe PAS une réaction en cours : la réaction
+   * vient d'un clic de la personne, et couper ce qu'on vient de déclencher soi-
+   * même se lit comme une panne, pas comme du rythme. Elle attend derrière, et
+   * si on avance encore, c'est la dernière carte vue qui prend la place.
+   */
+  if (protegee && voixEnCours) {
+    enAttente = actif && AVEC_REPLIQUE.has(ecran) ? ecran : null;
+    return;
+  }
+  // Sinon on coupe toujours, même sur un écran sans réplique : sans ça il finit
+  // sa phrase de la carte précédente par-dessus la nouvelle.
+  taire();
+  if (!actif || !AVEC_REPLIQUE.has(ecran)) return;
+  lancerLaVoix(ecran, AVANT_DE_PARLER_MS);
+}
+
+/**
+ * Le commissaire réagit à ce que la personne vient de faire.
+ *
+ * Deux différences avec `parler`, et les deux viennent du fait que c'est un
+ * CLIC qui déclenche : il répond tout de suite (le délai d'arrivée servait à
+ * laisser passer le bruit de page, ici il ferait juste attendre), et il n'est
+ * pas coupé par la carte suivante, qui attend son tour.
+ */
+export function reagir(nom: string): void {
+  if (typeof window === "undefined") return;
+  taire();
+  if (!actif || !AVEC_REPLIQUE.has(nom)) return;
+  protegee = true;
+  lancerLaVoix(nom, 0);
 }
 
 /** Coupe la réplique en cours. Appelé à chaque changement d'écran. */
@@ -403,6 +446,8 @@ export function taire(): void {
   // n'a lancé aucun fichier, mais il a armé trois départs.
   if (minuterieVoix) clearTimeout(minuterieVoix);
   minuterieVoix = null;
+  protegee = false;
+  enAttente = null;
   if (!voixEnCours) return;
   voixEnCours.pause();
   voixEnCours = null;
@@ -463,6 +508,8 @@ export function reglerSons(oui: boolean): void {
     minuterieFrappe = null;
     if (minuterieVoix) clearTimeout(minuterieVoix);
     minuterieVoix = null;
+    protegee = false;
+    enAttente = null;
     if (voixEnCours) { voixEnCours.pause(); voixEnCours = null; }
     ducking = false;
     return;

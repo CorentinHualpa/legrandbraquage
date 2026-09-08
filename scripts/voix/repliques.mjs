@@ -37,8 +37,6 @@ const SORTIE = process.env.SORTIE ?? join(racine, "public", "voix");
 const TAMPON = join(SORTIE, "_brut");
 
 const VAULT = "C:/Users/msi/.secrets/api-keys.env";
-const cle = (readFileSync(VAULT, "utf8").match(/^ELEVENLABS_API_KEY=(.+)$/m) ?? [])[1]?.trim();
-if (!cle) throw new Error(`ELEVENLABS_API_KEY absent de ${VAULT}`);
 
 /** Stéphane Martineau. « Chaleureuse, sérieuse et imposante », français, quarantaine. */
 const VOIX = "CkNazXuHNoWK3cIbgCIg";
@@ -122,15 +120,68 @@ export const REPLIQUES = {
     + "[dry] c'est pas ici. [flat] C'est tous les cinq ans. Même guichet.",
 };
 
-const demandes = process.argv.slice(2).length ? process.argv.slice(2) : Object.keys(REPLIQUES);
+/**
+ * LES RÉACTIONS À LA SIGNATURE DE LA DÉPOSITION.
+ *
+ * Les seules répliques qui dépendent de ce que la personne a saisi. Elles ne
+ * disent toujours AUCUN chiffre : ce qui change, c'est le REGISTRE. Le montant
+ * est déjà écrit en gros sur le procès-verbal, le commissaire n'a pas à le
+ * relire, il a à réagir.
+ *
+ * ⚠ Elles doivent rester COURTES (quatre à sept secondes). Elles se jouent juste
+ * avant que la carte suivante n'arrive avec sa propre réplique : plus longues,
+ * elles retiendraient tout le parcours à chaque signature.
+ *
+ * ⚠ Un `[pause]` coûte une seconde et demie à deux secondes de fichier, mesuré
+ * en régénérant les quatre avec puis sans. Sur une réplique de cinq secondes
+ * c'est un tiers de la durée, pour un silence que personne n'a demandé. Les
+ * réactions n'en portent donc AUCUN ; les répliques d'arrivée, qui ont le temps,
+ * le gardent.
+ *
+ * Les bornes sont celles que le site affiche déjà ailleurs (le mur de l'avis de
+ * recherche, les repères sous le champ de saisie) : le net du SMIC 2026 et le
+ * salaire médian. La borne haute est éditoriale, elle ne prétend rien mesurer.
+ */
+export const REACTIONS = {
+  /* Sous le SMIC : il ne prend pas de pincettes, il ne plaint pas non plus. */
+  "signature-sous-smic":
+    "[tired] D'accord. Installez-vous. [dry] Parce que même là-dessus, ils ont trouvé de quoi se servir.",
+
+  /* Du SMIC au médian : le cas ordinaire, donc le ton le plus plat. */
+  "signature-jusqu-au-median":
+    "[flat] Bon. Un salaire comme il en passe trente par jour ici. [dry] Et trente fois, le même montage.",
+
+  /* Au-dessus du médian : il se réveille un peu. */
+  "signature-au-dessus":
+    "[scoffs] Ah. Pas mal. [sarcastic] Ce qu'on vous prend est bon aussi.",
+
+  /* Le haut du panier : la seule fois où il se penche vraiment. */
+  "signature-tres-haut":
+    "[whispers] Oh. Alors là. [tired] J'ai vu des braquages rapporter moins que ça. [dry] Avec une arme.",
+};
+
+export const TOUTES = { ...REPLIQUES, ...REACTIONS };
+
+/*
+ * Rien ne se génère à l'IMPORT. `scripts/voix/doc.mjs` lit les textes d'ici pour
+ * fabriquer le document de relecture : sans cette garde, ouvrir le document
+ * relancerait seize synthèses payantes.
+ */
+const lanceDirectement = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
+if (lanceDirectement) {
+// La clé ne se lit QUE quand on génère pour de bon.
+const cle = (readFileSync(VAULT, "utf8").match(/^ELEVENLABS_API_KEY=(.+)$/m) ?? [])[1]?.trim();
+if (!cle) throw new Error(`ELEVENLABS_API_KEY absent de ${VAULT}`);
+
+const demandes = process.argv.slice(2).length ? process.argv.slice(2) : Object.keys(TOUTES);
 
 await mkdir(SORTIE, { recursive: true });
 await mkdir(TAMPON, { recursive: true });
 
 for (const nom of demandes) {
-  const texte = REPLIQUES[nom];
+  const texte = TOUTES[nom];
   if (!texte) {
-    throw new Error(`Réplique inconnue : « ${nom} ». Connues : ${Object.keys(REPLIQUES).join(", ")}`);
+    throw new Error(`Réplique inconnue : « ${nom} ». Connues : ${Object.keys(TOUTES).join(", ")}`);
   }
   // Une réplique qui contiendrait un chiffre ne peut PAS être pré-enregistrée :
   // elle dépend du salaire saisi. Le refus est ici plutôt que dans un commentaire.
@@ -168,3 +219,4 @@ for (const nom of demandes) {
 }
 
 await rm(TAMPON, { recursive: true, force: true });
+}
