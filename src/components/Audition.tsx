@@ -6,11 +6,26 @@ import { EnTete, Feuille, Renvoi, Scelle, Tampon } from "./papier";
 import type { Pieces } from "@/lib/images";
 import type { Simulation } from "@/lib/moteur";
 
-const HOTE = "https://dalevoz.revolutionagency.ai";
+/**
+ * ⚠ Surchargeable pour brancher le site sur une plateforme LOCALE
+ * (`NEXT_PUBLIC_DALEVOZ_HOST=http://localhost:4482`). Sans ça, un site qu'on
+ * fait tourner en local parle quand même à la production : on croit tester un
+ * correctif de moteur alors qu'on interroge le déployé, et le verdict est faux
+ * dans les deux sens. La base est la MÊME, donc l'agent et sa clé sont les
+ * mêmes ; seul le code du moteur change.
+ */
+const HOTE = process.env.NEXT_PUBLIC_DALEVOZ_HOST || "https://dalevoz.revolutionagency.ai";
 /* Le slug ne bouge pas : le widget publié en dépend. Le PERSONNAGE, lui, est
     devenu le commissaire (Coq, 08/09/2026 : « on va avoir un seul perso »).
     Son prompt vit dans `agent/commissaire.md`, à la racine du dépôt. */
-const AGENT = "le-braqueur";
+/**
+ * ⚠ Surchargeable comme l'hôte, et pour la même raison. L'API publique sert
+ * toujours la version PUBLIÉE : on ne peut donc pas regarder son propre site
+ * tourner sur du travail non publié. Pour voir le produit fini en local, on
+ * publie un JUMEAU de l'agent que rien en production ne désigne
+ * (`braquage-agent-local.ts` du dépôt de la plateforme) et on pointe ici.
+ */
+const AGENT = process.env.NEXT_PUBLIC_DALEVOZ_AGENT || "le-braqueur";
 
 /**
  * L'audition : le commissaire répond.
