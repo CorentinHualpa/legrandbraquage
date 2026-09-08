@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { Carte, Commissaire, Kicker, Papier, Reponse } from "./Carte";
 import type { Pieces } from "@/lib/images";
 import { euros } from "@/lib/format";
+import { jouer } from "@/lib/sons";
 import type { Statut } from "@/lib/moteur";
 import {
   ACTIVITES,
@@ -145,7 +146,10 @@ export function Deposition({
             onChange={(e) => {
               // Sept chiffres suffisent : au-delà, c'est une faute de frappe.
               const chiffres = e.target.value.replace(/[^d]/g, "").slice(0, 7);
-              changer({ netMensuel: chiffres === "" ? 0 : Number(chiffres) });
+              const nouveau = chiffres === "" ? 0 : Number(chiffres);
+              // La machine ne frappe qu'à l'écriture : au retour arrière, rien.
+              if (String(nouveau).length > String(etat.netMensuel).length) jouer("machine");
+              changer({ netMensuel: nouveau });
             }}
             aria-label={ouLire.label}
             aria-describedby="net-aide"

@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from "react";
 
 import { PIECES, type NumeroPiece, type Pieces } from "@/lib/pieces";
+import { jouer } from "@/lib/sons";
 
 /**
  * Une carte du parcours : un écran, un chiffre, la nuit du commissariat.
@@ -364,7 +365,10 @@ export function Reponse({
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={() => {
+        jouer("coche");
+        onClick();
+      }}
       aria-pressed={actif}
       className={`flex min-h-[48px] items-center gap-2.5 border-[1.5px] px-3.5 py-2.5 text-left text-[16px] transition-colors ${
         centre ? "justify-center" : "justify-between"

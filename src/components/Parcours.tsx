@@ -17,6 +17,7 @@ import { Verdict } from "./cartes/Verdict";
 import { Avis } from "./cartes/Avis";
 import type { Pieces } from "@/lib/images";
 import type { Cadeau } from "@/lib/lien";
+import { jouer, reglerSons, type Son } from "@/lib/sons";
 import { FRAIS_DEFAUT_ID, PLACEMENT_DEFAUT_ID, casDepuisRequete } from "@/lib/lien";
 import {
   CRANS_FRAIS,
@@ -180,7 +181,22 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
     return salairePivot({ ...reste, parts, perimetre, paliers, placement, habitudes });
   }, [simulation, ecran, etat, parts, perimetre, paliers, placement, habitudes]);
 
-  const aller = (e: Ecran) => {
+  /**
+   * Ce qu'on entend en ARRIVANT sur un écran. Le reste tourne la page.
+   * La couverture est absente : c'est elle qui joue la porte, dans le geste
+   * qui allume le son.
+   */
+  const BRUIT: Partial<Record<Ecran, "ruban" | "tampon">> = { butin: "ruban", verdict: "tampon" };
+
+  /** `bruit: null` quand l'appelant a déjà joué le sien : la porte du
+   *  commissariat ne doit pas être suivie d'une page qui tourne. */
+  const aller = (e: Ecran, bruit: Son | null = BRUIT[e] ?? "page") => {
+    if (bruit) jouer(bruit);
+    if (e === "verdict") {
+      // Le flash suit le tampon, comme sur l'écran : le photographe attend
+      // que le juge ait frappé.
+      window.setTimeout(() => jouer("flash"), 420);
+    }
     type Transition = { finished?: Promise<unknown>; ready?: Promise<unknown>; updateCallbackDone?: Promise<unknown> };
     type AvecTransition = Document & { startViewTransition?: (f: () => void) => Transition };
     const doc = document as AvecTransition;
@@ -208,7 +224,17 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
   if (ecran === "couverture") {
     return (
       <main className="min-h-dvh bg-nuit">
-        <Couverture pieces={pieces} porterPlainte={() => aller("deposition")} />
+        <Couverture
+          pieces={pieces}
+          porterPlainte={(avecSon) => {
+            // L'ordre compte : on allume AVANT de changer d'écran, pour que la
+            // porte du commissariat se referme sur la transition, et parce que
+            // le navigateur n'autorise le son que dans le geste lui-même.
+            reglerSons(avecSon);
+            jouer("porte");
+            aller("deposition", null);
+          }}
+        />
       </main>
     );
   }

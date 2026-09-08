@@ -10,7 +10,14 @@ import type { Pieces } from "@/lib/images";
  * travers, et le titre en bas, comme une affiche. Couverture B des maquettes
  * du 08/09/2026, choisie par Coq.
  */
-export function Couverture({ pieces, porterPlainte }: { pieces: Pieces; porterPlainte: () => void }) {
+export function Couverture({
+  pieces,
+  porterPlainte,
+}: {
+  pieces: Pieces;
+  /** Vrai si la personne a demandé le son : c'est ce geste qui l'autorise. */
+  porterPlainte: (avecSon: boolean) => void;
+}) {
   const fichier = pieces[9];
   return (
     <section className="relative mx-auto flex min-h-dvh w-full max-w-[460px] flex-col overflow-hidden bg-nuit text-papier sm:my-4 sm:min-h-[calc(100dvh-2rem)] sm:shadow-[0_30px_80px_rgba(0,0,0,0.6)]">
@@ -45,13 +52,33 @@ export function Couverture({ pieces, porterPlainte }: { pieces: Pieces; porterPl
         <p className="text-[17px] leading-[1.4] text-papier-2 italic">
           Chaque mois, quelqu’un passe chez vous avant vous. Il a une clé. Il a le droit.
         </p>
-        <button
-          type="button"
-          onClick={porterPlainte}
-          className="bg-jaune-police px-4 py-4 text-center text-[17px] font-semibold text-encre transition-colors hover:bg-jaune-sombre"
-        >
-          Porter plainte
-        </button>
+        {/*
+          Deux façons d'entrer, et c'est ici que le son se décide. Un bouton
+          unique aurait obligé à demander l'autorisation plus tard, au milieu
+          du parcours, ou à faire du bruit sans prévenir. Les deux libellés
+          sont des formules de procédure : « écoute » dit à la fois qu'on va
+          entendre et qu'on va être entendu, puisque le commissaire répond.
+        */}
+        <div className="flex flex-col gap-2.5">
+          <button
+            type="button"
+            onClick={() => porterPlainte(true)}
+            className="flex flex-col gap-0.5 bg-jaune-police px-4 py-3.5 text-center text-encre transition-colors hover:bg-jaune-sombre"
+          >
+            <span className="text-[17px] font-semibold">Passer sur écoute</span>
+            <span className="text-[12.5px] text-encre/70">
+              Sons, ambiance, et le commissaire vous répond.
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => porterPlainte(false)}
+            className="flex flex-col gap-0.5 border-2 border-papier/45 px-4 py-3.5 text-center text-papier transition-colors hover:border-papier"
+          >
+            <span className="text-[17px] font-semibold">Garder le silence</span>
+            <span className="text-[12.5px] text-ligne">Le dossier se lit, rien ne se joue.</span>
+          </button>
+        </div>
         <p className="text-center text-[12.5px] text-ligne">
           Rien n’est enregistré. Tout se calcule dans votre téléphone.{" "}
           <a href="/methode" className="underline underline-offset-2">La méthode.</a>
