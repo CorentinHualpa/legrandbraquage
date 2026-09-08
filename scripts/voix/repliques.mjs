@@ -86,8 +86,8 @@ export const REPLIQUES = {
     "[tired] Bon. [pause] Vous voulez savoir comment ils s'y prennent ? "
     + "[dry] Quatre lignes. Quatre. [scoffs] Et sur votre fiche de paie, vous en voyez une.",
   butin:
-    "[flat] Voilà le butin. [scoffs] C'est pas moi qui fixe les prix, hein. "
-    + "[dry] Moi je compte. [sarcastic] Et y'avait de quoi voir venir.",
+    "[flat] Voilà le butin. [scoffs] C'est pas moi qui fixe les prix, hein. Moi je compte. "
+    + "[dry] Et franchement, j'ai rarement vu un scellé aussi bien rempli.",
 
   /* Le témoin : le voisin. Registre d'interrogatoire, pas de démonstration. */
   temoin:
@@ -118,7 +118,8 @@ export const REPLIQUES = {
   /* Le rendu : il concède. Un commissaire honnête, c'est ce qui rend le reste crédible. */
   rendu:
     "[tired] Bon, soyons honnêtes. [pause] Ils vous ont pas tout pris pour rien. "
-    + "[dry] Voilà ce qu'ils ont laissé. [scoffs] Ils sont pas si mauvais, je vous dis.",
+    + "[dry] Voilà ce qu'ils ont laissé. [scoffs] Des cambrioleurs qui repeignent le salon "
+    + "avant de partir, faut le voir pour le croire.",
 
   /* La bourse : l'avocat du Braqueur demande la parole. Il s'agace un peu. */
   bourse:
