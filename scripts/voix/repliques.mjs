@@ -78,7 +78,7 @@ export const REPLIQUES = {
     "[tired] Et la caisse ? [scoffs] Plutôt écolo, ou à frimer avec votre BM ? "
     + "[dry] Dites-moi juste combien de pleins.",
   alcool:
-    "[dry] Et à boire ? [scoffs] Mentez pas, on est au commissariat, pas à un mariage. "
+    "[dry] Et à boire ? [scoffs] Mentez pas, on est au commissariat, pas chez la belle-famille. "
     + "[flat] Combien de verres dans la semaine ?",
 
   /* La pièce à conviction : le mécanisme. Il explique, il ne s'emporte pas. */
