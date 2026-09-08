@@ -27,6 +27,9 @@
   /* Le vert de ce qu'ils ont laissé : assez sombre pour tenir sur le papier
      (6,3 de contraste sur #ece5d5), et il ne se confond pas avec le bleu. */
   --color-vert: #24663f;
+  /* Le même vert, remonté pour le fond de nuit : #24663f y tombe à 1,7 de
+     contraste, illisible. Celui-ci tient à 7,4 sur #0f151c. */
+  --color-vert-clair: #4fa87a;
 
   /* La nuit du commissariat : le fond des cartes, et le rouge qui se lit dessus. */
   --color-nuit: #0f151c;

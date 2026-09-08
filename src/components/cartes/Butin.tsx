@@ -123,10 +123,10 @@ export function Butin({
         <div className="flex flex-col gap-2 border-t border-papier/15 pt-3">
           <Kicker couleur="rouge">Content de votre cadeau ?</Kicker>
           <div className="flex flex-col gap-2">
-            <Reponse actif={cadeau === "partage"} onClick={() => repondreCadeau("partage")}>
+            <Reponse actif={cadeau === "partage"} onClick={() => repondreCadeau("partage")} teinte="vert">
               <span className="text-[15.5px]">Ça fait toujours plaisir de partager</span>
             </Reponse>
-            <Reponse actif={cadeau === "picotte"} onClick={() => repondreCadeau("picotte")}>
+            <Reponse actif={cadeau === "picotte"} onClick={() => repondreCadeau("picotte")} teinte="rouge">
               <span className="text-[15.5px]">Ça picotte un peu</span>
             </Reponse>
           </div>

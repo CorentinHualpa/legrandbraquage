@@ -304,31 +304,57 @@ export function Lien({ children, href }: { children: ReactNode; href: string }) 
 }
 
 /** Une réponse au commissaire : une rangée qu'on tape. */
+/**
+ * Le vert et le rouge d'une réponse qui prend parti. Deux réponses de même
+ * poids se distinguent d'abord par leur couleur, pas par leur libellé : c'est
+ * ce qui permet de choisir sans lire (Coq, 08/09/2026).
+ */
+const TEINTE = {
+  neutre: {
+    repos: "border-papier/45 text-papier hover:border-papier",
+    actif: "border-rouge bg-papier text-encre",
+    coche: "#b8342a",
+  },
+  vert: {
+    repos: "border-vert-clair/55 text-vert-clair hover:border-vert-clair",
+    actif: "border-vert bg-papier text-vert",
+    coche: "#24663f",
+  },
+  rouge: {
+    repos: "border-rouge-clair/55 text-rouge-clair hover:border-rouge-clair",
+    actif: "border-rouge bg-papier text-rouge-texte",
+    coche: "#9c2b22",
+  },
+} as const;
+
 export function Reponse({
   actif,
   onClick,
   children,
   repere,
   centre = false,
+  teinte = "neutre",
 }: {
   actif: boolean;
   onClick: () => void;
   children: ReactNode;
   repere?: ReactNode;
   centre?: boolean;
+  teinte?: keyof typeof TEINTE;
 }) {
+  const t = TEINTE[teinte];
   return (
     <button
       type="button"
       onClick={onClick}
       aria-pressed={actif}
-      className={`flex min-h-[48px] items-center gap-2.5 px-3.5 py-2.5 text-left text-[16px] transition-colors ${
+      className={`flex min-h-[48px] items-center gap-2.5 border-[1.5px] px-3.5 py-2.5 text-left text-[16px] transition-colors ${
         centre ? "justify-center" : "justify-between"
-      } ${actif ? "border-[1.5px] border-rouge bg-papier font-medium text-encre shadow-[0_6px_16px_rgba(0,0,0,0.45)]" : "border-[1.5px] border-papier/45 text-papier hover:border-papier"}`}
+      } ${actif ? `${t.actif} font-medium shadow-[0_6px_16px_rgba(0,0,0,0.45)]` : t.repos}`}
     >
       <span className="flex items-center gap-2">
         {actif ? (
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#b8342a" strokeWidth="2.2" aria-hidden className="shrink-0">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke={t.coche} strokeWidth="2.2" aria-hidden className="shrink-0">
             <path d="m3 8.5 3.2 3L13 4.5" />
           </svg>
         ) : null}

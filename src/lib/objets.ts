@@ -321,6 +321,7 @@ export const ECHELLE: Palier[] = [
   },
   {
     id: "courses",
+    image: "courses",
     seuil: 0,
     nom: "De quoi faire les courses un moment",
     pointe: "C’est peu. C’est aussi ce que ça veut dire.",
