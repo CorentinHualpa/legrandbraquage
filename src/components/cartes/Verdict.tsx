@@ -2,6 +2,7 @@
 
 import { Carte, Commissaire, Papier, Volet } from "./Carte";
 import { taux } from "./Bourse";
+import type { Cadeau } from "@/lib/lien";
 import type { Pieces } from "@/lib/images";
 import { euros, eurosSigne } from "@/lib/format";
 import { CRANS_RENDEMENT, type Perimetre, type Simulation } from "@/lib/moteur";
@@ -15,12 +16,24 @@ import { CRANS_RENDEMENT, type Perimetre, type Simulation } from "@/lib/moteur";
  * en actions, la balance penche du même côté à tout niveau), et c'est un
  * résultat. Le commissaire le lâche en sortant.
  */
+/**
+ * Ce que le commissaire ressort de la réponse donnée sur l'écran du butin.
+ * C'est tout l'intérêt de la question : sur le moment elle ne coûte rien, ici
+ * elle est confrontée au chiffre.
+ */
+const RAPPEL: Record<"partage" | "picotte", string> = {
+  partage:
+    "« Vous m’avez dit que ça faisait toujours plaisir de partager. Je vous ai chiffré le plaisir. »",
+  picotte: "« Vous m’aviez dit que ça picottait un peu. Vous aviez le bon mot, et le mauvais ordre de grandeur. »",
+};
+
 export function Verdict({
   pieces,
   simulation,
   pivot,
   perimetre,
   placementId,
+  cadeau,
   numero,
   total,
   suivant,
@@ -31,6 +44,7 @@ export function Verdict({
   pivot: number | null;
   perimetre: Perimetre;
   placementId: string;
+  cadeau: Cadeau;
   numero: number;
   total: number;
   suivant: () => void;
@@ -74,6 +88,9 @@ export function Verdict({
           <span className="font-mono text-[10px] tracking-[0.1em] text-bleu">RENDU {euros(plateauDroit.total)} €</span>
         </div>
       </Papier>
+
+      {/* Sa propre réponse, ressortie. Rien si la question a été sautée. */}
+      {cadeau ? <Commissaire>{RAPPEL[cadeau]}</Commissaire> : null}
 
       <Commissaire qui="Le commissaire, en sortant">
         {pivot ? (

@@ -1,10 +1,11 @@
 "use client";
 
-import { Carte, Commissaire, Lien, Volet } from "./Carte";
+import { Carte, Commissaire, Kicker, Lien, Reponse, Volet } from "./Carte";
+import type { Cadeau } from "@/lib/lien";
 import type { Pieces } from "@/lib/images";
 import { eurosSigne } from "@/lib/format";
 import type { Simulation } from "@/lib/moteur";
-import { SEUIL_ANNEES, anneesSansTravailler, enAnneesDeDepute, objetPour } from "@/lib/objets";
+import { SEUIL_ANNEES, anneesSansTravailler, objetPour } from "@/lib/objets";
 
 /**
  * Écran 4 : le butin. Avec ça, ils se sont payé…
@@ -12,9 +13,21 @@ import { SEUIL_ANNEES, anneesSansTravailler, enAnneesDeDepute, objetPour } from 
  * Le dessin du butin en plein cadre, l'objet en gros, et le commissaire qui
  * compte la monnaie. Les sources des prix sont au clic.
  */
+/**
+ * Ce que le commissaire répond selon qu'on assume ou pas. La réponse ne
+ * change aucun chiffre : elle est ressortie au verdict, où elle pèse plus
+ * lourd que sur le moment.
+ */
+const REPLIQUE: Record<"partage" | "picotte", string> = {
+  partage: "« Voilà un bon citoyen. On repasse le mois prochain, même heure. »",
+  picotte: "« Ça picotte quarante-trois ans, oui. Après, on s’habitue. C’est prévu pour. »",
+};
+
 export function Butin({
   pieces,
   simulation,
+  cadeau,
+  repondreCadeau,
   numero,
   total,
   suivant,
@@ -22,6 +35,8 @@ export function Butin({
 }: {
   pieces: Pieces;
   simulation: Simulation;
+  cadeau: Cadeau;
+  repondreCadeau: (reponse: Cadeau) => void;
   numero: number;
   total: number;
   suivant: () => void;
@@ -31,7 +46,6 @@ export function Butin({
   const objet = objetPour(montant);
   const reste = montant - objet.seuil;
   const annees = anneesSansTravailler(montant, simulation.netApresImpotActuel);
-  const deputes = enAnneesDeDepute(montant);
   void pieces;
 
   return (
@@ -89,14 +103,35 @@ export function Butin({
         {objet.seuil > 0 && reste > 1000 ? (
           <p className="text-[15px] leading-relaxed text-papier-2 italic">{objet.pointe}</p>
         ) : null}
-        <p className="text-[14.5px] leading-relaxed text-ligne">
-          <span className="chiffres font-mono font-medium text-papier">{deputes.toFixed(1).replace(".", ",")}</span> années de salaire net d’un député.
-          {montant >= SEUIL_ANNEES ? (
-            <>
-              {" "}<span className="chiffres font-mono font-medium text-papier">{annees.toFixed(1).replace(".", ",")}</span> années de votre vie sans travailler, à votre niveau de vie.
-            </>
-          ) : null}
-        </p>
+        {/*
+          Les années de député ont sauté : un montant converti en carrière de
+          quelqu'un d'autre n'apprend rien à personne (Coq, 08/09/2026 : « ce
+          genre de trucs, on s'en fout »). Les années de SA vie restent : c'est
+          la seule conversion qui parle de la personne devant l'écran.
+        */}
+        {montant >= SEUIL_ANNEES ? (
+          <p className="text-[14.5px] leading-relaxed text-ligne">
+            <span className="chiffres font-mono font-medium text-papier">{annees.toFixed(1).replace(".", ",")}</span> années de votre vie sans travailler, à votre niveau de vie.
+          </p>
+        ) : null}
+        {/*
+          La question du cadeau. Elle ne calcule rien : elle sert à ce que la
+          personne prenne position, pour qu'on puisse la lui ressortir au
+          verdict. Les deux réponses mènent au même écran (Coq, 08/09/2026 :
+          « oui ou non, même topo »), seule la réplique change.
+        */}
+        <div className="flex flex-col gap-2 border-t border-papier/15 pt-3">
+          <Kicker couleur="rouge">Content de votre cadeau ?</Kicker>
+          <div className="flex flex-col gap-2">
+            <Reponse actif={cadeau === "partage"} onClick={() => repondreCadeau("partage")}>
+              <span className="text-[15.5px]">Ça fait toujours plaisir de partager</span>
+            </Reponse>
+            <Reponse actif={cadeau === "picotte"} onClick={() => repondreCadeau("picotte")}>
+              <span className="text-[15.5px]">Ça picotte un peu</span>
+            </Reponse>
+          </div>
+          {cadeau ? <Commissaire>{REPLIQUE[cadeau]}</Commissaire> : null}
+        </div>
       </div>
 
       <div className="grow" />
@@ -104,10 +139,6 @@ export function Butin({
       <Volet titre="D’où viennent ces prix ?">
         <p className="text-[14px] leading-relaxed text-ligne">
           <span className="font-medium text-papier">{objet.nom}</span> : {objet.source}.
-        </p>
-        <p className="text-[13.5px] leading-relaxed text-ligne">
-          Le député : 71 440,08 € nets par an, tels que l’Assemblée nationale les publie. Sans l’avance
-          de frais de mandat, qui n’existe plus depuis le 1er janvier 2026.
         </p>
         <Lien href="/methode">Toutes les sources</Lien>
       </Volet>

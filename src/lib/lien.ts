@@ -47,7 +47,17 @@ export type Cas = {
   fraisId: string;
   /** Tabac, carburant, alcool : les accises comptent dans ce qui est pris. */
   habitudes: Habitudes;
+  /**
+   * « Content de votre cadeau ? » sur l'écran du butin. Ne change AUCUN
+   * chiffre : c'est une réponse qu'on ressort à la personne au verdict, et
+   * elle voyage donc avec le dossier, sinon un lien partagé rouvre un procès
+   * où le commissaire cite une phrase que personne n'a dite.
+   */
+  cadeau: Cadeau;
 };
+
+/** La réponse à « Content de votre cadeau ? », ou rien tant qu'on n'a pas répondu. */
+export type Cadeau = "partage" | "picotte" | null;
 
 /** Le placement qu'on sert quand la personne n'a rien choisi : le fonds en euros, ce que la moitié des Français détient. */
 export const PLACEMENT_DEFAUT_ID = "fonds-euros";
@@ -113,6 +123,7 @@ export function requeteDuCas(cas: Cas): string {
   if (cas.habitudes.tabac !== HABITUDES_DEFAUT.tabac) q.set("ht", cas.habitudes.tabac);
   if (cas.habitudes.carburant !== HABITUDES_DEFAUT.carburant) q.set("hc", cas.habitudes.carburant);
   if (cas.habitudes.alcool !== HABITUDES_DEFAUT.alcool) q.set("ha", cas.habitudes.alcool);
+  if (cas.cadeau) q.set("cd", cas.cadeau);
   return `?${q.toString()}`;
 }
 
@@ -177,7 +188,13 @@ export function casDepuisRequete(recherche: string): Cas | null {
       carburant: litParmi(q.get("hc"), HABITUDES.carburant.choix.map((c) => c.id), HABITUDES_DEFAUT.carburant),
       alcool: litParmi(q.get("ha"), HABITUDES.alcool.choix.map((c) => c.id), HABITUDES_DEFAUT.alcool),
     },
+    cadeau: litCadeau(q.get("cd")),
   };
+}
+
+/** Une réponse inconnue vaut « pas répondu », jamais une erreur. */
+function litCadeau(valeur: string | null): Cadeau {
+  return valeur === "partage" || valeur === "picotte" ? valeur : null;
 }
 
 function litParmi(valeur: string | null, valides: string[], defaut: string): string {

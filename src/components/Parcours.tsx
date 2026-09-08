@@ -16,6 +16,7 @@ import { Rendu } from "./cartes/Rendu";
 import { Verdict } from "./cartes/Verdict";
 import { Avis } from "./cartes/Avis";
 import type { Pieces } from "@/lib/images";
+import type { Cadeau } from "@/lib/lien";
 import { FRAIS_DEFAUT_ID, PLACEMENT_DEFAUT_ID, casDepuisRequete } from "@/lib/lien";
 import {
   CRANS_FRAIS,
@@ -80,6 +81,8 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
   const [placementId, setPlacementId] = useState(PLACEMENT_DEFAUT_ID);
   const [fraisId, setFraisId] = useState(FRAIS_DEFAUT_ID);
   const [habitudes, setHabitudes] = useState<Habitudes>(HABITUDES_DEFAUT);
+  /* « Content de votre cadeau ? » : aucun effet sur les chiffres, ressorti au verdict. */
+  const [cadeau, setCadeau] = useState<Cadeau>(null);
   const [ecran, setEcran] = useState<Ecran>("couverture");
 
   const changer = (patch: Partial<EtatSaisie>) => setEtat((e) => ({ ...e, ...patch }));
@@ -123,6 +126,7 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
     setPlacementId(cas.placementId);
     setFraisId(cas.fraisId);
     setHabitudes(cas.habitudes);
+    setCadeau(cas.cadeau);
     const ouvrable = regimeCalculable(regimeDe(cas.statut, cas.formeTpe, cas.activite));
     const ancre = window.location.hash.slice(1) as Ecran;
     if (ouvrable && (ECRANS as readonly string[]).includes(ancre) && ancre !== "couverture") {
@@ -230,7 +234,7 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
   }
 
   const commun = { pieces, numero, total, suivant, retour };
-  const cas = { ...etat, perimetre, paliers, placementId, fraisId, habitudes };
+  const cas = { ...etat, perimetre, paliers, placementId, fraisId, habitudes, cadeau };
   const rangs: Record<"ecole" | "sante" | "chomage", string> = { ecole: "1 sur 3", sante: "2 sur 3", chomage: "3 sur 3" };
   if (regime === "fonctionnaire") {
     rangs.ecole = "1 sur 2";
@@ -244,7 +248,7 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
       ) : ecran === "pris" ? (
         <Pris {...commun} simulation={simulation} perimetre={perimetre} setPerimetre={setPerimetre} />
       ) : ecran === "butin" ? (
-        <Butin {...commun} simulation={simulation} />
+        <Butin {...commun} simulation={simulation} cadeau={cadeau} repondreCadeau={setCadeau} />
       ) : ecran === "temoin" ? (
         <Temoin {...commun} simulation={simulation} temoin={temoin} />
       ) : ecran === "bourse" ? (
@@ -276,7 +280,7 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
       ) : ecran === "rendu" ? (
         <Rendu {...commun} simulation={simulation} paliers={paliers} allerAuPalier={(poste) => aller(poste)} />
       ) : ecran === "verdict" ? (
-        <Verdict {...commun} simulation={simulation} pivot={pivot} perimetre={perimetre} placementId={placementId} />
+        <Verdict {...commun} simulation={simulation} pivot={pivot} perimetre={perimetre} placementId={placementId} cadeau={cadeau} />
       ) : (
         <Avis {...commun} simulation={simulation} cas={cas} recommencer={() => aller("deposition")} />
       )}
