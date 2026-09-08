@@ -47,15 +47,29 @@ export function Pris({
     >
       <Kicker couleur="rouge">D’ici la fin de votre carrière, ils vous auront pris</Kicker>
       <Chiffre>{eurosSigne(plateauGauche.total)}</Chiffre>
+      {/*
+        ⚠ Il COMMENTE le montant, il ne le paraphrase pas. La version d'avant
+        (« Ça fait beaucoup pour un seul plaignant. Pour l'essentiel sans que
+        vous le voyiez, évidemment. ») ne disait ni de quoi elle parlait ni sur
+        quelle durée : « on comprend rien » (Coq, 09/09/2026). Le chiffre est
+        juste au-dessus, donc la phrase doit apporter les deux choses qu'il
+        n'affiche pas : la durée, et le fait qu'on ne l'a jamais vu passer.
+      */}
       <Commissaire>
         {micro
-          ? "« Sur tout ce que vous aurez encaissé. Une partie avant même que vous vous payiez. »"
-          : "« Ça fait beaucoup pour un seul plaignant. Pour l’essentiel sans que vous le voyiez, évidemment. »"}
+          ? "« Voilà la pièce à conviction. Tout ça sur ce que vous encaissez, et une partie part avant même que vous vous payiez. »"
+          : "« Voilà la pièce à conviction. Tout ça sur une carrière, et vous l’avez jamais vu passer. »"}
       </Commissaire>
 
-      <div className="grow" />
-
-      <Volet titre="Comment ? Les quatre lignes">
+      {/*
+        ⚠ Les quatre lignes sont DEHORS, plus dans un volet replié. Pliées, on
+        lisait « les quatre lignes » sous un chiffre sans voir une seule ligne :
+        la carte accusait sans montrer la preuve, ce qui est exactement ce
+        qu'elle reproche. C'est la piece a conviction de l'ecran, elle ne se
+        range pas dans un tiroir.
+      */}
+      <div className="flex flex-col gap-1.5">
+        <Kicker couleur="jaune">{micro ? "Le détail, ligne par ligne" : "Les quatre lignes"}</Kicker>
         <ul className="flex flex-col">
           {lignes.map((ligne) => {
             const montant = plateauGauche.lignes[ligne.cle];
@@ -90,6 +104,11 @@ export function Pris({
             );
           })}
         </ul>
+      </div>
+
+      <div className="grow" />
+
+      <Volet titre="D’où sortent ces chiffres ?">
         <p className="text-[13px] leading-relaxed text-ligne">
           Tapez une ligne pour la sortir du total. Tout est en euros d’aujourd’hui, aux barèmes 2026 :{" "}
           <a href="/methode" className="underline underline-offset-2">la méthode, ligne par ligne</a>.

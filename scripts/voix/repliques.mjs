@@ -94,8 +94,8 @@ export const REPLIQUES = {
 
   /* La pièce à conviction : le mécanisme. Il explique, il ne s'emporte pas. */
   pris:
-    "[tired] Bon. [pause] Vous voulez savoir comment ils s'y prennent ? "
-    + "[dry] Quatre lignes. Quatre. [scoffs] Et sur votre fiche de paie, vous en voyez une.",
+    "[tired] Voilà la pièce à conviction. [pause] Tout ça sur une carrière. "
+    + "[dry] Quatre lignes, quatre. [scoffs] Et sur votre fiche de paie, vous en voyez une.",
   butin:
     "[flat] Voilà le butin. [scoffs] C'est pas moi qui fixe les prix, hein. Moi je compte. "
     + "[dry] Et franchement, j'ai rarement vu un scellé aussi bien rempli.",
