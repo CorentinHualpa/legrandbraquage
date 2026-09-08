@@ -18,7 +18,7 @@ import { Avis } from "./cartes/Avis";
 import type { Pieces } from "@/lib/images";
 import type { Cadeau } from "@/lib/lien";
 import { contexte, evenement } from "@/lib/dalevoz";
-import { jouer, reglerSons, type Son } from "@/lib/sons";
+import { jouer, poserDecor, reglerSons, type Acte, type Son } from "@/lib/sons";
 import { FRAIS_DEFAUT_ID, PLACEMENT_DEFAUT_ID, casDepuisRequete } from "@/lib/lien";
 import {
   CRANS_FRAIS,
@@ -47,6 +47,28 @@ const ECRANS = [
   "ecole", "sante", "chomage", "rendu", "bourse", "verdict", "avis",
 ] as const;
 type Ecran = (typeof ECRANS)[number];
+
+/**
+ * Où se passe chaque écran. Le son suit le LIEU, pas le numéro de carte : on
+ * reste dans le bureau du commissaire pendant toute la déposition, on descend
+ * aux scellés quand on regarde le butin, et le verdict se rend au tribunal.
+ *
+ * `liberation` est dehors, et c'est un choix de mise en scène plutôt qu'une
+ * évidence : l'écran calcule l'heure de la journée à partir de laquelle on
+ * travaille pour soi, donc l'heure où on sort. Il donne au passage une
+ * respiration au milieu du parcours, entre deux salles fermées. À déplacer
+ * si ça ne va pas.
+ *
+ * Ce qui n'est pas listé retombe sur le commissariat.
+ */
+const ACTE: Partial<Record<Ecran, Acte>> = {
+  pris: "scelles",
+  butin: "scelles",
+  rendu: "tribunal",
+  bourse: "tribunal",
+  verdict: "tribunal",
+  liberation: "rue",
+};
 
 /**
  * Le parcours, de bout en bout : la nuit du commissariat, un écran, un
@@ -141,6 +163,15 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
   /* Chaque carte s'ouvre en haut : on vient de changer d'écran, pas de page. */
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
+  }, [ecran]);
+
+  /**
+   * Le décor sonore suit le LIEU, pas l'écran. Le fondu se fait tout seul dans
+   * `poserDecor`, qui ne fait rien tant que l'acte ne change pas : on peut donc
+   * l'appeler à chaque rendu sans y penser.
+   */
+  useEffect(() => {
+    poserDecor(ACTE[ecran] ?? "commissariat");
   }, [ecran]);
 
   const placement = useMemo(() => {

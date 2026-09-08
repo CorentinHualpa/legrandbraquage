@@ -85,13 +85,68 @@ const SONS = {
       'A ballpoint pen ticking a box on a paper form, two short scratches on paper, very close '
       + 'microphone, dry, no music, no voices',
   },
-  commissariat: {
-    duree: 22,
-    influence: 0.35,
+  /*
+   * ⚠ L'ambiance `commissariat` de 22 secondes a été RETIRÉE le 08/09/2026.
+   * Elle tournait en boucle sur tout le parcours, et l'oreille repérait la
+   * boucle au deuxième passage. Elle contenait en plus « faint radio static »,
+   * un grésillement CONTINU, c'est-à-dire le pire contenu possible pour une
+   * boucle courte, puisque rien n'y bouge. Coq : « c'est le même grésillement
+   * qui tourne en boucle ».
+   *
+   * Les ambiances vivent maintenant dans `ambiances.mjs`, à côté : l'API
+   * plafonne à 22 secondes par appel, donc elles se fabriquent en plusieurs
+   * PRISES de la même pièce enchaînées en fondu. Ce fichier garde les bruits
+   * ponctuels, qui tiennent en un appel.
+   */
+  'bruit-telephone': {
+    duree: 3.5,
+    influence: 0.8,
     texte:
-      'Quiet night ambience inside an old police station office: a wall clock ticking slowly, a '
-      + 'distant typewriter, faint radio static down the corridor, a chair creak, no music, no '
-      + 'intelligible voices, seamless loop',
+      'An old rotary desk telephone ringing twice in a distant room and stopping unanswered, '
+      + 'corridor reverb, no music, no voices',
+  },
+  'bruit-chaise': {
+    duree: 1.6,
+    influence: 0.85,
+    texte:
+      'A heavy wooden chair scraping back on a tiled floor, close microphone, dry, no music, '
+      + 'no voices',
+  },
+  'bruit-briquet': {
+    duree: 1.4,
+    influence: 0.85,
+    texte:
+      'A metal petrol lighter opening with a click, flint striking, flame catching, then the lid '
+      + 'snapping shut, very close microphone, no music, no voices',
+  },
+  'bruit-tiroir': {
+    duree: 2.2,
+    influence: 0.8,
+    texte:
+      'A metal filing cabinet drawer rolling open and being pushed shut with a dull clang, '
+      + 'office room reverb, no music, no voices',
+  },
+  'bruit-clavier-court': {
+    duree: 2.2,
+    influence: 0.85,
+    texte:
+      'A short burst of typing on a modern membrane computer keyboard, about ten keystrokes then '
+      + 'stopping, office desk, close microphone, no music, no voices',
+  },
+  'bruit-clavier-long': {
+    duree: 5,
+    influence: 0.8,
+    texte:
+      'Someone typing a sentence on a computer keyboard at a police station desk, uneven rhythm '
+      + 'with two short pauses, ending with a single firm Enter key press, close microphone, '
+      + 'no music, no voices',
+  },
+  'bruit-clavier-mecanique': {
+    duree: 3,
+    influence: 0.85,
+    texte:
+      'Typing on an old clicky mechanical computer keyboard, loud plastic clacks, about fifteen '
+      + 'keystrokes, office room, close microphone, no music, no voices',
   },
 };
 
