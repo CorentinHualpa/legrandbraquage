@@ -3,7 +3,7 @@
 import { useState, type ReactNode } from "react";
 
 import { PIECES, type NumeroPiece, type Pieces } from "@/lib/pieces";
-import { jouer } from "@/lib/sons";
+import { frapper, jouer } from "@/lib/sons";
 
 /**
  * Une carte du parcours : un écran, un chiffre, la nuit du commissariat.
@@ -367,6 +367,9 @@ export function Reponse({
       type="button"
       onClick={() => {
         jouer("coche");
+        // Le stylo coche, puis quelqu'un le saisit au clavier. La rafale est
+        // différée dans `frapper` : deux clics rapprochés n'en font qu'une.
+        frapper("court");
         onClick();
       }}
       aria-pressed={actif}

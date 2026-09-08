@@ -42,10 +42,10 @@ function lireVie() {
 
 const VIE = lireVie();
 
-function choisir(acte, dernier, hasard) {
+function choisir(acte, recents, hasard) {
   const duLieu = VIE.filter((b) => b.actes.includes(acte));
   if (!duLieu.length) return null;
-  const candidats = duLieu.filter((b) => b.fichier !== dernier);
+  const candidats = duLieu.filter((b) => !recents.includes(b.fichier));
   const tirables = candidats.length ? candidats : duLieu;
   const total = tirables.reduce((n, b) => n + b.poids, 0);
   let tirage = Math.max(0, Math.min(0.999999, hasard)) * total;
@@ -70,7 +70,7 @@ test("jamais deux fois le même d'affilée, quand il y a le choix", () => {
   // C'est la répétition qui trahit la machine, pas la fréquence.
   for (const b of VIE.filter((x) => x.actes.includes("commissariat"))) {
     for (let i = 0; i < 50; i++) {
-      const suivant = choisir("commissariat", b.fichier, i / 50);
+      const suivant = choisir("commissariat", [b.fichier], i / 50);
       assert.notEqual(suivant?.fichier, b.fichier);
     }
   }
@@ -87,9 +87,9 @@ test("un acte à un seul bruit ne devient pas MUET", () => {
     const duLieu = VIE.filter((b) => b.actes.includes(acte));
     if (duLieu.length !== 1) continue;
     const seul = duLieu[0].fichier;
-    assert.equal(choisir(acte, seul, 0.5)?.fichier, seul, `l'acte « ${acte} » devient muet`);
+    assert.equal(choisir(acte, [seul], 0.5)?.fichier, seul, `l'acte « ${acte} » devient muet`);
   }
-  assert.doesNotThrow(() => choisir("rue", "n-existe-pas", 0.99));
+  assert.doesNotThrow(() => choisir("rue", ["n-existe-pas"], 0.99));
 });
 
 test("le téléphone reste le plus rare et le plus bas", () => {
@@ -112,7 +112,8 @@ test("aucun bruit de vie ne dépasse le volume d'une ambiance forte", () => {
 test("les bornes laissent respirer", () => {
   const min = Number(source.match(/VIE_MIN_MS = ([\d_]+)/)[1].replace(/_/g, ""));
   const max = Number(source.match(/VIE_MAX_MS = ([\d_]+)/)[1].replace(/_/g, ""));
-  assert.ok(min >= 15_000, "moins de quinze secondes entre deux bruits devient du bruitage");
+  assert.ok(min >= 4_000, "sous quatre secondes, ce n'est plus une pièce vivante, c'est du bruitage");
+  assert.ok(min <= 12_000, "au-delà, le commissariat sonne vide : mesuré, 22 s donnaient DEUX bruits en 75 s");
   assert.ok(max > min * 2, "un écart trop serré rend le rythme régulier, donc repérable");
 });
 
@@ -121,7 +122,7 @@ test("la répartition suit les poids", () => {
   // souvent que le téléphone (poids 1). Sans dernier joué, pour ne pas biaiser.
   const compte = new Map();
   for (let i = 0; i < 1000; i++) {
-    const c = choisir("commissariat", "", i / 1000);
+    const c = choisir("commissariat", [], i / 1000);
     compte.set(c.fichier, (compte.get(c.fichier) ?? 0) + 1);
   }
   const tel = compte.get("bruit-telephone") ?? 0;

@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { Carte, Commissaire, Kicker, Papier, Reponse } from "./Carte";
 import type { Pieces } from "@/lib/images";
 import { euros } from "@/lib/format";
-import { jouer } from "@/lib/sons";
+import { frapper, jouer } from "@/lib/sons";
 import type { Statut } from "@/lib/moteur";
 import {
   ACTIVITES,
@@ -144,11 +144,26 @@ export function Deposition({
             onFocus={() => setSaisie(true)}
             onBlur={() => setSaisie(false)}
             onChange={(e) => {
-              // Sept chiffres suffisent : au-delà, c'est une faute de frappe.
-              const chiffres = e.target.value.replace(/[^d]/g, "").slice(0, 7);
+              /*
+               * Sept chiffres suffisent : au-delà, c'est une faute de frappe.
+               *
+               * ⚠ `\D` et pas `[^d]`. L'antislash avait sauté (commit 83b46a4),
+               * et la classe voulait alors dire « tout sauf la lettre d » : le
+               * champ effaçait donc chaque chiffre tapé et restait bloqué à
+               * zéro, sur l'écran qui ouvre tout le parcours. Rien ne le
+               * signalait, ni le typecheck ni le build, et le champ avait l'air
+               * parfaitement normal.
+               */
+              const chiffres = e.target.value.replace(/\D/g, "").slice(0, 7);
               const nouveau = chiffres === "" ? 0 : Number(chiffres);
               // La machine ne frappe qu'à l'écriture : au retour arrière, rien.
               if (String(nouveau).length > String(etat.netMensuel).length) jouer("machine");
+              /*
+               * Et le greffier saisit ce qu'on vient de déclarer. Différé et
+               * regroupé (cf. `frapper`) : une rafale APRÈS la dernière touche,
+               * jamais une frappe qui suit le doigt.
+               */
+              frapper("long");
               changer({ netMensuel: nouveau });
             }}
             aria-label={ouLire.label}

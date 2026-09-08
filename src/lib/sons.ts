@@ -114,9 +114,18 @@ const VIE: BruitDeVie[] = [
   { fichier: "bruit-clavier-mecanique", volume: 0.13, actes: ["commissariat"], poids: 2 },
 ];
 
-/** Bornes entre deux bruits de vie, en millisecondes. */
-const VIE_MIN_MS = 22_000;
-const VIE_MAX_MS = 70_000;
+/**
+ * Bornes entre deux bruits de vie, en millisecondes.
+ *
+ * ⚠ Ces deux nombres se règlent À L'OREILLE, jamais au raisonnement. Ils
+ * valaient 22 à 70 secondes, écrits en réfléchissant sans écouter : ça donne
+ * DEUX bruits en soixante-quinze secondes, mesuré en rendant le mix, et le
+ * commissariat sonnait vide. La cadence retenue vient d'une comparaison de
+ * trois versions rendues en fichiers (`scripts/sons/mix.mjs`), écoutées côte à
+ * côte. Pour les changer, refaire un mix, ne pas raisonner.
+ */
+const VIE_MIN_MS = 6_000;
+const VIE_MAX_MS = 16_000;
 
 /* ------------------------------------------------------------------ *
  * Machinerie
@@ -129,7 +138,8 @@ const modeles = new Map<string, HTMLAudioElement>();
 /** Les nappes en cours : le décor, et la rumeur quand l'acte en a une. */
 const nappes = new Map<string, HTMLAudioElement>();
 let minuterieVie: ReturnType<typeof setTimeout> | null = null;
-let dernierBruitDeVie = "";
+/** Les deux derniers bruits de vie joués, pour ne pas les reprendre tout de suite. */
+const recentsDeVie: string[] = [];
 
 function audio(fichier: string): HTMLAudioElement | null {
   if (typeof window === "undefined") return null;
@@ -237,11 +247,18 @@ function programmerVie() {
  */
 export function choisirBruitDeVie(
   acte: Acte,
-  dernier: string,
+  /** Les derniers joués, du plus ancien au plus récent. */
+  recents: readonly string[],
   hasard: number,
 ): { fichier: string; volume: number } | null {
   const duLieu = VIE.filter((b) => b.actes.includes(acte));
   if (!duLieu.length) return null;
+  /*
+   * ⚠ On écarte les DEUX derniers, pas seulement le précédent. Une mémoire d'un
+   * seul laisse passer A-B-A-B, qui s'entend exactement comme une boucle de
+   * deux sons : sur le premier mix rendu, le clavier revenait trois fois en une
+   * minute alors que la règle « jamais deux fois de suite » était respectée.
+   */
   /*
    * ⚠ Écarter le dernier joué est une bonne règle tant qu'il RESTE quelqu'un.
    * Sur un acte qui n'a qu'un seul bruit (la rue n'a que le briquet), elle ne
@@ -250,7 +267,7 @@ export function choisirBruitDeVie(
    * montré avant que ça ne s'entende. On retombe donc sur la liste complète
    * plutôt que de se taire.
    */
-  const candidats = duLieu.filter((b) => b.fichier !== dernier);
+  const candidats = duLieu.filter((b) => !recents.includes(b.fichier));
   const tirables = candidats.length ? candidats : duLieu;
   const total = tirables.reduce((n, b) => n + b.poids, 0);
   let tirage = Math.max(0, Math.min(0.999999, hasard)) * total;
@@ -264,14 +281,51 @@ function tirerUnBruitDeVie() {
   // L'onglet en arrière-plan ne doit RIEN jouer : un bruit qui sort d'un onglet
   // qu'on ne regarde plus se cherche pendant trente secondes.
   if (typeof document !== "undefined" && document.hidden) return;
-  const choisi = choisirBruitDeVie(acte, dernierBruitDeVie, Math.random());
+  const choisi = choisirBruitDeVie(acte, recentsDeVie, Math.random());
   if (!choisi) return;
-  dernierBruitDeVie = choisi.fichier;
+  recentsDeVie.push(choisi.fichier);
+  if (recentsDeVie.length > 2) recentsDeVie.shift();
   const source = audio(choisi.fichier);
   if (!source) return;
   const ex = source.cloneNode(true) as HTMLAudioElement;
   ex.volume = choisi.volume;
   void ex.play().catch(() => {});
+}
+
+/* ------------------------------------------------------------------ *
+ * LA FRAPPE DU GREFFIER
+ * ------------------------------------------------------------------ */
+
+/**
+ * Quelqu'un tape ce que la personne vient de dire.
+ *
+ * ⚠ Volontairement DIFFÉRÉE et regroupée. Une frappe par touche donnerait un
+ * clavier qui suit le doigt, ce qui est du bruitage ; ce qu'on veut, c'est un
+ * greffier qui écoute, puis qui saisit. Les appels rapprochés se fondent donc
+ * en UNE rafale, tirée après la dernière frappe de la personne.
+ *
+ * `long` pour un montant qu'on vient de saisir, `court` pour un simple clic :
+ * on ne tape pas la même chose pour une case cochée et pour un chiffre.
+ */
+const FRAPPE = {
+  court: { fichier: "bruit-clavier-court", volume: 0.22, apres: 260 },
+  long: { fichier: "bruit-clavier-long", volume: 0.2, apres: 700 },
+} as const;
+
+let minuterieFrappe: ReturnType<typeof setTimeout> | null = null;
+
+export function frapper(genre: keyof typeof FRAPPE = "court"): void {
+  if (!actif || typeof window === "undefined") return;
+  const f = FRAPPE[genre];
+  if (minuterieFrappe) clearTimeout(minuterieFrappe);
+  minuterieFrappe = setTimeout(() => {
+    minuterieFrappe = null;
+    const source = audio(f.fichier);
+    if (!source) return;
+    const ex = source.cloneNode(true) as HTMLAudioElement;
+    ex.volume = f.volume;
+    void ex.play().catch(() => {});
+  }, f.apres);
 }
 
 /**
@@ -288,6 +342,8 @@ export function reglerSons(oui: boolean): void {
     }
     if (minuterieVie) clearTimeout(minuterieVie);
     minuterieVie = null;
+    if (minuterieFrappe) clearTimeout(minuterieFrappe);
+    minuterieFrappe = null;
     return;
   }
   for (const nom of Object.keys(SONS)) audio(nom)?.load();
