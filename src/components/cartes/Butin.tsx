@@ -55,6 +55,7 @@ export function Butin({
       nature="Le butin"
       retour={retour}
       action={{ libelle: "Suivant", onClick: suivant }}
+      teteSurClair
     >
       {/*
         L'annonce AVANT le dessin. Le dessin seul se lisait comme une
@@ -62,15 +63,17 @@ export function Butin({
         l'achat (Coq, 08/09/2026 : « il faudrait vraiment qu'on fasse
         comprendre VOILÀ CE QU'ILS SE SONT ACHETÉ »).
       */}
-      <div className="-mx-5 -mt-16 flex flex-col gap-1 bg-rouge px-5 pt-16 pb-3 sm:-mx-6 sm:px-6">
-        <span className="font-mono text-[10.5px] tracking-[0.16em] text-papier/80 uppercase">
+      <div className="-mx-5 -mt-16 flex flex-col gap-1 bg-jaune-police px-5 pt-16 pb-3 text-encre sm:-mx-6 sm:px-6">
+        <span className="font-mono text-[10.5px] tracking-[0.16em] text-encre/65 uppercase">
           Scellé n° 1 · le butin
         </span>
-        <p className="text-[20px] leading-tight font-bold text-papier">
+        <p className="text-[20px] leading-tight font-bold">
           Voilà ce qu’ils se sont acheté avec vos{" "}
           <span className="chiffres font-mono tracking-[-0.02em] whitespace-nowrap">{eurosSigne(montant)}</span>.
         </p>
       </div>
+      {/* Les rayures qui ferment le scellé, tendues d'un bord à l'autre. */}
+      <div aria-hidden className="ruban -mx-5 -mt-4 h-[10px] sm:-mx-6" />
 
       <div className="relative -mx-5 h-[300px] overflow-hidden bg-papier sm:-mx-6">
         {objet.image ? (
@@ -121,7 +124,7 @@ export function Butin({
           « oui ou non, même topo »), seule la réplique change.
         */}
         <div className="flex flex-col gap-2 border-t border-papier/15 pt-3">
-          <Kicker couleur="rouge">Content de votre cadeau ?</Kicker>
+          <Kicker couleur="jaune">Content de votre cadeau ?</Kicker>
           <div className="flex flex-col gap-2">
             <Reponse actif={cadeau === "partage"} onClick={() => repondreCadeau("partage")} teinte="vert">
               <span className="text-[15.5px]">Ça fait toujours plaisir de partager</span>

@@ -35,7 +35,27 @@
   --color-nuit: #0f151c;
   --color-nuit-2: #1b2430;
   --color-rouge-clair: #e0564a;
+  /*
+   * Le jaune du ruban de police. Depuis le 08/09/2026, c'est LA couleur du
+   * décor et de l'action : bandeaux, boutons, jauge d'avancement, libellés de
+   * section. Le rouge ne garde que le crime (les montants pris) et la
+   * condamnation (le tampon). Le rouge tenait les trois rôles à la fois, si
+   * bien que le tampon COUPABLE avait la couleur du mobilier, et que le ruban
+   * de la couverture ne réapparaissait plus jamais (choix de Coq parmi trois
+   * pistes maquettées).
+   */
+  /*
+   * Le jaune du ruban de police. Depuis le 08/09/2026, c'est LA couleur du
+   * décor et de l'action : bandeaux, boutons, jauge d'avancement, libellés de
+   * section. Le rouge ne garde que le crime (les montants pris) et la
+   * condamnation (le tampon). Le rouge tenait les trois rôles à la fois, si
+   * bien que le tampon COUPABLE avait la couleur du mobilier, et que le ruban
+   * de la couverture ne réapparaissait plus jamais (choix de Coq parmi trois
+   * pistes maquettées).
+   */
   --color-jaune-police: #e8c126;
+  --color-jaune-sombre: #cfa817;
+  --color-jaune-sombre: #cfa817;
 
   --font-serif: var(--police-serif), Georgia, "Times New Roman", serif;
   --font-mono: var(--police-mono), ui-monospace, "Courier New", monospace;

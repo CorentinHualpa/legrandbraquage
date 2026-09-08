@@ -27,6 +27,7 @@ export function Carte({
   action,
   actionSecondaire,
   pied,
+  teteSurClair = false,
 }: {
   numero: number;
   total: number;
@@ -35,11 +36,18 @@ export function Carte({
   retour?: () => void;
   photo?: { numero: NumeroPiece; pieces: Pieces; hauteur: number; legende?: string; clair?: boolean; position?: string };
   children: ReactNode;
-  action?: { libelle: string; onClick: () => void; disabled?: boolean; couleur?: "rouge" | "papier" };
+  action?: { libelle: string; onClick: () => void; disabled?: boolean; couleur?: "jaune" | "rouge" | "papier" };
   actionSecondaire?: { libelle: string; onClick: () => void };
   pied?: ReactNode;
+  /**
+   * Vrai quand la carte glisse un aplat clair SOUS le bandeau (l'écran du
+   * butin). Le bandeau est en position absolue : sans ça, son texte gris
+   * clair et sa jauge crème se posent sur du jaune et disparaissent.
+   */
+  teteSurClair?: boolean;
 }) {
   const couleurs = {
+    jaune: "bg-jaune-police text-encre hover:bg-jaune-sombre",
     rouge: "bg-rouge text-papier hover:bg-rouge-sombre",
     papier: "bg-papier text-encre hover:bg-papier-2",
   };
@@ -61,17 +69,26 @@ export function Carte({
                 </svg>
               </button>
             ) : null}
-            <span className="font-mono text-[10px] tracking-[0.14em] text-ligne uppercase">
+            <span className={`font-mono text-[10px] tracking-[0.14em] uppercase ${teteSurClair ? "text-encre/70" : "text-ligne"}`}>
               {nature} · 43 ans
             </span>
           </div>
-          <span className="font-mono text-[10px] tracking-[0.14em] text-ligne">
+          <span className={`font-mono text-[10px] tracking-[0.14em] ${teteSurClair ? "text-encre/70" : "text-ligne"}`}>
             {numero} / {total}
           </span>
         </div>
+        {/* La jauge en jaune de ruban : c'est elle qui porte la langue de la
+            couverture sur toutes les cartes, y compris celles sans aplat. */}
         <div className="flex gap-1" aria-hidden>
           {Array.from({ length: total }, (_, i) => (
-            <span key={i} className={`h-[3px] flex-1 ${i < numero ? "bg-papier" : "bg-papier/25"}`} />
+            <span
+              key={i}
+              className={`h-[3px] flex-1 ${
+                i < numero
+                  ? teteSurClair ? "bg-encre" : "bg-jaune-police"
+                  : teteSurClair ? "bg-encre/25" : "bg-papier/25"
+              }`}
+            />
           ))}
         </div>
       </header>
@@ -90,7 +107,7 @@ export function Carte({
               onClick={action.onClick}
               disabled={action.disabled}
               className={`px-4 py-4 text-center text-[17px] font-semibold transition-colors disabled:cursor-not-allowed disabled:bg-encre-3 disabled:text-ligne ${
-                couleurs[action.couleur ?? "rouge"]
+                couleurs[action.couleur ?? "jaune"]
               }`}
             >
               {action.libelle}
@@ -210,8 +227,9 @@ export function Papier({
 }
 
 /** Le petit libellé en capitales mono au-dessus d'un bloc. */
-export function Kicker({ children, couleur = "gris" }: { children: ReactNode; couleur?: "gris" | "rouge" | "encre" | "bleu" }) {
-  const c = { gris: "text-ligne", rouge: "text-rouge-clair", encre: "text-encre-3", bleu: "text-bleu" }[couleur];
+export function Kicker({ children, couleur = "gris" }: { children: ReactNode; couleur?: "gris" | "jaune" | "rouge" | "encre" | "bleu" }) {
+  /* Jaune = l'enquête pose une question. Rouge = elle annonce ce qui est pris. */
+  const c = { gris: "text-ligne", jaune: "text-jaune-police", rouge: "text-rouge-clair", encre: "text-encre-3", bleu: "text-bleu" }[couleur];
   return <span className={`font-mono text-[10px] tracking-[0.14em] uppercase ${c}`}>{children}</span>;
 }
 

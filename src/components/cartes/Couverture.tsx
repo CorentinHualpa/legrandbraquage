@@ -48,7 +48,7 @@ export function Couverture({ pieces, porterPlainte }: { pieces: Pieces; porterPl
         <button
           type="button"
           onClick={porterPlainte}
-          className="bg-rouge px-4 py-4 text-center text-[17px] font-semibold text-papier transition-colors hover:bg-rouge-sombre"
+          className="bg-jaune-police px-4 py-4 text-center text-[17px] font-semibold text-encre transition-colors hover:bg-jaune-sombre"
         >
           Porter plainte
         </button>

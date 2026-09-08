@@ -32,7 +32,7 @@ export function Aparte({
       photo={{ numero: 22, pieces, hauteur: 320, legende: "CLICHÉ 22 · IL SE PENCHE", position: "50% 25%" }}
       action={{ libelle: "Répondre à ses questions", onClick: suivant, couleur: "papier" }}
     >
-      <Kicker couleur="rouge">Le commissaire baisse la voix.</Kicker>
+      <Kicker couleur="jaune">Le commissaire baisse la voix.</Kicker>
       <p className="text-[36px] leading-[1.08] font-bold tracking-[-0.02em]">
         « Entre nous… ils étaient de bonne foi. »
       </p>
