@@ -59,12 +59,24 @@ export type Acte = "commissariat" | "scelles" | "tribunal" | "rue";
  * ⚠ Les volumes sont BAS et ils doivent le rester. Une ambiance qu'on remarque
  * est une ambiance ratée : elle doit s'oublier au bout de dix secondes et ne
  * manquer que si on la coupe.
+ *
+ * ⚠⚠ Ces nombres n'ont de sens que parce que les fichiers ont été mis au même
+ * niveau (`scripts/sons/normaliser.mjs`, 08/09/2026). Ils valaient 0,15 / 0,13 /
+ * 0,12 / 0,15 quand les fichiers sortaient bruts du générateur, avec onze
+ * décibels d'écart entre la rue et le tribunal : les nappes sortaient alors
+ * entre 33 et 44 dB SOUS la voix, c'est-à-dire inaudibles, et le tribunal était
+ * le plus bas des cinq alors que le code croyait le poser deux crans sous le
+ * commissariat. Régénérer une ambiance sans la repasser au normaliseur remet
+ * exactement ce défaut, sans rien casser de visible.
+ *
+ * Les petits écarts qui restent sont VOULUS : un tribunal plus feutré, une rue
+ * et un commissariat au même plan.
  */
 const DECORS: Record<Acte, { fichier: string; volume: number }> = {
-  commissariat: { fichier: "ambiance-commissariat", volume: 0.15 },
-  scelles: { fichier: "ambiance-scelles", volume: 0.13 },
-  tribunal: { fichier: "ambiance-tribunal", volume: 0.12 },
-  rue: { fichier: "ambiance-rue", volume: 0.15 },
+  commissariat: { fichier: "ambiance-commissariat", volume: 0.72 },
+  scelles: { fichier: "ambiance-scelles", volume: 0.57 },
+  tribunal: { fichier: "ambiance-tribunal", volume: 0.41 },
+  rue: { fichier: "ambiance-rue", volume: 0.62 },
 };
 
 /**
@@ -72,8 +84,13 @@ const DECORS: Record<Acte, { fichier: string; volume: number }> = {
  * seulement là où il y a du monde. Séparée du décor pour pouvoir la doser à
  * part : c'est le seul son du dossier qui contient des voix, et une voix mal
  * dosée capte toute l'attention même quand on n'en comprend pas un mot.
+ *
+ * ⚠ Son fichier normalisé sort 7 dB plus fort que les décors, parce que la
+ * mesure R128 est pondérée pour la parole : d'où un multiplicateur qui a l'air
+ * quatre fois plus bas que celui du commissariat pour un résultat cinq
+ * décibels dessous. Le nombre ne se compare pas à ceux d'au-dessus.
  */
-const RUMEUR = { fichier: "ambiance-rumeur", volume: 0.075 };
+const RUMEUR = { fichier: "ambiance-rumeur", volume: 0.15 };
 const ACTES_AVEC_RUMEUR: Acte[] = ["commissariat"];
 
 /* ------------------------------------------------------------------ *

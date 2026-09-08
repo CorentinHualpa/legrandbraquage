@@ -102,8 +102,14 @@ test("le téléphone reste le plus rare et le plus bas", () => {
   }
 });
 
-test("aucun bruit de vie ne dépasse le volume d'une ambiance forte", () => {
-  // Un bruit de fond plus fort que le décor cesse d'être un fond.
+test("aucun bruit de vie ne monte au-dessus de son plafond", () => {
+  /*
+   * ⚠ Ce plafond ne se compare PAS aux volumes des décors : les fichiers de vie
+   * sortent du générateur vingt décibels plus fort que les nappes (la chaise à
+   * -14,7 dB, le clavier court à -35,2), alors que les ambiances, elles, ont été
+   * ramenées au même niveau. Comparer les deux multiplicateurs ne veut donc rien
+   * dire. 0,25 est une borne mesurée sur ces fichiers-là.
+   */
   for (const b of VIE) {
     assert.ok(b.volume <= 0.25, `${b.fichier} à ${b.volume} : trop fort pour un bruit de fond`);
   }
