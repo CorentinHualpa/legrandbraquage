@@ -4,6 +4,7 @@ import { Carte, Commissaire, Papier, Volet } from "./Carte";
 import { taux } from "./Bourse";
 import type { Cadeau } from "@/lib/lien";
 import type { Pieces } from "@/lib/images";
+import { dit } from "@/lib/repliques";
 import { euros, eurosSigne } from "@/lib/format";
 import { CRANS_RENDEMENT, type Perimetre, type Simulation } from "@/lib/moteur";
 
@@ -88,6 +89,8 @@ export function Verdict({
           <span className="font-mono text-[10px] tracking-[0.1em] text-bleu">RENDU {euros(plateauDroit.total)} €</span>
         </div>
       </Papier>
+
+      <Commissaire>{dit("verdict")}</Commissaire>
 
       {/* Sa propre réponse, ressortie. Rien si la question a été sautée. */}
       {cadeau ? <Commissaire>{RAPPEL[cadeau]}</Commissaire> : null}

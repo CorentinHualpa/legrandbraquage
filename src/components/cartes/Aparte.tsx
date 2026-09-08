@@ -2,6 +2,7 @@
 
 import { Carte, Kicker } from "./Carte";
 import type { Pieces } from "@/lib/images";
+import { APARTE } from "@/lib/repliques";
 
 /**
  * Écran 7 : l'aparté. Le commissaire baisse la voix.
@@ -33,12 +34,9 @@ export function Aparte({
       action={{ libelle: "Répondre à ses questions", onClick: suivant, couleur: "papier" }}
     >
       <Kicker couleur="jaune">Le commissaire baisse la voix.</Kicker>
-      <p className="text-[36px] leading-[1.08] font-bold tracking-[-0.02em]">
-        « Entre nous… ils étaient de bonne foi. »
-      </p>
-      <p className="text-[22px] leading-[1.3] text-papier-2 italic">
-        « Ils vous ont laissé un petit quelque chose dans le coffre. Ou pas. Ça dépend, en fait. »
-      </p>
+      {/* Les deux phrases viennent de la source commune : c'est aussi ce qu'il DIT. */}
+      <p className="text-[36px] leading-[1.08] font-bold tracking-[-0.02em]">« {APARTE.fort} »</p>
+      <p className="text-[22px] leading-[1.3] text-papier-2 italic">« {APARTE.suite} »</p>
 
       <div className="grow" />
 

@@ -46,7 +46,7 @@ import { promisify } from "node:util";
 import { readFileSync, existsSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const run = promisify(execFile);
 const ici = dirname(fileURLToPath(import.meta.url));
@@ -66,135 +66,16 @@ const STABILITE = 0;
 /** Accéléré APRÈS coup, en conservant la hauteur. v3 n'a pas de réglage de débit. */
 const TEMPO = 1.15;
 
-export const REPLIQUES = {
-  /** Écran 2. La seule qui a été validée mot pour mot par Coq. */
-  deposition:
-    "[tired] Asseyez-vous. [pause] Nom, prénom... [scoffs] laissez tomber, ça n'intéresse personne. "
-    + "[sarcastic] Ce qui m'intéresse, MOI, c'est combien vous palpez par mois. "
-    + "[whispers] Écrivez-le là. [dry] Sur le procès-verbal.",
-
-  /* Les trois habitudes : il note, il ne juge pas, il taquine. */
-  /*
-   * ⚠ Le « Bon. » d'ouverture n'est pas un tic, c'est une CHARNIÈRE. C'est la
-   * seule carte qu'on atteint après une réaction du commissaire (celle au
-   * montant signé), donc la seule où il reprend la parole après s'être déjà
-   * exprimé. Sans ce mot, il attaque « Vous fumez ? » comme s'il venait
-   * d'entrer dans la pièce, et les deux répliques se lisent comme deux
-   * personnes. C'est aussi le mot qu'il dit à l'écran, dans la bulle.
-   */
-  tabac:
-    "[tired] Bon. [pause] Vous fumez ? [scoffs] Vous en faites pas, la morale c'est pas mon service. "
-    + "[flat] Combien de paquets ? Et comptez ceux que vous taxez aux collègues.",
-  carburant:
-    "[tired] Et la caisse ? [scoffs] Plutôt écolo, ou à frimer avec votre BM ? "
-    + "[dry] Dites-moi juste combien de pleins.",
-  alcool:
-    "[dry] Et à boire ? [scoffs] Mentez pas, on est au commissariat, pas chez la belle-famille. "
-    + "[flat] Combien de verres dans la semaine ?",
-
-  /* La pièce à conviction : le mécanisme. Il explique, il ne s'emporte pas. */
-  pris:
-    "[tired] Voilà la pièce à conviction. [pause] Tout ça sur une carrière. "
-    + "[dry] Quatre lignes, quatre. [scoffs] Et sur votre fiche de paie, vous en voyez une.",
-  butin:
-    "[flat] Voilà le butin. [scoffs] C'est pas moi qui fixe les prix, hein. Moi je compte. "
-    + "[dry] Et franchement, j'ai rarement vu un scellé aussi bien rempli.",
-
-  /* Le témoin : le voisin. Registre d'interrogatoire, pas de démonstration. */
-  temoin:
-    "[dry] On a un témoin. [pause] Votre voisin. Même salaire que vous. "
-    + "[sarcastic] Et pas du tout le même traitement. [scoffs] Regardez-moi ça.",
-
-  /* L'horaire : le moment où il devient presque bavard. */
-  liberation:
-    "[tired] Regardez votre montre. [pause] Vous, vous bossez depuis janvier. Eux aussi. "
-    + "[dry] Sauf qu'eux, ils s'arrêtent pile là. [flat] Tous les ans, à la minute près.",
-
-  /* L'aparté : il se penche. C'est la réplique la plus basse du parcours. */
-  aparte:
-    "[whispers] Entre nous. [pause] Le magnéto tourne pas, vous inquiétez pas. "
-    + "[tired] J'ai deux, trois questions qui sont pas dans le formulaire.",
-
-  /* Les trois interrogatoires : école, santé, chômage. Ce qu'on a reçu en face. */
-  ecole:
-    "[dry] L'école. [scoffs] Gratuite, hein ? C'est ce qu'on dit. "
-    + "[flat] Mettez un prix dessus, on verra bien.",
-  sante:
-    "[tired] La santé. [pause] Là non plus, personne vous a présenté la note. "
-    + "[dry] Allez-y, chiffrez. Ça compte dans l'autre plateau.",
-  chomage:
-    "[flat] Le chômage. [pause] Vous y avez peut-être jamais touché. "
-    + "[scoffs] Ça vous a pas empêché de le payer. [dry] Combien, à votre avis ?",
-
-  /* Le rendu : il concède. Un commissaire honnête, c'est ce qui rend le reste crédible. */
-  rendu:
-    "[tired] Bon, soyons honnêtes. [pause] Ils vous ont pas tout pris pour rien. "
-    + "[dry] Voilà ce qu'ils ont laissé. [scoffs] Des cambrioleurs qui repeignent le salon "
-    + "avant de partir, faut le voir pour le croire.",
-
-  /* La bourse : l'avocat du Braqueur demande la parole. Il s'agace un peu. */
-  bourse:
-    "[dry] Dernière question. [pause] Ce pognon, vous l'auriez mis où ? "
-    + "[scoffs] Et me dites pas que vous y auriez pas touché, hein.",
-
-  /* Le verdict : le tampon vient de tomber. Il ne triomphe pas, il constate. */
-  verdict:
-    "[flat] Voilà. [pause] Tampon. [dry] Je commente pas les verdicts. "
-    + "[tired] Mais celui-là, vous voulez savoir d'où il sort.",
-
-  /* L'édition de demain : la sortie. C'est la dernière chose qu'on entend. */
-  avis:
-    "[tired] C'est fini pour ce soir. [pause] Vous voulez porter plainte pour de vrai ? "
-    + "[dry] C'est pas ici. [scoffs] C'est tous les cinq ans. Même guichet.",
-};
-
-/**
- * LES RÉACTIONS À LA SIGNATURE DE LA DÉPOSITION.
- *
- * Les seules répliques qui dépendent de ce que la personne a saisi. Elles ne
- * disent toujours AUCUN chiffre : ce qui change, c'est le REGISTRE. Le montant
- * est déjà écrit en gros sur le procès-verbal, le commissaire n'a pas à le
- * relire, il a à réagir.
- *
- * ⚠ Elles doivent rester COURTES (quatre à sept secondes). Elles se jouent juste
- * avant que la carte suivante n'arrive avec sa propre réplique : plus longues,
- * elles retiendraient tout le parcours à chaque signature.
- *
- * ⚠ Un `[pause]` coûte une seconde et demie à deux secondes de fichier, mesuré
- * en régénérant les quatre avec puis sans. Sur une réplique de cinq secondes
- * c'est un tiers de la durée, pour un silence que personne n'a demandé. Les
- * réactions n'en portent donc AUCUN ; les répliques d'arrivée, qui ont le temps,
- * le gardent.
- *
- * Les bornes sont celles que le site affiche déjà ailleurs (le mur de l'avis de
- * recherche, les repères sous le champ de saisie) : le net du SMIC 2026 et le
- * salaire médian. La borne haute est éditoriale, elle ne prétend rien mesurer.
+/*
+ * ⚠ LES TEXTES NE SONT PLUS ICI. Ils vivent dans `src/lib/repliques.ts`, avec
+ * la fonction qui les affiche dans la bulle : la bulle et la voix portaient
+ * deux textes différents, écrits à des moments différents, et on lisait une
+ * phrase en en entendant une autre. Une copie dans ce script redonnerait
+ * exactement ce défaut à la première correction faite d'un seul côté.
  */
-export const REACTIONS = {
-  /*
-   * Sous le SMIC : il ne prend pas de pincettes, mais il ne blague pas non plus
-   * SUR la personne. La vanne vise toujours les braqueurs, jamais celui qui est
-   * assis en face : à ce niveau de salaire, un trait d'humour se prend de
-   * travers, et on perd la personne pour le reste du parcours.
-   */
-  "signature-sous-smic":
-    "[tired] D'accord. Installez-vous. [dry] Même là-dedans, ils ont trouvé à se servir. [scoffs] Faut le faire.",
+const { REPLIQUES, REACTIONS, TOUTES } = await import(pathToFileURL(join(racine, "src", "lib", "repliques.ts")).href);
 
-  /* Du SMIC au médian : le cas ordinaire, donc le ton le plus plat. */
-  "signature-jusqu-au-median":
-    "[flat] Bon. Le salaire de tout le monde. [scoffs] Et le braquage de tout le monde, du coup.",
 
-  /* Au-dessus du médian. Formulation de Coq, gardée telle quelle. */
-  "signature-au-dessus":
-    "[scoffs] Ah. Pas mal. [sarcastic] Les braqueurs ont dû se régaler. [laughs]",
-
-  /* Le haut du panier : la seule fois où il se penche vraiment. */
-  "signature-tres-haut":
-    "[whispers] Oh. [scoffs] Alors là. [tired] J'ai vu des braquages à main armée rapporter moins. "
-    + "[dry] Et eux, ils ont pris vingt ans.",
-};
-
-export const TOUTES = { ...REPLIQUES, ...REACTIONS };
 
 /*
  * Rien ne se génère à l'IMPORT. `scripts/voix/doc.mjs` lit les textes d'ici pour

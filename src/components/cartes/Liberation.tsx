@@ -2,6 +2,7 @@
 
 import { Carte, Commissaire, Kicker, Volet } from "./Carte";
 import type { Pieces } from "@/lib/images";
+import { dit } from "@/lib/repliques";
 import { pourcent } from "@/lib/format";
 import { heureDeLiberation, type Simulation } from "@/lib/moteur";
 
@@ -58,10 +59,7 @@ export function Liberation({
         Tout ce que votre travail rapporte jusqu’à cette date part chez eux. À partir de là seulement, vous
         travaillez pour vous. {liberation.part >= 0.5 ? "Plus de la moitié" : "Presque la moitié"} de l’année, chaque année.
       </p>
-      <Commissaire>
-        « Regardez votre montre. Vous, vous bossez depuis janvier. Eux, ils encaissent depuis janvier. Et
-        ils s’arrêtent pile à cette heure-là, chaque année. Réglés comme une horloge. »
-      </Commissaire>
+      <Commissaire>{dit("liberation")}</Commissaire>
 
       <div className="grow" />
 

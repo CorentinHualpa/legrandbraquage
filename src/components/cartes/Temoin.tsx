@@ -2,6 +2,7 @@
 
 import { Carte, Chiffre, Commissaire, Kicker, Ligne, Volet } from "./Carte";
 import type { Pieces } from "@/lib/images";
+import { texte } from "@/lib/repliques";
 import { euros, eurosSigne } from "@/lib/format";
 import type { Simulation } from "@/lib/moteur";
 import { NOMS_REGIME, type Regime } from "@/lib/statuts";
@@ -52,8 +53,8 @@ export function Temoin({
       action={{ libelle: "Suivant", onClick: suivant }}
     >
       <Commissaire>
-        « On a un témoin. Votre voisin. Même net que vous, {euros(simulation.netAvantImpotActuel)} € par
-        mois, mais {regimeLui ? `en ${regimeLui}` : "pas le même statut"}. »
+        « {texte("temoin")} Même net que vous, {euros(simulation.netAvantImpotActuel)} € par mois,
+        mais {regimeLui ? `en ${regimeLui}` : "pas le même statut"}. »
       </Commissaire>
 
       {lui !== null ? (

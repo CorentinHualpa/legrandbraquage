@@ -3,6 +3,7 @@
 import { Carte, Chiffre, Commissaire, Kicker, Lien, Reponse, Volet } from "./Carte";
 import type { NumeroPiece, Pieces } from "@/lib/images";
 import { euros, eurosSigne } from "@/lib/format";
+import { texte } from "@/lib/repliques";
 import {
   ALCOOL,
   CARBURANT,
@@ -25,30 +26,28 @@ const ECRAN: Record<PosteHabitude, {
   piece: NumeroPiece;
   legende: string;
   rang: string;
-  replique: string;
+  avant: string | null;
   note: string;
 }> = {
   tabac: {
     piece: 26,
     legende: "CLICHÉ 26 · C’EST OFFERT",
     rang: "1 sur 3",
-    replique:
-      "« Café ? Cadeau. Enfin, 1,20 €, dont onze centimes qui repartent chez eux. Vous les aviez déjà "
-      + "payés, remarquez. Bon. Vous fumez ? »",
+    avant: "Café ? Cadeau. Enfin, 1,20 €, dont onze centimes qui repartent chez eux. Vous les aviez déjà payés, remarquez.",
     note: "Il note dans le PV · le tabac",
   },
   carburant: {
     piece: 10,
     legende: "CLICHÉ 10 · LA POMPE, LA NUIT",
     rang: "2 sur 3",
-    replique: "« Bien. » Il tourne la page. « Et la voiture ? »",
+    avant: null,
     note: "Il note dans le PV · le carburant",
   },
   alcool: {
     piece: 8,
     legende: "CLICHÉ 08 · LA TABLE DES SCELLÉS",
     rang: "3 sur 3",
-    replique: "« Dernière, promis. Un verre, le soir ? »",
+    avant: null,
     note: "Il note dans le PV · l’alcool",
   },
 };
@@ -105,7 +104,13 @@ export function Cafe({
       photo={{ numero: ecran.piece, pieces, hauteur: 230, legende: ecran.legende }}
       action={{ libelle: dernier ? "Voir l’addition" : "Question suivante", onClick: suivant }}
     >
-      <Commissaire>{ecran.replique}</Commissaire>
+      {/*
+        La bulle porte exactement ce que la voix DIT, plus, pour le café, la
+        phrase d'ouverture qui explique la photo. Voir la règle dans
+        `src/lib/repliques.ts` : on peut lire plus qu'on n'entend, jamais
+        l'inverse.
+      */}
+      <Commissaire>« {ecran.avant ? `${ecran.avant} ` : ""}{texte(poste)} »</Commissaire>
 
       <div className="flex flex-col gap-1.5">
         <Kicker>{definition.question}</Kicker>

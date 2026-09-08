@@ -2,6 +2,7 @@
 
 import { Carte, Chiffre, Commissaire, Kicker, Ligne, Reponse, Volet } from "./Carte";
 import type { Pieces } from "@/lib/images";
+import { texte } from "@/lib/repliques";
 import { ETIQUETTES_PLACEMENT as ETIQUETTES } from "@/lib/placements";
 import { euros, eurosSigne } from "@/lib/format";
 import { CRANS_FRAIS, CRANS_RENDEMENT, PALIERS_ALIBI, type Simulation } from "@/lib/moteur";
@@ -85,8 +86,7 @@ export function Bourse({
       action={{ libelle: "Le verdict", onClick: suivant }}
     >
       <Commissaire>
-        « Alors, entre nous. Ces {eurosSigne(simulation.plateauGauche.total)} sur 43 ans. Si vous aviez
-        eu le choix, vous l’auriez mis où, ce pognon ? »
+        « {texte("bourse")} Enfin, {eurosSigne(simulation.plateauGauche.total)} sur 43 ans. »
       </Commissaire>
 
       {/* La table. Les enveloppes sont des boutons posés sur la photo. */}

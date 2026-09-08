@@ -8,6 +8,7 @@ import { ETIQUETTES_PLACEMENT as ETIQUETTES } from "@/lib/placements";
 import { Audition } from "../Audition";
 import { CarteAvis } from "../CarteAvis";
 import type { Pieces } from "@/lib/images";
+import { dit } from "@/lib/repliques";
 import { euros, eurosSigne } from "@/lib/format";
 import { requeteDuCas, type Cas } from "@/lib/lien";
 import { CRANS_FRAIS, CRANS_RENDEMENT, simuler, type Simulation } from "@/lib/moteur";
@@ -171,9 +172,7 @@ export function Avis({
         </div>
       </div>
 
-      <Commissaire qui="Le commissaire, chapeau à la main">
-        « Si vous voulez porter plainte pour de vrai, c’est pas ici. C’est tous les cinq ans, même guichet. »
-      </Commissaire>
+      <Commissaire qui="Le commissaire, chapeau à la main">{dit("avis")}</Commissaire>
 
       <div className="grow" />
 

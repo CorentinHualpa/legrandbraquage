@@ -20,8 +20,8 @@ import { existsSync } from "node:fs";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-import { REPLIQUES, REACTIONS } from "./repliques.mjs";
+import { fileURLToPath, pathToFileURL } from "node:url";
+const { REPLIQUES, REACTIONS } = await import(pathToFileURL(join(dirname(fileURLToPath(import.meta.url)), "..", "..", "src", "lib", "repliques.ts")).href);
 
 const run = promisify(execFile);
 const ici = dirname(fileURLToPath(import.meta.url));

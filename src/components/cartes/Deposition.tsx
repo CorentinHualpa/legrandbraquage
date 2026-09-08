@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { Carte, Commissaire, Kicker, Papier, Reponse } from "./Carte";
 import type { Pieces } from "@/lib/images";
 import { euros } from "@/lib/format";
+import { dit } from "@/lib/repliques";
 import { frapper, jouer } from "@/lib/sons";
 import type { Statut } from "@/lib/moteur";
 import {
@@ -116,7 +117,7 @@ export function Deposition({
     >
       <Commissaire>
         {vide ? (
-          <>« Asseyez-vous. Nom, prénom… non, laissez tomber. Ce qui m’intéresse, c’est combien vous palpez par mois. Écrivez-le là, sur le procès-verbal. »</>
+          <>{dit("deposition")}</>
         ) : (
           <>« Voilà. {euros(etat.netMensuel)} € par mois. On va pouvoir travailler. »</>
         )}

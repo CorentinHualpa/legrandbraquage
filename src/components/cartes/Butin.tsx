@@ -3,6 +3,7 @@
 import { Carte, Commissaire, Kicker, Lien, Reponse, Volet } from "./Carte";
 import type { Cadeau } from "@/lib/lien";
 import type { Pieces } from "@/lib/images";
+import { texte } from "@/lib/repliques";
 import { eurosSigne } from "@/lib/format";
 import type { Simulation } from "@/lib/moteur";
 import { SEUIL_ANNEES, anneesSansTravailler, objetPour } from "@/lib/objets";
@@ -97,9 +98,9 @@ export function Butin({
       <div className="flex flex-col gap-3">
         <Commissaire>
           {objet.seuil > 0 && reste > 1000 ? (
-            <>« Cash. Et il leur reste {eurosSigne(reste)} de monnaie. »</>
+            <>« {texte("butin")} Cash, et il leur reste {eurosSigne(reste)} de monnaie. »</>
           ) : (
-            <>« {objet.pointe} »</>
+            <>« {texte("butin")} {objet.pointe} »</>
           )}
         </Commissaire>
         {/* La pointe du palier, sauf quand le commissaire vient de la dire. */}

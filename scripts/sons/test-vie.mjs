@@ -16,10 +16,10 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const ici = dirname(fileURLToPath(import.meta.url));
 const source = readFileSync(join(ici, "..", "..", "src", "lib", "sons.ts"), "utf8");
@@ -162,7 +162,7 @@ test("aucun fichier de voix ne date d'une version précédente du texte", async 
    * la compare ici au texte courant. Une divergence dit exactement quoi
    * régénérer, au lieu de tout refaire par précaution.
    */
-  const { TOUTES } = await import("../voix/repliques.mjs");
+  const { TOUTES } = await import(pathToFileURL(join(ici, "..", "..", "src", "lib", "repliques.ts")).href);
   const manifeste = JSON.parse(readFileSync(join(ici, "..", "..", "public", "voix", "_textes.json"), "utf8"));
   const empreinte = (t) => createHash("sha256").update(t).digest("hex").slice(0, 12);
 
@@ -170,6 +170,43 @@ test("aucun fichier de voix ne date d'une version précédente du texte", async 
     .filter(([nom, texte]) => manifeste[nom] !== empreinte(texte))
     .map(([nom]) => nom);
   assert.deepEqual(perimes, [], `à régénérer : node scripts/voix/repliques.mjs ${perimes.join(" ")}`);
+});
+
+test("chaque réplique est écrite quelque part à l'écran", async () => {
+  /*
+   * LA RÈGLE : tout ce qu'il DIT est écrit, l'écrit peut en dire un peu plus.
+   *
+   * Elle se défait sans bruit. Il suffit qu'une carte retape sa bulle à la main
+   * « juste pour cette fois » et on relit un texte pendant qu'on en entend un
+   * autre : c'est exactement d'où on vient (la carte du tabac parlait du café à
+   * l'écran et des paquets à l'oreille).
+   *
+   * Le contrôle est grossier à dessein : on vérifie que chaque réplique est
+   * TIRÉE de la source commune par une carte, pas qu'elle est bien placée. Un
+   * test plus fin devrait lire du JSX, et il coûterait plus qu'il ne rapporte.
+   */
+  const { REPLIQUES } = await import(pathToFileURL(join(ici, "..", "..", "src", "lib", "repliques.ts")).href);
+  const cartes = readdirSync(join(ici, "..", "..", "src", "components", "cartes"))
+    .filter((f) => f.endsWith(".tsx"))
+    .map((f) => readFileSync(join(ici, "..", "..", "src", "components", "cartes", f), "utf8"))
+    .join("\n");
+
+  // Les cartes à table (le café, les paliers) passent la clé en variable.
+  const parVariable = [...cartes.matchAll(/\b(?:dit|texte)\((poste|ecran)\)/g)].length > 0;
+  const muettes = Object.keys(REPLIQUES).filter(
+    (nom) => !cartes.includes(`dit("${nom}")`) && !cartes.includes(`texte("${nom}")`),
+  );
+  // L'aparté n'a pas de bulle : ses deux phrases sont mises en page à part,
+  // depuis la même source (`APARTE`).
+  const tolerees = [
+    ...(parVariable ? ["tabac", "carburant", "alcool", "ecole", "sante", "chomage"] : []),
+    ...(cartes.includes("APARTE.fort") ? ["aparte"] : []),
+  ];
+  assert.deepEqual(
+    muettes.filter((n) => !tolerees.includes(n)),
+    [],
+    "ces répliques ne sont écrites nulle part : on les entend sans les lire",
+  );
 });
 
 test("les quatre réactions à la signature sont atteignables et enregistrées", () => {

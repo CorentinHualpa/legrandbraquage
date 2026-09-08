@@ -2,6 +2,7 @@
 
 import { Carte, Chiffre, Commissaire, Kicker, Ligne, Volet } from "./Carte";
 import type { Pieces } from "@/lib/images";
+import { texte } from "@/lib/repliques";
 import { eurosSigne } from "@/lib/format";
 import type { Perimetre, Simulation } from "@/lib/moteur";
 import { LIGNES_PERIMETRE, type Regime } from "@/lib/statuts";
@@ -56,9 +57,7 @@ export function Pris({
         n'affiche pas : la durée, et le fait qu'on ne l'a jamais vu passer.
       */}
       <Commissaire>
-        {micro
-          ? "« Voilà la pièce à conviction. Tout ça sur ce que vous encaissez, et une partie part avant même que vous vous payiez. »"
-          : "« Voilà la pièce à conviction. Tout ça sur une carrière, et vous l’avez jamais vu passer. »"}
+        « {texte("pris")}{micro ? " Et une partie part avant même que vous vous payiez." : ""} »
       </Commissaire>
 
       {/*

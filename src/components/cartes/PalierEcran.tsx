@@ -3,6 +3,7 @@
 import { Carte, Commissaire, Lien, Reponse, Volet } from "./Carte";
 import type { NumeroPiece, Pieces } from "@/lib/images";
 import { euros, eurosSigne } from "@/lib/format";
+import { dit } from "@/lib/repliques";
 import {
   PALIERS,
   PRIX_CHOMAGE,
@@ -18,12 +19,6 @@ const PIECE: Record<PosteDuPlateau, { numero: NumeroPiece; legende: string }> = 
   ecole: { numero: 23, legende: "CLICHÉ 23 · L’INTERROGATOIRE COMMENCE" },
   sante: { numero: 16, legende: "CLICHÉ 16 · SALLE D’EXAMEN" },
   chomage: { numero: 17, legende: "CLICHÉ 17 · L’OPEN SPACE, 18 H" },
-};
-
-const QUESTION: Record<PosteDuPlateau, string> = {
-  ecole: "« L’école. Ça vous a servi, ou vous avez séché ? »",
-  sante: "« Et la santé ? Vous m’avez l’air solide. En quelque sorte. »",
-  chomage: "« Le chômage. Vous y êtes passé ? Combien de temps ? »",
 };
 
 const NOTE: Record<PosteDuPlateau, string> = {
@@ -78,7 +73,7 @@ export function PalierEcran({
       photo={{ numero: piece.numero, pieces, hauteur: 210, legende: piece.legende }}
       action={{ libelle: libelleSuivant, onClick: suivant }}
     >
-      <Commissaire>{QUESTION[poste]}</Commissaire>
+      <Commissaire>{dit(poste)}</Commissaire>
 
       <div className="flex flex-col gap-2" role="radiogroup" aria-label={definition.question}>
         {definition.choix.map((c) => (
