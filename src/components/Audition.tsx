@@ -7,10 +7,13 @@ import type { Pieces } from "@/lib/images";
 import type { Simulation } from "@/lib/moteur";
 
 const HOTE = "https://dalevoz.revolutionagency.ai";
+/* Le slug ne bouge pas : le widget publié en dépend. Le PERSONNAGE, lui, est
+    devenu le commissaire (Coq, 08/09/2026 : « on va avoir un seul perso »).
+    Son prompt vit dans `agent/commissaire.md`, à la racine du dépôt. */
 const AGENT = "le-braqueur";
 
 /**
- * L'audition du suspect.
+ * L'audition : le commissaire répond.
  *
  * Le widget se monte UNE fois, dans le cadre du procès-verbal, en mode
  * « embed » : il n'y a pas de pastille flottante à découvrir en bas d'écran,
@@ -21,7 +24,7 @@ const AGENT = "le-braqueur";
  * jusqu'à l'agent. Ni variables, ni accueil : `data-greeting` est ignoré dès que
  * l'agent en a un configuré, et c'est celui du serveur qui s'affiche. Le cas du
  * visiteur ne lui parvient donc que s'il le dit lui-même, et le prompt du
- * Braqueur est écrit pour le DEMANDER avant d'annoncer le moindre verdict.
+ * commissaire est écrit pour le DEMANDER avant d'annoncer le moindre verdict.
  * C'est aussi la bonne façon de faire : la balance penche des deux côtés, et
  * annoncer un sens avant de connaître le salaire serait faux une fois sur deux.
  */
@@ -69,7 +72,7 @@ export function Audition({
     script.setAttribute("data-mode", "embed");
     script.setAttribute("data-target", "#audition-cadre");
     script.setAttribute("data-uid", uid);
-    script.setAttribute("data-title", "Le Braqueur");
+    script.setAttribute("data-title", "Le commissaire");
     document.body.appendChild(script);
   }, [ouverte, cle]);
 
@@ -77,8 +80,8 @@ export function Audition({
     <Feuille id="audition" className="mt-10 border-t-2 border-dashed border-ligne pt-2">
       <EnTete
         nature="PROCÈS-VERBAL D’AUDITION"
-        titre="Le suspect parle"
-        tampon={<Tampon>MIS EN CAUSE</Tampon>}
+        titre="Le commissaire vous reçoit"
+        tampon={<Tampon>SUR RENDEZ-VOUS</Tampon>}
       />
 
       <div className="flex items-center gap-3 border border-ligne bg-papier-2 p-3">
@@ -92,23 +95,23 @@ export function Audition({
         </div>
         <div className="flex flex-col gap-0.5">
           <span className="font-mono text-[9.5px] tracking-[0.12em] text-encre-3">
-            MIS EN CAUSE
+            POLICE DES PRÉLÈVEMENTS
           </span>
-          <span className="text-[17px] font-bold">Le Braqueur</span>
+          <span className="text-[17px] font-bold">Le commissaire</span>
           <span className="text-[13px] text-encre-2 italic">
-            A tout avoué. Ne s’excuse de rien.
+            A tout vu. Ne s’indigne plus.
           </span>
         </div>
       </div>
 
       <p className="text-[14.5px] leading-relaxed">
-        Il conteste le procès-verbal, il détaille sa méthode, et il argumente
-        dans les deux sens. Il ne ment jamais sur un chiffre : quand le dossier
-        ne contient pas la pièce, il le dit au lieu d’inventer.
+        Il reprend le procès-verbal ligne par ligne, il détaille la méthode, et
+        il argumente dans les deux sens. Il ne ment jamais sur un chiffre :
+        quand le dossier ne contient pas la pièce, il le dit au lieu d’inventer.
       </p>
 
       <p className="text-[13.5px] leading-relaxed text-encre-2">
-        Il ne voit pas votre écran. Donnez-lui votre net mensuel s’il vous le
+        Il ne voit pas votre écran. Donnez-lui votre net mensuel quand il le
         demande : sans lui, il refuse d’annoncer un sens à la balance, et il a
         raison de le refuser. Le vôtre est de{" "}
         <span className="font-semibold text-encre">
@@ -134,7 +137,7 @@ export function Audition({
           }}
           className="bg-encre px-4 py-3.5 text-center text-[16px] font-semibold text-papier transition-colors hover:bg-bleu"
         >
-          Ouvrir l’audition
+          Parler au commissaire
         </button>
       ) : null}
 

@@ -30,7 +30,7 @@ const MUR = [
  * Écran 15 : l'avis de recherche, collé sur le mur, à côté des autres.
  *
  * Le lien rouvre CE dossier, réponses et enveloppe comprises, sur l'écran du
- * verdict. Le Braqueur s'interroge ici, au clic. Le commissaire raccompagne.
+ * verdict. Le commissaire répond ici, au clic, puis il raccompagne.
  */
 export function Avis({
   pieces,
@@ -177,7 +177,7 @@ export function Avis({
 
       <div className="grow" />
 
-      <Volet titre="Interroger le Braqueur">
+      <Volet titre="Parler au commissaire">
         <div className="-mx-5 bg-papier text-encre sm:-mx-6">
           <Audition pieces={pieces} simulation={simulation} ouvrirAudition={() => {}} />
         </div>
