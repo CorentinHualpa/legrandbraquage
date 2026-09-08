@@ -16,7 +16,7 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -115,6 +115,32 @@ test("les bornes laissent respirer", () => {
   assert.ok(min >= 4_000, "sous quatre secondes, ce n'est plus une pièce vivante, c'est du bruitage");
   assert.ok(min <= 12_000, "au-delà, le commissariat sonne vide : mesuré, 22 s donnaient DEUX bruits en 75 s");
   assert.ok(max > min * 2, "un écart trop serré rend le rythme régulier, donc repérable");
+});
+
+test("chaque réplique annoncée existe vraiment sur le disque", () => {
+  /*
+   * Trois listes doivent rester d'accord : les écrans du parcours, le texte des
+   * répliques, et les fichiers générés. Elles ne se cassent pas bruyamment :
+   * un nom qui diverge donne juste un commissaire muet sur une carte, et
+   * personne ne remarque un silence de plus dans un parcours de seize écrans.
+   */
+  const annonces = [...source
+    .slice(source.indexOf("const AVEC_REPLIQUE"), source.indexOf("const AVANT_DE_PARLER_MS"))
+    .matchAll(/"([a-z]+)"/g)].map((m) => m[1]);
+  assert.ok(annonces.length >= 10, `seulement ${annonces.length} écrans lus : l'extraction a cassé`);
+
+  const voix = join(ici, "..", "..", "public", "voix");
+  for (const ecran of annonces) {
+    assert.ok(existsSync(join(voix, `${ecran}.mp3`)), `public/voix/${ecran}.mp3 manque`);
+  }
+
+  const repliques = readFileSync(join(ici, "..", "voix", "repliques.mjs"), "utf8");
+  const ecrits = [...repliques
+    .slice(repliques.indexOf("export const REPLIQUES"), repliques.indexOf("const demandes"))
+    .matchAll(/^ {2}([a-z]+):$/gm)].map((m) => m[1]);
+  for (const ecran of ecrits) {
+    assert.ok(annonces.includes(ecran), `« ${ecran} » est écrit mais jamais joué : absent de AVEC_REPLIQUE`);
+  }
 });
 
 test("la répartition suit les poids", () => {

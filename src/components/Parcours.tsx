@@ -18,7 +18,7 @@ import { Avis } from "./cartes/Avis";
 import type { Pieces } from "@/lib/images";
 import type { Cadeau } from "@/lib/lien";
 import { contexte, evenement } from "@/lib/dalevoz";
-import { jouer, poserDecor, reglerSons, type Acte, type Son } from "@/lib/sons";
+import { jouer, parler, poserDecor, reglerSons, type Acte, type Son } from "@/lib/sons";
 import { FRAIS_DEFAUT_ID, PLACEMENT_DEFAUT_ID, casDepuisRequete } from "@/lib/lien";
 import {
   CRANS_FRAIS,
@@ -172,6 +172,12 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
    */
   useEffect(() => {
     poserDecor(ACTE[ecran] ?? "commissariat");
+    // Le commissaire commente la carte à l'arrivée. `parler` coupe d'abord ce
+    // qu'il était en train de dire : on avance souvent plus vite qu'il ne
+    // parle, et deux répliques qui se chevauchent n'en laissent entendre
+    // aucune. Un écran sans réplique le fait donc taire, ce qui est le bon
+    // comportement.
+    parler(ecran);
   }, [ecran]);
 
   const placement = useMemo(() => {

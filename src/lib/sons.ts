@@ -293,6 +293,106 @@ function tirerUnBruitDeVie() {
 }
 
 /* ------------------------------------------------------------------ *
+ * LA VOIX DU COMMISSAIRE
+ * ------------------------------------------------------------------ */
+
+/**
+ * Une réplique par écran, pré-enregistrée (`scripts/voix/repliques.mjs`).
+ *
+ * ⚠ Elle ne se superpose JAMAIS à la précédente. Deux commissaires qui parlent
+ * en même temps, c'est ce qui arrive dès qu'on avance vite dans le parcours, et
+ * ça ne se répare pas à l'écoute : on n'entend plus rien des deux. La nouvelle
+ * coupe l'ancienne, sèchement, parce qu'un fondu sur une voix s'entend comme un
+ * problème de lecture.
+ *
+ * ⚠ Le DÉCOR baisse pendant qu'il parle. Sans ça, la rumeur et le clavier
+ * passent par-dessus la moitié de ses phrases : c'est le défaut classique d'un
+ * mixage à volumes fixes, et il ne se voit que quand les deux tombent ensemble.
+ */
+let voixEnCours: HTMLAudioElement | null = null;
+let minuterieVoix: ReturnType<typeof setTimeout> | null = null;
+let ducking = false;
+
+/** De combien on baisse le décor pendant qu'il parle. */
+const DUCK = 0.4;
+
+/**
+ * Les écrans qui ont une réplique. Écrit ici plutôt que déduit d'un 404 : une
+ * requête qui échoue baisse le décor le temps de l'aller-retour, et pollue la
+ * console du visiteur d'une erreur rouge à chaque écran muet.
+ *
+ * ⚠ « couverture » n'en a pas et n'en aura pas : c'est l'écran où l'on demande
+ * la permission de faire du bruit. Une voix y serait exactement ce qu'on
+ * s'interdit ailleurs.
+ */
+const AVEC_REPLIQUE = new Set([
+  "deposition", "tabac", "carburant", "alcool", "pris", "butin", "temoin",
+  "liberation", "aparte", "ecole", "sante", "chomage", "rendu", "bourse",
+  "verdict", "avis",
+]);
+
+/**
+ * Le temps qu'on laisse avant qu'il ouvre la bouche.
+ *
+ * L'arrivée sur une carte joue déjà la page qu'on tourne, et la carte s'anime.
+ * Une voix qui démarre dans la même image se cogne au bruit de page et donne
+ * l'impression d'un fichier lancé trop tôt. Une seconde suffit à faire croire
+ * qu'il lève les yeux du dossier avant de parler.
+ */
+const AVANT_DE_PARLER_MS = 900;
+
+function duckerLesNappes(baisser: boolean) {
+  if (ducking === baisser) return;
+  ducking = baisser;
+  for (const [fichier, el] of nappes) {
+    const plein = fichier === RUMEUR.fichier
+      ? RUMEUR.volume
+      : (Object.values(DECORS).find((d) => d.fichier === fichier)?.volume ?? el.volume);
+    fondre(el, baisser ? plein * DUCK : plein, 400);
+  }
+}
+
+/**
+ * Fait parler le commissaire. Sans effet si la personne a gardé le silence :
+ * la voix suit le même interrupteur que le reste, elle n'a pas de régime à part.
+ */
+export function parler(ecran: string): void {
+  if (typeof window === "undefined") return;
+  // On coupe TOUJOURS, même sur un écran sans réplique : sinon il finit sa
+  // phrase de la carte précédente par-dessus la nouvelle.
+  taire();
+  if (!actif || !AVEC_REPLIQUE.has(ecran)) return;
+
+  minuterieVoix = setTimeout(() => {
+    minuterieVoix = null;
+    const el = new Audio(`/voix/${ecran}.mp3`);
+    voixEnCours = el;
+    duckerLesNappes(true);
+    const fini = () => {
+      if (voixEnCours === el) voixEnCours = null;
+      duckerLesNappes(false);
+    };
+    el.addEventListener("ended", fini);
+    // Un fichier manquant ne doit pas laisser le décor baissé pour toujours :
+    // c'est le genre de panne qu'on met une heure à relier à sa cause.
+    el.addEventListener("error", fini);
+    void el.play().catch(fini);
+  }, AVANT_DE_PARLER_MS);
+}
+
+/** Coupe la réplique en cours. Appelé à chaque changement d'écran. */
+export function taire(): void {
+  // La minuterie d'abord : quelqu'un qui traverse trois cartes en deux secondes
+  // n'a lancé aucun fichier, mais il a armé trois départs.
+  if (minuterieVoix) clearTimeout(minuterieVoix);
+  minuterieVoix = null;
+  if (!voixEnCours) return;
+  voixEnCours.pause();
+  voixEnCours = null;
+  duckerLesNappes(false);
+}
+
+/* ------------------------------------------------------------------ *
  * LA FRAPPE DU GREFFIER
  * ------------------------------------------------------------------ */
 
@@ -344,6 +444,10 @@ export function reglerSons(oui: boolean): void {
     minuterieVie = null;
     if (minuterieFrappe) clearTimeout(minuterieFrappe);
     minuterieFrappe = null;
+    if (minuterieVoix) clearTimeout(minuterieVoix);
+    minuterieVoix = null;
+    if (voixEnCours) { voixEnCours.pause(); voixEnCours = null; }
+    ducking = false;
     return;
   }
   for (const nom of Object.keys(SONS)) audio(nom)?.load();
