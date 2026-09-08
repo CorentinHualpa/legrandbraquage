@@ -209,6 +209,30 @@ test("chaque réplique est écrite quelque part à l'écran", async () => {
   );
 });
 
+test("une réaction n'ouvre pas sur le mot qui ouvre la carte suivante", async () => {
+  /*
+   * Les quatre réactions sont suivies, deux secondes après, de la carte du
+   * tabac. Une réaction qui ouvre sur le même mot qu'elle donne « Bon… » puis
+   * « Bon… », et c'est le genre de défaut qui n'existe dans AUCUN des deux
+   * textes pris séparément : il n'apparaît qu'enchaîné, donc on ne le voit pas
+   * en relisant, on l'entend une fois le parcours joué.
+   */
+  const { REPLIQUES, REACTIONS, texte } = await import(
+    pathToFileURL(join(ici, "..", "..", "src", "lib", "repliques.ts")).href
+  );
+  const premierMot = (t) => texte(t).split(/[\s.,!?]+/)[0].toLowerCase();
+  const suivante = premierMot("tabac");
+
+  for (const nom of Object.keys(REACTIONS)) {
+    assert.notEqual(
+      premierMot(nom),
+      suivante,
+      `« ${nom} » ouvre sur « ${suivante} », comme la carte du tabac juste après`,
+    );
+  }
+  assert.ok(Object.keys(REPLIQUES).length > 0);
+});
+
 test("les quatre réactions à la signature sont atteignables et enregistrées", () => {
   /*
    * Trois choses doivent rester d'accord, et aucune ne fait de bruit en cassant :

@@ -150,9 +150,19 @@ export const REACTIONS: Record<string, string> = {
   "signature-sous-smic":
     "[tired] D'accord. Installez-vous. [dry] Même là-dedans, ils ont trouvé à se servir. [scoffs] Faut le faire.",
 
-  /* Du SMIC au médian : le cas ordinaire, donc le ton le plus plat. */
+  /*
+   * Du SMIC au médian : le cas ordinaire, donc le ton le plus plat.
+   *
+   * ⚠ Elle NE commence PAS par « Bon ». C'est le premier mot de la carte du
+   * tabac, qui arrive deux secondes après, et on entendait « Bon… » puis
+   * « Bon… » d'affilée. Le défaut n'existe dans aucun des deux textes pris
+   * séparément, il n'apparaît qu'enchaîné : on ne le voit pas en relisant, on
+   * l'entend une fois le parcours joué. Un test garde la porte.
+   *
+   * Le voisin est là exprès : c'est le fil du témoin, six cartes plus loin.
+   */
   "signature-jusqu-au-median":
-    "[flat] Bon. Le salaire de tout le monde. [scoffs] Et le braquage de tout le monde, du coup.",
+    "[flat] Le salaire de tout le monde. [dry] Ils ont fait pareil avec votre voisin. [scoffs] Et avec le sien.",
 
   /* Au-dessus du médian. Formulation de Coq, gardée telle quelle. */
   "signature-au-dessus":
