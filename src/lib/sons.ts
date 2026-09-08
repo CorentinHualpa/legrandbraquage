@@ -365,6 +365,16 @@ const AVEC_REPLIQUE = new Set([
  */
 const AVANT_DE_PARLER_MS = 900;
 
+/**
+ * Le silence entre une réaction et la réplique de la carte suivante.
+ *
+ * Plus long que le délai d'arrivée, et c'est voulu : ici il ne s'agit pas de
+ * laisser passer un bruit de page, mais de faire entendre qu'il a FINI de
+ * répondre avant de passer à autre chose. Sous deux secondes, les deux phrases
+ * se lisent comme une seule.
+ */
+const ENTRE_DEUX_REPLIQUES_MS = 2_000;
+
 function duckerLesNappes(baisser: boolean) {
   if (ducking === baisser) return;
   ducking = baisser;
@@ -390,12 +400,19 @@ function lancerLaVoix(nom: string, delaiMs: number) {
       if (voixEnCours !== el) return;
       voixEnCours = null;
       protegee = false;
-      // Ce qui attendait derrière une réaction part maintenant, sans délai :
-      // il a déjà attendu, en rajouter donnerait un commissaire qui traîne.
+      /*
+       * ⚠ Le décor remonte TOUJOURS, même quand une réplique attend derrière.
+       * Enchaîner sans le laisser revenir collait les deux phrases : on
+       * entendait un seul bloc de parole ininterrompu, la réaction au montant
+       * et le commentaire de la carte suivante mélangés, et on ne comprenait
+       * plus qui commente quoi (Coq, 09/09/2026 : « il enchaîne directement,
+       * du coup on comprend pas »). Ce sont les deux secondes de bureau qui
+       * disent qu'une phrase est finie et qu'une autre commence.
+       */
+      duckerLesNappes(false);
       const suite = enAttente;
       enAttente = null;
-      if (suite) lancerLaVoix(suite, 0);
-      else duckerLesNappes(false);
+      if (suite) lancerLaVoix(suite, ENTRE_DEUX_REPLIQUES_MS);
     };
     el.addEventListener("ended", fini);
     // Un fichier manquant ne doit pas laisser le décor baissé pour toujours :

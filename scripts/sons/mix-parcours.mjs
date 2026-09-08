@@ -51,6 +51,7 @@ const NAPPE = NIVEAUX[NIVEAU];
 const nombre = (nom) => Number(source.match(new RegExp(`${nom} = ([\\d._]+)`))[1].replace(/_/g, ""));
 const DUCK = nombre("DUCK");
 const AVANT_DE_PARLER = nombre("AVANT_DE_PARLER_MS") / 1000;
+const ENTRE_DEUX = nombre("ENTRE_DEUX_REPLIQUES_MS") / 1000;
 const VIE_MIN = nombre("VIE_MIN_MS") / 1000;
 const VIE_MAX = nombre("VIE_MAX_MS") / 1000;
 
@@ -83,7 +84,8 @@ const VIE = [...source
  * et le temps qu'elle y met.
  */
 const VISITE = [
-  { ecran: "deposition", acte: "commissariat", geste: "long", attente: 5 },
+  // `reaction` : ce qu'il dit AU CLIC, avant que la carte suivante n'arrive.
+  { ecran: "deposition", acte: "commissariat", geste: "long", attente: 5, reaction: "signature-au-dessus" },
   { ecran: "tabac", acte: "commissariat", geste: "court", attente: 3 },
   { ecran: "pris", acte: "commissariat", geste: "court", attente: 3 },
   { ecran: "butin", acte: "scelles", geste: "court", attente: 3.5 },
@@ -109,6 +111,8 @@ const gestes = [];   // { f, v, t }
 const paroles = [];  // { fichier, t, fin }
 const segments = []; // { acte, debut, fin }
 let t = 1.2;
+/** Avant cet instant, la réplique d'arrivée ne peut pas partir : il parle encore. */
+let contrainte = 0;
 
 for (const etape of VISITE) {
   // La page qu'on tourne : c'est le geste qui fait changer d'écran.
@@ -122,7 +126,7 @@ for (const etape of VISITE) {
 
   const fichier = join(VOIX, `${etape.ecran}.mp3`);
   const d = await duree(fichier);
-  const depart = t + AVANT_DE_PARLER;
+  const depart = Math.max(t + AVANT_DE_PARLER, contrainte);
   paroles.push({ fichier, t: depart, fin: depart + d });
   t = depart + d;
 
@@ -133,6 +137,18 @@ for (const etape of VISITE) {
     gestes.push({ f: "coche", v: 0.45, t: t + 1.2 });
   }
   t += etape.attente;
+
+  if (etape.reaction) {
+    /*
+     * Le clic fait DEUX choses en même temps : il déclenche la réaction et il
+     * change de carte. La réplique de la carte suivante ne coupe donc pas la
+     * réaction, elle attend sa fin plus le silence du module.
+     */
+    const f = join(VOIX, `${etape.reaction}.mp3`);
+    const dr = await duree(f);
+    paroles.push({ fichier: f, t, fin: t + dr });
+    contrainte = t + dr + ENTRE_DEUX;
+  }
 }
 const FIN = t + 2;
 segments[segments.length - 1].fin = FIN;

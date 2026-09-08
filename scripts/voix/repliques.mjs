@@ -74,8 +74,16 @@ export const REPLIQUES = {
     + "[whispers] Écrivez-le là. [dry] Sur le procès-verbal.",
 
   /* Les trois habitudes : il note, il ne juge pas, il taquine. */
+  /*
+   * ⚠ Le « Bon. » d'ouverture n'est pas un tic, c'est une CHARNIÈRE. C'est la
+   * seule carte qu'on atteint après une réaction du commissaire (celle au
+   * montant signé), donc la seule où il reprend la parole après s'être déjà
+   * exprimé. Sans ce mot, il attaque « Vous fumez ? » comme s'il venait
+   * d'entrer dans la pièce, et les deux répliques se lisent comme deux
+   * personnes. C'est aussi le mot qu'il dit à l'écran, dans la bulle.
+   */
   tabac:
-    "[dry] Vous fumez. [scoffs] Vous en faites pas, la morale c'est pas mon service. "
+    "[tired] Bon. [pause] Vous fumez ? [scoffs] Vous en faites pas, la morale c'est pas mon service. "
     + "[flat] Combien de paquets ? Et comptez ceux que vous taxez aux collègues.",
   carburant:
     "[tired] Et la caisse ? [scoffs] Plutôt écolo, ou à frimer avec votre BM ? "
