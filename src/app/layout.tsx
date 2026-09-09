@@ -18,8 +18,14 @@ const mono = IBM_Plex_Mono({
   display: "swap",
 });
 
+/**
+ * ⚠ VOUVOYER. Le produit vouvoie partout depuis que le commissaire est le seul
+ * à parler, et cette phrase est la plus lue de toutes : c'est elle qui s'affiche
+ * sous le lien quand quelqu'un le partage sur WhatsApp ou LinkedIn. Elle
+ * tutoyait encore, seule survivante de la version d'avant.
+ */
 const DESCRIPTION =
-  "Chaque mois, quelqu'un passe chez toi avant toi. On chiffre ce qu'il emporte, ce qu'il repose, et lequel des deux pèse le plus lourd. Barèmes officiels, moteur de calcul public.";
+  "Chaque mois, quelqu'un passe chez vous avant vous. On chiffre ce qu'il emporte, ce qu'il repose, et lequel des deux pèse le plus lourd. Barèmes officiels, moteur de calcul public.";
 
 /**
  * L'image de partage par DÉFAUT, pour l'adresse nue.

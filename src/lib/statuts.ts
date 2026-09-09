@@ -244,13 +244,13 @@ export const OU_LIRE_SON_NET: Record<Regime, { label: string; aide: string }> = 
   tns: {
     label: "CE QU’IL VOUS RESTE PAR MOIS, AVANT IMPÔT SUR LE REVENU",
     aide:
-      "Ton revenu professionnel une fois les cotisations payées, avant l’impôt. "
+      "Votre revenu professionnel une fois les cotisations payées, avant l’impôt. "
       + "Ni votre chiffre d’affaires, ni ce qui reste après les acomptes.",
   },
   cipav: {
     label: "CE QU’IL VOUS RESTE PAR MOIS, AVANT IMPÔT SUR LE REVENU",
     aide:
-      "Ton revenu professionnel une fois les cotisations payées, avant l’impôt. "
+      "Votre revenu professionnel une fois les cotisations payées, avant l’impôt. "
       + "Ni votre chiffre d’affaires, ni ce qui reste après les acomptes.",
   },
   micro: {
