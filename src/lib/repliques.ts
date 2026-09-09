@@ -66,9 +66,15 @@ export const REPLIQUES: Record<string, string> = {
     + "[flat] Combien de verres dans la semaine ?",
 
   /* La pièce à conviction : le mécanisme. Il explique, il ne s'emporte pas. */
+  /*
+   * Il juge un MODE OPÉRATOIRE, pas un prélèvement : c'est le seul angle où le
+   * commissaire reste un commissaire au lieu de devenir un contribuable qui
+   * râle. Les quatre lignes sont sous ses yeux à l'écran, il n'a donc pas à les
+   * compter à voix haute.
+   */
   pris:
-    "[tired] Voilà la pièce à conviction. [pause] Tout ça sur une carrière. "
-    + "[dry] Quatre lignes, quatre. [scoffs] Et sur votre fiche de paie, vous en voyez une.",
+    "[flat] Voilà la pièce à conviction. [dry] Du travail propre, hein. "
+    + "Pas une porte forcée, pas un cri. [scoffs] Et personne qui porte plainte.",
   butin:
     "[flat] Voilà le butin. [scoffs] C'est pas moi qui fixe les prix, hein. Moi je compte. "
     + "[dry] Et franchement, j'ai rarement vu un scellé aussi bien rempli.",

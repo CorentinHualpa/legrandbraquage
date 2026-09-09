@@ -57,7 +57,7 @@ export function Pris({
         n'affiche pas : la durée, et le fait qu'on ne l'a jamais vu passer.
       */}
       <Commissaire>
-        « {texte("pris")}{micro ? " Et une partie part avant même que vous vous payiez." : ""} »
+        « {texte("pris")}{micro ? " Chez vous, une partie part même avant que vous vous payiez." : ""} »
       </Commissaire>
 
       {/*
