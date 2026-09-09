@@ -368,7 +368,22 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
     setEcran(e);
   };
   const suivant = () => aller(ecrans[Math.min(ecrans.length - 1, indexEcran + 1)]);
-  const retour = () => aller(ecrans[Math.max(0, indexEcran - 1)]);
+  /**
+   * LA FLÈCHE DE RETOUR COUPE TOUT et rejoue la carte d'avant comme si on
+   * venait d'y arriver.
+   *
+   * ⚠ `taire()` d'abord, et ce n'est pas une précaution : quand une réaction au
+   * salaire est en cours, elle est PROTÉGÉE, donc la réplique de la carte
+   * suivante attend son tour au lieu de la couper. Sans ce `taire()`, revenir
+   * en arrière laissait le commissaire finir sa phrase sur la carte qu'on vient
+   * de quitter, puis parler de la précédente plusieurs secondes trop tard. Or on
+   * revient en arrière justement quand quelque chose s'est mal passé : c'est le
+   * moment où il faut repartir propre.
+   */
+  const retour = () => {
+    taire();
+    aller(ecrans[Math.max(0, indexEcran - 1)]);
+  };
   const choisirPalier = (poste: PosteDuPlateau, id: string) =>
     setPaliers((p) => ({ ...p, [poste]: id }));
   const choisirHabitude = (poste: PosteHabitude, id: string) =>

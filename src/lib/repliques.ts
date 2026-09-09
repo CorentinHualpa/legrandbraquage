@@ -35,7 +35,7 @@
  * c'est précisément la carte la plus mise en avant qui se désaligne.
  */
 export const APARTE = {
-  fort: "Objection. Je suis l'avocate des braqueurs.",
+  fort: "Contente de vous voir aussi. Objection : je suis l'avocate des braqueurs.",
   suite: "Vous lui montrez ce qu'on lui a pris, très bien. Vous comptez lui montrer ce qu'on lui a rendu, ou c'est pas dans le dossier ?",
 };
 
@@ -57,18 +57,28 @@ export const APARTE = {
  */
 export const AVOCATE: Record<string, string> = {
   /* Elle entre en coupant. Les deux phrases sont celles de la carte, en gros. */
-  aparte: `[dry] ${APARTE.fort} [sarcastic] ${APARTE.suite}`,
+  aparte: `[sarcastic] Contente de vous voir aussi. [dry] Objection : je suis l'avocate des braqueurs. [sarcastic] ${APARTE.suite}`,
 
-  /* Les trois interrogatoires. Elle nomme la chose, puis elle demande le prix. */
+  /*
+   * ⚠⚠ ELLE PLAIDE POUR SES CLIENTS, pas pour le visiteur. La première version
+   * disait « vous l'avez payé quand même » et « on ne vous a pas présenté la
+   * note » : ça défend le PLAIGNANT, c'est-à-dire l'inverse de son rôle, et le
+   * contradictoire tombe à plat parce que tout le monde est du même avis
+   * (Coq, 09/09/2026 : « on dirait qu'elle nous défend nous »).
+   *
+   * Son argument, sur les trois cartes, est toujours le même : vous avez REÇU,
+   * mes clients ont payé, chiffrez-le. C'est elle qui demande le montant, et
+   * plus le visiteur qui se plaint de l'avoir payé.
+   */
   ecole:
-    "[flat] L'école. [pause] De la maternelle au diplôme. "
-    + "[dry] On vous a présenté une facture ? [sarcastic] Non. [flat] Mettez un prix dessus.",
+    "[flat] L'école. [pause] Du CP au diplôme, sans sortir un centime. "
+    + "[dry] Ce sont mes clients qui ont réglé la note. [sarcastic] Alors dites-moi ce que ça valait.",
   sante:
-    "[flat] La santé. [pause] Une opération, une nuit aux urgences, un cancer. "
-    + "[dry] Vous avez payé combien, vous ?",
+    "[flat] La santé. [pause] Une opération, des urgences, un cancer. "
+    + "[dry] Vous avez présenté une carte, mes clients ont payé le reste. [sarcastic] Ça vaut combien, à votre avis ?",
   chomage:
-    "[flat] Le chômage. [pause] Vous n'y êtes peut-être jamais passé. "
-    + "[dry] Vous l'avez payé quand même. [flat] Et ceux qui y sont passés étaient couverts.",
+    "[flat] Le chômage. [pause] Vous n'y êtes peut-être jamais passé, tant mieux pour vous. "
+    + "[dry] Mes clients vous couvraient quand même, tous les mois. [sarcastic] Une assurance, ça a un prix.",
 
   /* Le rendu : elle conclut, et c'est le visiteur qui a fait le calcul. */
   rendu:
@@ -133,8 +143,9 @@ export const REPLIQUES: Record<string, string> = {
     + "[dry] Après seulement, vous travaillez pour vous. [scoffs] Et le premier janvier, ça repart.",
 
   /* La bourse : l'avocat du Braqueur demande la parole. Il s'agace un peu. */
+  /* Il lui reprend la parole. C'est le mot qui referme sa plaidoirie. */
   bourse:
-    "[dry] Dernière question. [pause] Ce pognon, vous l'auriez mis où ? "
+    "[dry] Objection à l'objection. [pause] Ce pognon, vous l'auriez mis où ? "
     + "[scoffs] Et me dites pas que vous y auriez pas touché, hein.",
 
   /* Le verdict : le tampon vient de tomber. Il ne triomphe pas, il constate. */
@@ -210,8 +221,9 @@ export const REACTIONS: Record<string, string> = {
     + "[dry] Et eux, ils ont pris vingt ans.",
 
   /* Il cede la parole a l'avocate, sur l'aparte. Trois mots, c'est tout. */
+  /* ⚠ Sans [pause] : c'est un râle, il le lâche d'un bloc. Avec, il méditait. */
   "aparte-commissaire":
-    "[tired] Oh non. [pause] Pas elle. [scoffs] On discutait bien, pourtant.",
+    "[tired] Oh non, pas elle. [scoffs] On discutait bien, pourtant.",
 
   /*
    * « Content de votre cadeau ? », sur le butin. Il répond AU CLIC, pas au
