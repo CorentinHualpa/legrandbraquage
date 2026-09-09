@@ -206,7 +206,7 @@ export function Commissaire({
   children,
 }: {
   qui?: string;
-  /** Le commissaire parle en rouge, l'avocat du Braqueur en bleu. */
+  /** Le commissaire parle en rouge, l'avocate du Braqueur en bleu. */
   couleur?: "rouge" | "bleu";
   children: ReactNode;
 }) {

@@ -29,15 +29,57 @@
  */
 
 /**
- * L'aparté est le seul écran où il parle en GROS, sur deux tailles, sans bulle.
- * Ses deux phrases sont donc exportées à part : la carte les met en page, la
+ * L'aparté est le seul écran où on parle en GROS, sur deux tailles, sans bulle.
+ * Les deux phrases sont donc exportées à part : la carte les met en page, la
  * réplique les recolle avec ses balises. Une seule source quand même, sinon
  * c'est précisément la carte la plus mise en avant qui se désaligne.
  */
 export const APARTE = {
-  fort: "Entre nous. Ils étaient de bonne foi.",
-  suite: "Ils vous ont laissé un petit quelque chose dans le coffre. Ou pas. Ça dépend, en fait.",
+  fort: "Objection. Vous lui montrez ce qu'on lui a pris, très bien.",
+  suite: "Vous comptez lui montrer ce qu'on lui a rendu, ou c'est pas dans le dossier ?",
 };
+
+/**
+ * L'AVOCATE DU BRAQUEUR prend la main sur toute la partie « nuance ».
+ *
+ * Décision de Coq, 09/09/2026 : ce n'est plus le commissaire qui explique que
+ * les braqueurs ont laissé quelque chose. Et ça vaut mieux, parce que c'est le
+ * seul moment où il devait plaider contre son propre dossier, ce qui l'affadit
+ * pendant cinq cartes. Une avocate qui l'interrompt pose le contradictoire au
+ * lieu de le diluer, et rend au commissaire sa sortie au verdict.
+ *
+ * Voix Émilie (`i6ke7jvmGEVUyV4zjSaT`), choisie à l'oreille parmi quatre le
+ * 09/09/2026. Même traitement que lui : eleven_v3, stabilité 0, ×1,15.
+ *
+ * ⚠ Elle ne charrie PAS. Le commissaire lâche une vanne par réplique ; elle
+ * pose des questions et laisse la personne répondre. Deux personnages qui
+ * blaguent pareil sont un seul personnage avec deux voix.
+ */
+export const AVOCATE: Record<string, string> = {
+  /* Elle entre en coupant. Les deux phrases sont celles de la carte, en gros. */
+  aparte: `[dry] ${APARTE.fort} [sarcastic] ${APARTE.suite}`,
+
+  /* Les trois interrogatoires. Elle nomme la chose, puis elle demande le prix. */
+  ecole:
+    "[flat] L'école. [pause] De la maternelle au diplôme. "
+    + "[dry] On vous a présenté une facture ? [sarcastic] Non. [flat] Mettez un prix dessus.",
+  sante:
+    "[flat] La santé. [pause] Une opération, une nuit aux urgences, un cancer. "
+    + "[dry] Vous avez payé combien, vous ?",
+  chomage:
+    "[flat] Le chômage. [pause] Vous n'y êtes peut-être jamais passé. "
+    + "[dry] Vous l'avez payé quand même. [flat] Et ceux qui y sont passés étaient couverts.",
+
+  /* Le rendu : elle conclut, et c'est le visiteur qui a fait le calcul. */
+  rendu:
+    "[dry] Voilà. [pause] Mon client ne vous a pas tout pris pour rien. "
+    + "[sarcastic] Et c'est vous qui venez de le chiffrer.",
+};
+
+/** Vrai si cette réplique est dite par l'avocate. Décide la voix ET la bulle. */
+export function estAvocate(nom: string): boolean {
+  return nom in AVOCATE;
+}
 
 /** Ce qu'il dit à l'ARRIVÉE sur chaque carte. Une par écran. */
 export const REPLIQUES: Record<string, string> = {
@@ -84,33 +126,6 @@ export const REPLIQUES: Record<string, string> = {
     "[tired] Regardez votre montre. [pause] Vous, vous bossez depuis janvier. Eux aussi. "
     + "[dry] Sauf qu'eux, ils s'arrêtent pile là. [flat] Tous les ans, à la minute près.",
 
-  /*
-   * L'aparté : il se penche. C'est la réplique la plus basse du parcours.
-   *
-   * ⚠ Ici c'est la VOIX qui a été alignée sur la carte, pas l'inverse. Les deux
-   * phrases de l'écran sont en gros caractères et portent la révélation du
-   * parcours (ils ont laissé quelque chose dans le coffre) : c'est le texte qui
-   * commande, la voix le suit.
-   */
-  aparte: `[whispers] ${APARTE.fort} [pause] [tired] ${APARTE.suite}`,
-
-  /* Les trois interrogatoires : école, santé, chômage. Ce qu'on a reçu en face. */
-  ecole:
-    "[dry] L'école. [scoffs] Gratuite, hein ? C'est ce qu'on dit. "
-    + "[flat] Mettez un prix dessus, on verra bien.",
-  sante:
-    "[tired] La santé. [pause] Là non plus, personne vous a présenté la note. "
-    + "[dry] Allez-y, chiffrez. Ça compte dans l'autre plateau.",
-  chomage:
-    "[flat] Le chômage. [pause] Vous y avez peut-être jamais touché. "
-    + "[scoffs] Ça vous a pas empêché de le payer. [dry] Combien, à votre avis ?",
-
-  /* Le rendu : il concède. Un commissaire honnête, c'est ce qui rend le reste crédible. */
-  rendu:
-    "[tired] Bon, soyons honnêtes. [pause] Ils vous ont pas tout pris pour rien. "
-    + "[dry] Voilà ce qu'ils ont laissé. [scoffs] Des cambrioleurs qui repeignent le salon "
-    + "avant de partir, faut le voir pour le croire.",
-
   /* La bourse : l'avocat du Braqueur demande la parole. Il s'agace un peu. */
   bourse:
     "[dry] Dernière question. [pause] Ce pognon, vous l'auriez mis où ? "
@@ -142,6 +157,9 @@ export const REPLIQUES: Record<string, string> = {
  * c'est un tiers de la durée : elles n'en portent aucun.
  */
 export const REACTIONS: Record<string, string> = {
+  /* Il cede la parole a l'avocate, sur l'aparte. Trois mots, c'est tout. */
+  "aparte-concede": "[tired] Maître. [pause] Allez-y.",
+
   /*
    * « Content de votre cadeau ? », sur le butin. Il répond AU CLIC, pas au
    * bouton suivant : une réaction qui arrive une carte plus tard n'est plus une
@@ -208,7 +226,7 @@ export const REACTIONS: Record<string, string> = {
     + "[dry] Et eux, ils ont pris vingt ans.",
 };
 
-export const TOUTES: Record<string, string> = { ...REPLIQUES, ...REACTIONS };
+export const TOUTES: Record<string, string> = { ...REPLIQUES, ...REACTIONS, ...AVOCATE };
 
 /**
  * Le texte tel qu'on le LIT : sans les balises, guillemets compris.

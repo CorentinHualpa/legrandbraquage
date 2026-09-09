@@ -164,10 +164,13 @@ test("aucun fichier de voix ne date d'une version précédente du texte", async 
    */
   const { TOUTES } = await import(pathToFileURL(join(ici, "..", "..", "src", "lib", "repliques.ts")).href);
   const manifeste = JSON.parse(readFileSync(join(ici, "..", "..", "public", "voix", "_textes.json"), "utf8"));
-  const empreinte = (t) => createHash("sha256").update(t).digest("hex").slice(0, 12);
+  const { estAvocate } = await import(pathToFileURL(join(ici, "..", "..", "src", "lib", "repliques.ts")).href);
+  // La voix fait partie de l'empreinte : changer de voix sans changer le texte
+  // laisserait le manifeste vert sur un fichier dit par quelqu'un d'autre.
+  const empreinte = (nom, t) => createHash("sha256").update(`${estAvocate(nom) ? "avocate" : "commissaire"}|${t}`).digest("hex").slice(0, 12);
 
   const perimes = Object.entries(TOUTES)
-    .filter(([nom, texte]) => manifeste[nom] !== empreinte(texte))
+    .filter(([nom, texte]) => manifeste[nom] !== empreinte(nom, texte))
     .map(([nom]) => nom);
   assert.deepEqual(perimes, [], `à régénérer : node scripts/voix/repliques.mjs ${perimes.join(" ")}`);
 });

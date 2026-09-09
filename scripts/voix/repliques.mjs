@@ -59,7 +59,9 @@ const MANIFESTE = join(SORTIE, "_textes.json");
 const VAULT = "C:/Users/msi/.secrets/api-keys.env";
 
 /** Stéphane Martineau. « Chaleureuse, sérieuse et imposante », français, quarantaine. */
-const VOIX = "CkNazXuHNoWK3cIbgCIg";
+const VOIX_COMMISSAIRE = "CkNazXuHNoWK3cIbgCIg";
+/** Émilie, studio, précise. L'avocate du Braqueur, choisie parmi quatre à l'oreille. */
+const VOIX_AVOCATE = "i6ke7jvmGEVUyV4zjSaT";
 const MODELE = "eleven_v3";
 /** 0 = « créatif » : le modèle joue. v3 ne prend que 0, 0.5 ou 1. */
 const STABILITE = 0;
@@ -73,7 +75,7 @@ const TEMPO = 1.15;
  * phrase en en entendant une autre. Une copie dans ce script redonnerait
  * exactement ce défaut à la première correction faite d'un seul côté.
  */
-const { TOUTES } = await import(pathToFileURL(join(racine, "src", "lib", "repliques.ts")).href);
+const { TOUTES, estAvocate } = await import(pathToFileURL(join(racine, "src", "lib", "repliques.ts")).href);
 
 
 
@@ -120,7 +122,7 @@ for (const nom of demandes) {
   }
 
   const r = await fetch(
-    `https://api.elevenlabs.io/v1/text-to-speech/${VOIX}?output_format=mp3_44100_128`,
+    `https://api.elevenlabs.io/v1/text-to-speech/${estAvocate(nom) ? VOIX_AVOCATE : VOIX_COMMISSAIRE}?output_format=mp3_44100_128`,
     {
       method: "POST",
       headers: { "xi-api-key": cle, "content-type": "application/json" },
@@ -145,7 +147,7 @@ for (const nom of demandes) {
   const { stdout } = await run("ffprobe", [
     "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", cible,
   ]);
-  empreintes[nom] = empreinte(texte);
+  empreintes[nom] = empreinte(`${estAvocate(nom) ? "avocate" : "commissaire"}|${texte}`);
   console.log(`${nom.padEnd(14)} ${Number(stdout).toFixed(1).padStart(5)} s  ${cible}`);
 }
 

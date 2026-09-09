@@ -73,7 +73,7 @@ export function PalierEcran({
       photo={{ numero: piece.numero, pieces, hauteur: 210, legende: piece.legende }}
       action={{ libelle: libelleSuivant, onClick: suivant }}
     >
-      <Commissaire>{dit(poste)}</Commissaire>
+      <Commissaire qui="L’avocate du Braqueur" couleur="bleu">{dit(poste)}</Commissaire>
 
       <div className="flex flex-col gap-2" role="radiogroup" aria-label={definition.question}>
         {definition.choix.map((c) => (

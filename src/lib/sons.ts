@@ -354,6 +354,8 @@ const AVEC_REPLIQUE = new Set([
   "signature-sous-smic", "signature-jusqu-au-median", "signature-au-dessus",
   "cadeau-partage", "cadeau-picotte",
   "placement-prudent", "placement-pierre", "placement-audacieux", "placement-cac",
+  // L'avocate du Braqueur, sur toute la partie nuance.
+  "aparte", "aparte-concede", "ecole", "sante", "chomage", "rendu",
   "signature-tres-haut",
 ]);
 
