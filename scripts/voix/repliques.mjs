@@ -140,8 +140,23 @@ for (const nom of demandes) {
   const cible = join(SORTIE, `${nom}.mp3`);
   // `atempo` conserve la hauteur : la voix va plus vite sans rajeunir. Un
   // `asetrate` la monterait dans les aigus et lui enlèverait vingt ans.
+  /*
+   * ⚠ LES BLANCS SONT PLAFONNÉS, et c'est le seul moyen fiable.
+   *
+   * v3 pose des silences de son propre chef, sur les `[pause]` mais aussi sur
+   * les points de suspension et parfois sur rien du tout : mesuré le
+   * 09/09/2026, la déposition portait un trou de 3,4 secondes entre
+   * « Asseyez-vous » et « Nom, prénom », le rendu 3,4 aussi, l'avis 2,6. À
+   * l'écoute, on croit que le fichier s'est arrêté.
+   *
+   * Retoucher les textes ne règle rien de durable : la même phrase régénérée
+   * peut placer son trou ailleurs. On coupe donc APRÈS, mécaniquement, ce qui
+   * protège aussi toutes les répliques à venir. 0,35 s de silence gardé : assez
+   * pour une respiration, trop peu pour un doute.
+   */
   await run("ffmpeg", [
-    "-y", "-i", brut, "-filter:a", `atempo=${TEMPO}`,
+    "-y", "-i", brut,
+    "-filter:a", `atempo=${TEMPO},silenceremove=stop_periods=-1:stop_duration=0.55:stop_threshold=-38dB:stop_silence=0.35`,
     "-codec:a", "libmp3lame", "-q:a", "3", cible,
   ]);
   const { stdout } = await run("ffprobe", [
