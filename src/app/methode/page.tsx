@@ -151,7 +151,7 @@ export default function Methode() {
             <span className="font-semibold">Défendable au centime :</span> toutes
             les cotisations ligne par ligne, la RGDU, l’impôt sur le revenu avec
             décote et quotient familial, l’inversion du net vers le brut, la
-            projection de carrière sur la courbe de salaire par âge de l’INSEE,
+            projection de carrière sur les courbes de salaire par âge de l’INSEE,
             et le capital équivalent à la pension.
           </p>
           <p className="text-[14.5px] leading-relaxed">
@@ -170,6 +170,32 @@ export default function Methode() {
             dépense de santé remboursée par tranche d’âge, l’
             <span className="font-semibold">Unédic</span> pour l’allocation
             mensuelle. Le poste retraite, lui, est calculé.
+          </p>
+          <p className="text-[14.5px] leading-relaxed">
+            <span className="font-semibold">La carrière n’a pas la même forme
+            partout.</span>{" "}
+            Le salaire ne reste pas figé pendant quarante-trois ans : il suit une
+            courbe par âge, et cette page en utilise{" "}
+            <span className="font-semibold">quatre</span>, une pour le privé et une
+            par versant de la fonction publique (INSEE, séries longues, salaires nets
+            annuels moyens par tranche d’âge). Elles ne se ressemblent pas : la
+            territoriale est nettement plus plate que le privé, l’État plus pentu.
+            Servir la courbe du privé à un fonctionnaire, ce que faisait cette page
+            jusqu’au 9 septembre 2026, faussait sa pension, qui se calcule sur le
+            traitement de fin de carrière.
+          </p>
+          <p className="text-[14.5px] leading-relaxed">
+            <span className="font-semibold">Deux conventions, et elles sont de nous.</span>{" "}
+            La fonction publique n’est publiée qu’en six tranches d’âge, jamais au
+            quinquennat : les points sont posés au milieu de chaque tranche. Et la
+            dernière tranche, « 60 ans et plus », est{" "}
+            <span className="italic">plafonnée</span> : elle mesure une population à
+            un instant, pas une carrière suivie, et dans l’hospitalière elle est tirée
+            par les praticiens hospitaliers, qui n’ont rien à voir avec le reste du
+            versant. Au-delà de 55 ans, la progression retenue est donc celle, très
+            plate, que la courbe du privé applique déjà pour la même raison. Sans ce
+            plafond, un agent hospitalier se verrait annoncer une pension de 2 049 €
+            au lieu de 1 614 €.
           </p>
           <p className="text-[14.5px] leading-relaxed">
             <span className="font-semibold">Le taux d’effort de TVA</span> suit

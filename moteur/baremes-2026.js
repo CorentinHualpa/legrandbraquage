@@ -196,16 +196,99 @@ export const RETRAITE = {
 };
 
 // ─── Carrière ────────────────────────────────────────────────────────────────
-// Courbe de salaire par âge, privé, net EQTP 2024 (INSEE séries longues).
-// Indice 100 = 2 733 €/mois. ⚠ La remontée après 55 ans est un effet de
-// SÉLECTION (les ouvriers sortent plus tôt de l'emploi), pas une accélération
-// de carrière : on plafonne la pente pour un individu suivi.
-export const COURBE_AGE = [
+/**
+ * Courbes de salaire par âge, en indice. Une par régime, et ce n'est pas un
+ * raffinement.
+ *
+ * ⚠ Jusqu'au 09/09/2026 il n'y en avait qu'UNE, celle du privé, et la
+ * projection l'appliquait à TOUS les régimes, fonctionnaires compris. C'était
+ * le seul endroit du moteur où un régime empruntait un chiffre à un autre,
+ * alors que `regimeDe` lève explicitement plutôt que de le faire ailleurs.
+ *
+ * ⚠⚠ ET LA RAISON QU'ON SE DONNAIT ÉTAIT FAUSSE. « Une carrière publique
+ * avance à l'ancienneté, son profil est plus plat » : sur champ symétrique
+ * (Insee Première n° 2043, données 2021, hors apprentis et stagiaires des deux
+ * côtés), le rapport entre le salaire des 55 ans et plus et celui des moins de
+ * 25 ans vaut 1,86 dans le public contre 1,88 dans le privé. Le profil agrégé
+ * public n'est PAS plus plat. Ce qui est plat, c'est la territoriale ; l'État,
+ * lui, est plus pentu que le privé. Une courbe publique unique aurait remplacé
+ * une erreur par une autre : le découpage utile est le VERSANT.
+ *
+ * Indices calculés sur les valeurs publiées, base 100 à 36 ans, qui est l'âge
+ * de référence de la projection. Seule la FORME compte : `indiceAge` ne sert
+ * qu'en rapport à l'indice de l'âge où le salaire est constaté.
+ */
+
+/**
+ * Privé, net EQTP 2024 (INSEE séries longues). Indice 100 = 2 733 €/mois.
+ * ⚠ La remontée après 55 ans est un effet de SÉLECTION (les ouvriers sortent
+ * plus tôt de l'emploi), pas une accélération de carrière : la pente est
+ * plafonnée pour un individu suivi.
+ */
+const COURBE_PRIVE = [
   [20, 53.9], [22, 62.0], [25, 74.2], [28, 86.3], [30, 89.9],
   [32, 93.4], [35, 98.7], [36, 100.1], [38, 102.4], [40, 104.7],
   [43, 108.2], [45, 110.5], [47, 111.9], [50, 113.5], [53, 115.1],
   [55, 116.2], [57, 116.8], [60, 117.2], [62, 117.4], [64, 117.5],
 ];
+
+/*
+ * Fonction publique : INSEE, Insee Résultats, « Séries longues sur les salaires
+ * dans le secteur privé et dans la fonction publique » (04/12/2025), tableau
+ * EQTPFP04, « Salaire net annuel moyen par tranche d'âge et versant », source
+ * Siasp, données 2023.
+ *
+ * ⚠ SIX TRANCHES, et c'est tout ce qui est publié : moins de 26, 26-30, 31-40,
+ * 41-50, 51-60, 60 et plus. Aucune source ne descend au quinquennat dans le
+ * public, ni l'INSEE, ni la DGAFP, ni la DREES. Les points sont donc posés au
+ * MILIEU de chaque tranche (23, 28, 35,5, 45,5, 55,5 et 62 ans), ce qui est une
+ * convention de notre part, pas une donnée.
+ *
+ * ⚠ Ce sont des moyennes TRANSVERSALES, pas des cohortes : elles portent les
+ * effets de structure, à commencer par la part de catégorie A qui monte avec
+ * l'âge. Une carrière individuelle est plus plate que ce que la courbe suggère.
+ *
+ * ⚠ La première tranche ne résout pas 20-25 ans : elle vaut « moins de 26 »,
+ * tous agents confondus. La projection commence à 22 ans et lit donc la même
+ * valeur de 20 à 23 ans.
+ */
+/**
+ * ⚠⚠ LA TRANCHE « 60 ET PLUS » EST PLAFONNÉE, exactement comme celle du privé.
+ *
+ * Ce que la série publie à 62 ans : État 143,0, territoriale 116,8,
+ * hospitalière 143,5. Ces valeurs sont RÉELLES et elles ne sont pas jetées,
+ * elles sont écrites ici. Mais elles mesurent une POPULATION à un instant, pas
+ * une carrière suivie, et la dernière tranche est celle où les effets de
+ * composition sont les plus violents : dans l'hospitalière, les 48 500 € annuels
+ * des « 60 et plus » sont tirés par les praticiens hospitaliers, qui pèsent lourd
+ * dans une tranche peu nombreuse. Un aide-soignant ne voit pas son traitement
+ * bondir de 35 % après 60 ans.
+ *
+ * C'est le MÊME phénomène que la courbe du privé plafonne déjà (« effet de
+ * SÉLECTION, pas une accélération de carrière »), et le traitement est donc le
+ * même, sinon les quatre courbes ne se liraient pas de la même façon : au-delà
+ * de 55,5 ans on applique la pente de fin de carrière du PRIVÉ, la seule qu'on
+ * ait déjà jugée représentative d'un individu suivi, soit 117,5 / 116,2 = +1,12 %
+ * de 55 à 64 ans. Décision de Coq du 09/09/2026, et elle est écrite sur la page
+ * méthode : c'est notre jugement, pas une donnée.
+ *
+ * Effet sur la pension d'un agent à 2 600 € net : hospitalière 2 049 → 1 614 €,
+ * État 2 043 → 1 891 €, territoriale 1 728 → 1 657 €. Il porte surtout sur la
+ * pension parce qu'elle se calcule sur le traitement de FIN de carrière.
+ */
+const COURBE_FPE = [[23, 73.5], [28, 85.3], [35.5, 99.2], [45.5, 115.7], [55.5, 129.0], [64, 130.4]];
+const COURBE_FPT = [[23, 85.5], [28, 90.6], [35.5, 99.5], [45.5, 109.5], [55.5, 109.7], [64, 110.9]];
+const COURBE_FPH = [[23, 74.6], [28, 83.1], [35.5, 99.9], [45.5, 102.0], [55.5, 106.2], [64, 107.4]];
+
+export const COURBES_AGE = {
+  prive: COURBE_PRIVE,
+  fpe: COURBE_FPE,
+  fpt: COURBE_FPT,
+  fph: COURBE_FPH,
+};
+
+/** La courbe par défaut reste celle du privé, et c'est un choix DÉCLARÉ. */
+export const COURBE_AGE = COURBE_PRIVE;
 
 export const CARRIERE = {
   ageDebut: 22,

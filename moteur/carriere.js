@@ -8,7 +8,7 @@
  *    à une pension actuelle.
  */
 
-import { COURBE_AGE, CARRIERE } from './baremes-2026.js';
+import { COURBE_AGE, COURBES_AGE, CARRIERE } from './baremes-2026.js';
 import {
   brutDepuisNet, cotisationsSalariales, cotisationsPatronales, netsDepuisBrut,
 } from './salaire.js';
@@ -95,6 +95,14 @@ const REGIMES = {
     droitsRetraite: micro.droitsRetraiteAnnuels,
   },
   fonctionnaire: {
+    /*
+     * Le seul régime qui n'a pas la carrière du privé, et il en a TROIS.
+     * L'État est plus pentu que le privé, la territoriale nettement plus plate,
+     * l'hospitalière entre les deux. Servir une courbe publique unique aurait
+     * remplacé une erreur par une autre. Repli sur la territoriale, comme
+     * `versant()` de fonction-publique.js, pour que les deux ne divergent pas.
+     */
+    courbeAge: (opts = {}) => COURBES_AGE[opts.versant] ?? COURBES_AGE.fpt,
     brutDepuisNet: fp.brutDepuisNet,
     netsDepuisBrut: fp.netsDepuisBrut,
     salariales: fp.retenuesSalariales,
@@ -117,15 +125,22 @@ export function regimeDe(id = 'salarie') {
   return r;
 }
 
-/** Indice de salaire à un âge donné, interpolé sur la courbe INSEE. */
-export function indiceAge(age) {
-  if (age <= COURBE_AGE[0][0]) return COURBE_AGE[0][1];
-  const dernier = COURBE_AGE[COURBE_AGE.length - 1];
+/**
+ * Indice de salaire à un âge donné, interpolé sur la courbe du régime.
+ *
+ * La courbe est un ARGUMENT depuis le 09/09/2026. Avant, la fonction lisait
+ * `COURBE_AGE` directement, donc la courbe du privé servait aussi au
+ * fonctionnaire, au TNS, à la CIPAV et au micro. Le défaut par défaut reste le
+ * privé, mais c'est désormais un choix qu'un régime peut reprendre.
+ */
+export function indiceAge(age, courbe = COURBE_AGE) {
+  if (age <= courbe[0][0]) return courbe[0][1];
+  const dernier = courbe[courbe.length - 1];
   if (age >= dernier[0]) return dernier[1];
 
-  for (let i = 0; i < COURBE_AGE.length - 1; i += 1) {
-    const [a1, v1] = COURBE_AGE[i];
-    const [a2, v2] = COURBE_AGE[i + 1];
+  for (let i = 0; i < courbe.length - 1; i += 1) {
+    const [a1, v1] = courbe[i];
+    const [a2, v2] = courbe[i + 1];
     if (age >= a1 && age <= a2) {
       return v1 + ((age - a1) / (a2 - a1)) * (v2 - v1);
     }
@@ -154,13 +169,16 @@ export function deroulerCarriere(netMensuelActuel, opts = {}) {
 
   const R = regimeDe(regime);
 
-  const indiceReference = indiceAge(ageActuel);
+  // La courbe du RÉGIME, et le privé seulement à défaut. Elle sert aux deux
+  // bouts : la référence et chaque année, sinon le rapport n'a aucun sens.
+  const courbe = R.courbeAge ? R.courbeAge(opts) : COURBE_AGE;
+  const indiceReference = indiceAge(ageActuel, courbe);
   const annees = [];
 
   for (let age = ageDebut; age <= ageFin; age += 1) {
     // Effet d'âge (la carrière) et effet de génération (la croissance générale
     // des salaires) se composent, en euros constants d'aujourd'hui.
-    const facteurAge = indiceAge(age) / indiceReference;
+    const facteurAge = indiceAge(age, courbe) / indiceReference;
     const facteurGeneration = Math.pow(1 + croissance, age - ageActuel);
     /*
      * ⚠ L'ENTRÉE EST LE NET AVANT IMPÔT SUR LE REVENU, et ce n'est pas un

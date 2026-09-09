@@ -22,7 +22,7 @@ import {
 } from './capitalisation.js';
 import { simuler, salairePivot } from './index.js';
 import * as M from './index.js';
-import { RGDU_SMIC_REFERENCE_ANNUEL, SALAIRES_REFERENCE } from './baremes-2026.js';
+import { RGDU_SMIC_REFERENCE_ANNUEL, SALAIRES_REFERENCE, COURBES_AGE } from './baremes-2026.js';
 
 const pourcent = (x) => Math.round(x * 10000) / 100;
 
@@ -844,7 +844,17 @@ test('l’impôt sur le revenu est chiffré dans TOUS les régimes', () => {
     const s = M.simuler({ netMensuel: 2500, statut, ...extra });
     const ir = s.carriere.totaux.impotRevenu;
     assert.ok(Number.isFinite(ir), `${statut} : impôt non chiffrable (${ir})`);
-    assert.ok(ir > 100_000, `${statut} : impôt de ${Math.round(ir)} €, anormalement bas`);
+    /*
+     * ⚠ Plancher passé de 100 000 à 80 000 le 09/09/2026, et ce n'est PAS pour
+     * faire verdir un test. Il vise le bug qu'il a été écrit pour attraper : un
+     * impôt qui vaut ZÉRO sur quarante-trois ans. Le jour où la territoriale a
+     * reçu sa propre courbe de carrière, plus plate que celle du privé qu'on lui
+     * servait, le fonctionnaire est tombé à 99 502 € : une conséquence voulue et
+     * sourcée, à un demi-pour-cent d'un seuil rond. Un seuil rond n'est pas une
+     * mesure, et le garder aurait fait passer une correction juste pour une
+     * régression.
+     */
+    assert.ok(ir > 80_000, `${statut} : impôt de ${Math.round(ir)} €, anormalement bas`);
     return ir;
   });
   // ⚠ Ils ne sont PAS égaux, et il ne faut pas l'exiger : l'abattement de 10 %
@@ -882,7 +892,8 @@ test('cocher l’impôt AJOUTE vraiment quelque chose, dans tous les régimes', 
   ]) {
     const a = M.simuler({ netMensuel: 2500, statut, ...extra, perimetre: sans }).plateauGauche.total;
     const b = M.simuler({ netMensuel: 2500, statut, ...extra, perimetre: avec }).plateauGauche.total;
-    assert.ok(b - a > 100_000, `${statut} : cocher l’impôt n’ajoute que ${Math.round(b - a)} €`);
+    // Même plancher, même raison que ci-dessus : on cherche un zéro, pas 100 000.
+    assert.ok(b - a > 80_000, `${statut} : cocher l’impôt n’ajoute que ${Math.round(b - a)} €`);
   }
 });
 
@@ -1229,4 +1240,95 @@ test('l’échelle du butin est strictement décroissante et sourcée', async ()
     // Chaque palier est SERVI par son propre seuil : sinon il est inatteignable.
     assert.equal(objetPour(p.seuil).id, p.id);
   }
+});
+
+// ─── Les courbes de carrière, une par régime ─────────────────────────────────
+test('carrière : chaque versant public a SA courbe, jamais celle du privé', () => {
+  /*
+   * Le défaut d'origine : `indiceAge` lisait la courbe du privé en dur, donc la
+   * projection servait la carrière d'un salarié du privé à un fonctionnaire.
+   * C'était le seul endroit du moteur où un régime empruntait un chiffre à un
+   * autre, alors que `regimeDe` lève plutôt que de le faire ailleurs.
+   */
+  const { prive, fpe, fpt, fph } = COURBES_AGE;
+  for (const [nom, c] of Object.entries({ fpe, fpt, fph })) {
+    assert.notDeepEqual(c, prive, `${nom} ne doit pas être la courbe du privé`);
+  }
+  // Et les trois versants diffèrent entre eux : une courbe publique unique
+  // aurait remplacé une erreur par une autre.
+  assert.notDeepEqual(fpe, fpt);
+  assert.notDeepEqual(fpt, fph);
+  assert.notDeepEqual(fpe, fph);
+});
+
+test('carrière : la territoriale est PLATE, l’État est plus pentu que le privé', () => {
+  /*
+   * Le contresens qu'on s'est raconté avant de regarder les chiffres : « une
+   * carrière publique avance à l'ancienneté, son profil est plus plat ». Sur
+   * champ symétrique (Insee Première n° 2043), le public agrégé vaut 1,86 contre
+   * 1,88 pour le privé. C'est la TERRITORIALE qui est plate, et l'État qui monte
+   * plus vite que le privé. Ce test existe pour que la fausse intuition ne
+   * revienne pas réécrire les courbes.
+   */
+  /*
+   * ⚠ La comparaison se fait sur le SEGMENT 28 -> 55,5 ans, pas sur 22 -> 64.
+   * Les deux bouts ne sont pas comparables : le début de la courbe privée
+   * (indice 62 à 22 ans) vient d'un champ qui inclut apprentis et stagiaires,
+   * que le champ public exclut, et les deux fins sont plafonnées par une
+   * convention à nous. Le milieu de carrière est la seule partie où les deux
+   * séries mesurent la même chose, et c'est celle que la source compare.
+   */
+  const pente = (c) => indiceAge(55.5, c) / indiceAge(28, c);
+  const { prive, fpe, fpt, fph } = COURBES_AGE;
+  assert.ok(pente(fpt) < pente(prive), `la territoriale doit être plus plate que le privé`);
+  assert.ok(pente(fpe) > pente(prive), `l'État doit être plus pentu que le privé`);
+  assert.ok(pente(fph) > pente(fpt), `l'hospitalière doit être plus pentue que la territoriale`);
+});
+
+test('carrière : la fin des courbes publiques est PLAFONNÉE comme celle du privé', () => {
+  /*
+   * La tranche « 60 et plus » de l'INSEE porte les effets de composition les
+   * plus violents (dans l'hospitalière, les praticiens tirent la moyenne à
+   * +35 %). La courbe du privé plafonne déjà ce phénomène après 55 ans ; les
+   * publiques reçoivent le même traitement, sinon les quatre ne se lisent plus
+   * de la même façon. Décision du 09/09/2026, écrite sur la page méthode.
+   */
+  const penteTardivePrive = indiceAge(64, COURBES_AGE.prive) / indiceAge(55, COURBES_AGE.prive);
+  for (const nom of ["fpe", "fpt", "fph"]) {
+    const c = COURBES_AGE[nom];
+    const tardive = indiceAge(64, c) / indiceAge(55.5, c);
+    assert.ok(
+      tardive <= penteTardivePrive + 5e-4, // les indices sont arrondis au dixième
+      `${nom} : la pente après 55 ans (${tardive}) doit rester sous celle du privé (${penteTardivePrive})`,
+    );
+  }
+});
+
+test('carrière : la projection d’un fonctionnaire dépend du versant', () => {
+  /*
+   * ⚠ On compare la PENTE, pas le total. Le total diffère déjà entre versants
+   * par les taux de contribution (82,28 % à l'État contre 31,65 % ailleurs) :
+   * un test sur le total passait encore avec la courbe du privé partout, donc
+   * il ne prouvait rien sur la courbe. Le rapport du dernier brut au premier
+   * ne dépend, lui, que de la courbe et de la croissance générale, qui est la
+   * même pour tous.
+   */
+  const commun = { netMensuel: 2600, statut: 'fonctionnaire', perimetre: M.PERIMETRE_COMPLET };
+  const pente = (versant) => {
+    const a = simuler({ ...commun, versant }).carriere.annees;
+    return a[a.length - 1].brut / a[0].brut;
+  };
+  const [etat, terr, hosp] = ['fpe', 'fpt', 'fph'].map(pente);
+  assert.ok(etat > terr, `l'État (${etat.toFixed(3)}) doit monter plus que la territoriale (${terr.toFixed(3)})`);
+  assert.ok(hosp > terr, `l'hospitalière (${hosp.toFixed(3)}) doit monter plus que la territoriale`);
+  // Et la pension publique, calculée sur le traitement de FIN de carrière,
+  // suit : c'est là que la forme de la courbe se voit le plus.
+  const pension = (versant) => simuler({ ...commun, versant }).plateauDroit.pensionMensuelle;
+  assert.ok(pension('fpe') > pension('fpt'));
+});
+
+test('carrière : indiceAge retombe sur le privé quand aucune courbe n’est donnée', () => {
+  // Le défaut est un CHOIX déclaré, pas un hasard : les régimes non instruits
+  // sur ce point (TNS, CIPAV, micro) gardent le comportement d'avant.
+  assert.equal(indiceAge(45), indiceAge(45, COURBES_AGE.prive));
 });
