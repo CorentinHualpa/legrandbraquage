@@ -32,8 +32,11 @@ export const PIECES = {
   19: { fichier: "19-commissaire-dossier", nom: "Le commissaire, penché sur la pièce" },
   20: { fichier: "20-commissaire-regard", nom: "Le commissaire, qui vous regarde" },
   21: { fichier: "21-commissaire-montre", nom: "Le commissaire, la montre" },
-  22: { fichier: "22-commissaire-aparte", nom: "Le commissaire, en aparté" },
-  23: { fichier: "23-commissaire-interrogatoire", nom: "Le commissaire, bras croisés" },
+  /* Les trois clichés de l'avocate (09/09/2026). Elle est de FACE sur deux d'entre
+     eux : le commissaire l'est déjà sur la moitié du parcours, et un personnage
+     qu'on ne voit jamais en face ne s'impose pas devant lui. */
+  22: { fichier: "22-avocate-objection", nom: "L’avocate, objection" },
+  23: { fichier: "23-avocate-interrogatoire", nom: "L’avocate, la question posée" },
   24: { fichier: "24-commissaire-porte", nom: "Le commissaire, à la porte" },
   /** La table aux six enveloppes, vue du dessus : c'est là qu'on pose la liasse. */
   25: { fichier: "25-table-enveloppes", nom: "La table du commissaire" },
@@ -42,7 +45,7 @@ export const PIECES = {
   /* Plus affichée depuis le retrait de la carte du témoin (09/09/2026). Gardée :
      le fichier existe, il a coûté une génération, et la scène peut revenir. */
   27: { fichier: "27-temoin", nom: "Le témoin, derrière la vitre" },
-  28: { fichier: "28-avocat", nom: "L’avocate du Braqueur" },
+  28: { fichier: "28-avocate-couloir", nom: "L’avocate du Braqueur, dans le couloir" },
 } as const;
 
 export type NumeroPiece = keyof typeof PIECES;
