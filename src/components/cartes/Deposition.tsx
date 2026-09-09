@@ -102,7 +102,16 @@ export function Deposition({
   const minuterieMontant = useRef<ReturnType<typeof setTimeout> | null>(null);
   const commenterBientot = () => {
     if (minuterieMontant.current) clearTimeout(minuterieMontant.current);
-    minuterieMontant.current = setTimeout(() => derniereReaction.current(), 1_500);
+    minuterieMontant.current = setTimeout(() => {
+      /*
+       * ⚠ On OUBLIE la minuterie en partant. Sans cette ligne, l'identifiant
+       * périmé reste dans la ref, le démontage de la carte croit qu'une
+       * réaction attend encore et la rejoue : on entendait la même phrase deux
+       * fois, une fois à la frappe et une fois au clic sur « Signer ».
+       */
+      minuterieMontant.current = null;
+      derniereReaction.current();
+    }, 1_500);
   };
   /*
    * ⚠ En quittant la carte, une réaction EN ATTENTE est jouée au lieu d'être

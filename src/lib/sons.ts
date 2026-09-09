@@ -110,25 +110,36 @@ interface BruitDeVie {
   poids: number;
 }
 
+/*
+ * ⚠⚠ CES VOLUMES SUPPOSENT DES FICHIERS NORMALISÉS (`scripts/sons/normaliser.mjs`,
+ * 09/09/2026). Avant, la chaise sortait à -14,7 dB de moyenne et le clavier court
+ * à -35,2 : VINGT décibels d'écart, donc « 0,18 » et « 0,17 » donnaient deux
+ * mondes différents et on entendait la chaise vingt fois plus fort que le reste.
+ * Depuis, un multiplicateur se compare enfin à son voisin.
+ *
+ * Ils sont calculés pour sortir tous au MÊME niveau, -46 dB, le téléphone quatre
+ * décibels dessous. Régénérer un bruit sans le repasser au normaliseur remet le
+ * défaut d'origine, sans rien casser de visible.
+ */
 const VIE: BruitDeVie[] = [
   /*
    * ⚠ Le téléphone est le plus BAS et le plus RARE de tous. C'est le bruit qui
    * attire le plus l'oreille (une sonnerie appelle une réponse), donc celui qui
-   * lasse le plus vite. Volume divisé par trois par rapport aux autres, et un
-   * poids de 1 contre 4 ou 5 : il passe une fois toutes les cinq à dix minutes.
+   * lasse le plus vite. Quatre décibels sous les autres, et un poids de 1 contre
+   * 4 ou 5 : il passe une fois toutes les cinq à dix minutes.
    */
-  { fichier: "bruit-telephone", volume: 0.09, actes: ["commissariat"], poids: 1 },
-  { fichier: "bruit-tiroir", volume: 0.2, actes: ["commissariat", "scelles"], poids: 4 },
-  { fichier: "bruit-chaise", volume: 0.18, actes: ["commissariat", "tribunal"], poids: 4 },
-  { fichier: "bruit-briquet", volume: 0.16, actes: ["commissariat", "rue"], poids: 3 },
-  { fichier: "bruit-clavier-court", volume: 0.17, actes: ["commissariat"], poids: 5 },
-  { fichier: "bruit-clavier-long", volume: 0.15, actes: ["commissariat"], poids: 3 },
+  { fichier: "bruit-telephone", volume: 0.129, actes: ["commissariat"], poids: 1 },
+  { fichier: "bruit-tiroir", volume: 0.288, actes: ["commissariat", "scelles"], poids: 4 },
+  { fichier: "bruit-chaise", volume: 0.146, actes: ["commissariat", "tribunal"], poids: 4 },
+  { fichier: "bruit-briquet", volume: 0.295, actes: ["commissariat", "rue"], poids: 3 },
+  { fichier: "bruit-clavier-court", volume: 0.191, actes: ["commissariat"], poids: 5 },
+  { fichier: "bruit-clavier-long", volume: 0.164, actes: ["commissariat"], poids: 3 },
   /*
    * La mécanique claque plus fort et date la pièce autrement : le dossier a
    * déjà une machine à écrire, deux époques de clavier dans la même pièce se
    * remarquent. Gardée, mais rare et discrète.
    */
-  { fichier: "bruit-clavier-mecanique", volume: 0.13, actes: ["commissariat"], poids: 2 },
+  { fichier: "bruit-clavier-mecanique", volume: 0.186, actes: ["commissariat"], poids: 2 },
 ];
 
 /**

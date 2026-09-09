@@ -109,10 +109,12 @@ test("aucun bruit de vie ne monte au-dessus de son plafond", () => {
    * sortent du générateur vingt décibels plus fort que les nappes (la chaise à
    * -14,7 dB, le clavier court à -35,2), alors que les ambiances, elles, ont été
    * ramenées au même niveau. Comparer les deux multiplicateurs ne veut donc rien
-   * dire. 0,25 est une borne mesurée sur ces fichiers-là.
+   * dire tant qu'ils ne sont pas normalisés. Ils le sont depuis le 09/09/2026,
+   * donc les multiplicateurs se comparent, et 0,35 est la borne au-dessus de
+   * laquelle un bruit de fond cesse d'être un fond.
    */
   for (const b of VIE) {
-    assert.ok(b.volume <= 0.25, `${b.fichier} à ${b.volume} : trop fort pour un bruit de fond`);
+    assert.ok(b.volume <= 0.35, `${b.fichier} à ${b.volume} : trop fort pour un bruit de fond`);
   }
 });
 

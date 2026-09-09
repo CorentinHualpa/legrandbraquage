@@ -211,7 +211,8 @@ export const REACTIONS: Record<string, string> = {
     "[scoffs] Ah, on monte un peu. [dry] Eux aussi, figurez-vous. [flat] Ils suivent, toujours.",
   /* 08 */
   "salaire-08":
-    "[dry] Le tiers du haut. [sarcastic] Félicitations. [scoffs] C'est celui qu'on tond le mieux.",
+    "[dry] Vous êtes dans le tiers du haut. [sarcastic] Félicitations. "
+    + "[scoffs] C'est là qu'ils se servent le plus.",
   /* 09 · Formulation de Coq, gardée telle quelle. */
   "salaire-09":
     "[scoffs] Ah. Pas mal. [sarcastic] Les braqueurs ont dû se régaler. [laughs]",

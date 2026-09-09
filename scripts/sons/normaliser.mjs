@@ -46,6 +46,29 @@ const SONS = join(ici, "..", "..", "public", "sons");
  */
 const CIBLE = { I: -30, TP: -2, LRA: 7 };
 
+/**
+ * LES BRUITS DE VIE, même traitement, même raison.
+ *
+ * ⚠ Le défaut était encore plus violent que sur les ambiances : la chaise
+ * sortait à -14,7 dB de moyenne contre -35,2 pour le clavier court, soit VINGT
+ * décibels d'écart entre deux bruits censés être au même plan. Multiplicateurs
+ * appliqués, on entendait la chaise à -29,6 dB et le clavier à -50,6 : le même
+ * réglage « 0,18 » et « 0,17 » donnait deux mondes différents (Coq,
+ * 09/09/2026 : « la chaise elle est trop forte »).
+ *
+ * -26 LUFS et pas -30 comme les nappes : un bruit ponctuel est court, la mesure
+ * intégrée le pénalise, et on le veut au même plan qu'une ambiance continue.
+ */
+const BRUITS = [
+  "bruit-telephone",
+  "bruit-tiroir",
+  "bruit-chaise",
+  "bruit-briquet",
+  "bruit-clavier-court",
+  "bruit-clavier-long",
+  "bruit-clavier-mecanique",
+];
+
 const AMBIANCES = [
   "ambiance-commissariat",
   "ambiance-rumeur",
@@ -60,14 +83,17 @@ async function moyenne(fichier) {
   return Number((stderr.match(/mean_volume: ([-\d.]+) dB/) ?? [])[1]);
 }
 
-for (const nom of AMBIANCES) {
+for (const [nom, cible] of [
+  ...AMBIANCES.map((n) => [n, CIBLE]),
+  ...BRUITS.map((n) => [n, { ...CIBLE, I: -26 }]),
+]) {
   const source = join(SONS, `${nom}.mp3`);
   const avant = await moyenne(source);
   const tampon = join(SONS, `_${nom}.mp3`);
 
   await run("ffmpeg", [
     "-y", "-i", source,
-    "-af", `loudnorm=I=${CIBLE.I}:TP=${CIBLE.TP}:LRA=${CIBLE.LRA}`,
+    "-af", `loudnorm=I=${cible.I}:TP=${cible.TP}:LRA=${cible.LRA}`,
     "-codec:a", "libmp3lame", "-q:a", "3", tampon,
   ], { maxBuffer: 1 << 24 });
 
