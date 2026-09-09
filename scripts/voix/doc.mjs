@@ -37,7 +37,6 @@ const CONTEXTE = {
   alcool: "Carte des habitudes : combien de verres par semaine.",
   pris: "La pièce à conviction : les quatre lignes de prélèvement sur un salaire.",
   butin: "Le butin : ce que la somme volée aurait acheté, en objets.",
-  temoin: "Le témoin : le même salaire dans l'autre statut, côte à côte.",
   liberation: "L'heure de libération : la date de l'année où on arrête de payer.",
   aparte: "L'aparté : il annonce les trois questions sur ce qu'on a reçu en face.",
   ecole: "Interrogatoire : à combien la personne estime l'école.",

@@ -6,7 +6,6 @@ import { Couverture } from "./cartes/Couverture";
 import { Deposition, type EtatSaisie } from "./cartes/Deposition";
 import { Cafe } from "./cartes/Cafe";
 import { Pris } from "./cartes/Pris";
-import { Temoin } from "./cartes/Temoin";
 import { Butin } from "./cartes/Butin";
 import { Bourse } from "./cartes/Bourse";
 import { Liberation } from "./cartes/Liberation";
@@ -43,7 +42,7 @@ import { partsFiscales, regimeCalculable, regimeDe } from "@/lib/statuts";
  * chômage : la question ne lui est pas posée.
  */
 const ECRANS = [
-  "couverture", "deposition", "tabac", "carburant", "alcool", "pris", "butin", "temoin", "liberation", "aparte",
+  "couverture", "deposition", "tabac", "carburant", "alcool", "pris", "butin", "liberation", "aparte",
   "ecole", "sante", "chomage", "rendu", "bourse", "verdict", "avis",
 ] as const;
 type Ecran = (typeof ECRANS)[number];
@@ -220,26 +219,6 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
     return simuler({ ...etat, parts, perimetre, paliers, placement, habitudes });
   }, [calculable, etat, parts, perimetre, paliers, placement, habitudes]);
 
-  /**
-   * Le témoin : la même personne, même net avant impôt, dans l'autre statut.
-   * Un salarié voit un indépendant au réel, tout le monde d'autre voit un
-   * salarié. Calculé seulement sur son écran.
-   */
-  const temoin = useMemo<Simulation | null>(() => {
-    if (!simulation || ecran !== "temoin") return null;
-    const salarie = simulation.entree.regime === "salarie";
-    try {
-      return simuler({
-        netMensuel: simulation.netAvantImpotActuel,
-        statut: salarie ? "independant" : "salarie",
-        activite: salarie ? "ssi" : undefined,
-        parts, couple: etat.couple, perimetre, paliers, placement, habitudes,
-      });
-    } catch {
-      return null;
-    }
-  }, [simulation, ecran, etat.couple, parts, perimetre, paliers, placement, habitudes]);
-
   /** Le seuil, pour CE régime, CE périmètre et CES réponses. Quarante simulations, donc seulement au verdict. */
   const pivot = useMemo(() => {
     if (!simulation || ecran !== "verdict") return null;
@@ -397,8 +376,6 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
         <Pris {...commun} simulation={simulation} perimetre={perimetre} setPerimetre={setPerimetre} />
       ) : ecran === "butin" ? (
         <Butin {...commun} simulation={simulation} cadeau={cadeau} repondreCadeau={setCadeau} />
-      ) : ecran === "temoin" ? (
-        <Temoin {...commun} simulation={simulation} temoin={temoin} />
       ) : ecran === "bourse" ? (
         <Bourse
           {...commun}

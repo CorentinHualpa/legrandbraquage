@@ -73,11 +73,6 @@ export const REPLIQUES: Record<string, string> = {
     "[flat] Voilà le butin. [scoffs] C'est pas moi qui fixe les prix, hein. Moi je compte. "
     + "[dry] Et franchement, j'ai rarement vu un scellé aussi bien rempli.",
 
-  /* Le témoin : le voisin. Registre d'interrogatoire, pas de démonstration. */
-  temoin:
-    "[dry] On a un témoin. [pause] Votre voisin. Même salaire que vous. "
-    + "[sarcastic] Et pas du tout le même traitement. [scoffs] Regardez-moi ça.",
-
   /* L'horaire : le moment où il devient presque bavard. */
   liberation:
     "[tired] Regardez votre montre. [pause] Vous, vous bossez depuis janvier. Eux aussi. "
@@ -159,7 +154,9 @@ export const REACTIONS: Record<string, string> = {
    * séparément, il n'apparaît qu'enchaîné : on ne le voit pas en relisant, on
    * l'entend une fois le parcours joué. Un test garde la porte.
    *
-   * Le voisin est là exprès : c'est le fil du témoin, six cartes plus loin.
+   * Le voisin y était pour annoncer la carte du témoin ; elle a été retirée du
+   * parcours le 09/09/2026 et la phrase tient sans elle, c'est une façon de
+   * dire « tout le monde », pas une promesse d'écran.
    */
   "signature-jusqu-au-median":
     "[flat] Le salaire de tout le monde. [dry] Ils ont fait pareil avec votre voisin. [scoffs] Et avec le sien.",

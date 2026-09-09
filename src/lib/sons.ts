@@ -347,7 +347,7 @@ const DUCK = 0.4;
  * s'interdit ailleurs.
  */
 const AVEC_REPLIQUE = new Set([
-  "deposition", "tabac", "carburant", "alcool", "pris", "butin", "temoin",
+  "deposition", "tabac", "carburant", "alcool", "pris", "butin",
   "liberation", "aparte", "ecole", "sante", "chomage", "rendu", "bourse",
   "verdict", "avis",
   // Les quatre réactions à la signature (cf. `REACTIONS` de repliques.mjs).

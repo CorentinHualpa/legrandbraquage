@@ -39,6 +39,8 @@ export const PIECES = {
   25: { fichier: "25-table-enveloppes", nom: "La table du commissaire" },
   // Les encarts du 08/09/2026 au soir : le café, le témoin, l'avocat.
   26: { fichier: "26-cafe", nom: "Le café du commissariat" },
+  /* Plus affichée depuis le retrait de la carte du témoin (09/09/2026). Gardée :
+     le fichier existe, il a coûté une génération, et la scène peut revenir. */
   27: { fichier: "27-temoin", nom: "Le témoin, derrière la vitre" },
   28: { fichier: "28-avocat", nom: "L’avocat du Braqueur" },
 } as const;

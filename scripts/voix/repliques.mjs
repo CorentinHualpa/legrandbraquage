@@ -73,7 +73,7 @@ const TEMPO = 1.15;
  * phrase en en entendant une autre. Une copie dans ce script redonnerait
  * exactement ce défaut à la première correction faite d'un seul côté.
  */
-const { REPLIQUES, REACTIONS, TOUTES } = await import(pathToFileURL(join(racine, "src", "lib", "repliques.ts")).href);
+const { TOUTES } = await import(pathToFileURL(join(racine, "src", "lib", "repliques.ts")).href);
 
 
 
