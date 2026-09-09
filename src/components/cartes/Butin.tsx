@@ -3,7 +3,8 @@
 import { Carte, Commissaire, Kicker, Lien, Reponse, Volet } from "./Carte";
 import type { Cadeau } from "@/lib/lien";
 import type { Pieces } from "@/lib/images";
-import { texte } from "@/lib/repliques";
+import { dit, texte } from "@/lib/repliques";
+import { reagir } from "@/lib/sons";
 import { eurosSigne } from "@/lib/format";
 import type { Simulation } from "@/lib/moteur";
 import { SEUIL_ANNEES, anneesSansTravailler, objetPour } from "@/lib/objets";
@@ -19,11 +20,6 @@ import { SEUIL_ANNEES, anneesSansTravailler, objetPour } from "@/lib/objets";
  * change aucun chiffre : elle est ressortie au verdict, où elle pèse plus
  * lourd que sur le moment.
  */
-const REPLIQUE: Record<"partage" | "picotte", string> = {
-  partage: "« Voilà un bon citoyen. On repasse le mois prochain, même heure. »",
-  picotte: "« Ça picotte quarante-trois ans, oui. Après, on s’habitue. C’est prévu pour. »",
-};
-
 export function Butin({
   pieces,
   simulation,
@@ -48,6 +44,15 @@ export function Butin({
   const reste = montant - objet.seuil;
   const annees = anneesSansTravailler(montant, simulation.netApresImpotActuel);
   void pieces;
+
+/*
+   * ⚠ Il répond AU CLIC, pas au bouton suivant. Une réaction qui arrive une
+   * carte plus tard n'est plus une réaction, c'est un commentaire.
+   */
+  const repondre = (c: "partage" | "picotte") => {
+    repondreCadeau(c);
+    reagir(`cadeau-${c}`);
+  };
 
   return (
     <Carte
@@ -127,14 +132,14 @@ export function Butin({
         <div className="flex flex-col gap-2 border-t border-papier/15 pt-3">
           <Kicker couleur="jaune">Content de votre cadeau ?</Kicker>
           <div className="flex flex-col gap-2">
-            <Reponse actif={cadeau === "partage"} onClick={() => repondreCadeau("partage")} teinte="vert">
+            <Reponse actif={cadeau === "partage"} onClick={() => repondre("partage")} teinte="vert">
               <span className="text-[15.5px]">Ça fait toujours plaisir de partager</span>
             </Reponse>
-            <Reponse actif={cadeau === "picotte"} onClick={() => repondreCadeau("picotte")} teinte="rouge">
+            <Reponse actif={cadeau === "picotte"} onClick={() => repondre("picotte")} teinte="rouge">
               <span className="text-[15.5px]">Ça picotte un peu</span>
             </Reponse>
           </div>
-          {cadeau ? <Commissaire>{REPLIQUE[cadeau]}</Commissaire> : null}
+          {cadeau ? <Commissaire>{dit(`cadeau-${cadeau}`)}</Commissaire> : null}
         </div>
       </div>
 

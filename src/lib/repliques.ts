@@ -143,6 +143,37 @@ export const REPLIQUES: Record<string, string> = {
  */
 export const REACTIONS: Record<string, string> = {
   /*
+   * « Content de votre cadeau ? », sur le butin. Il répond AU CLIC, pas au
+   * bouton suivant : une réaction qui arrive une carte plus tard n'est plus une
+   * réaction, c'est un commentaire (Coq, 09/09/2026, la règle vaut pour toutes
+   * les réponses cliquables).
+   */
+  "cadeau-partage":
+    "[sarcastic] Voilà un bon citoyen. [scoffs] On repasse le mois prochain, même heure.",
+  "cadeau-picotte":
+    "[dry] Ça picotte quarante-trois ans, oui. [tired] Après, on s'habitue. [flat] C'est prévu pour.",
+
+  /*
+   * L'ENVELOPPE QU'ON CHOISIT, sur la bourse. Six placements, quatre réactions :
+   * ce qu'il commente c'est le TEMPÉRAMENT, pas le produit. Le livret A et le
+   * fonds en euros disent la même chose de quelqu'un, le MSCI et le S&P aussi.
+   * Le CAC garde la sienne parce que c'est la seule qui appelle une vanne
+   * française, et l'immobilier parce que c'est un choix de vie autant qu'un
+   * placement.
+   *
+   * ⚠ Aucun taux, aucun montant : les rendements sont affichés sur chaque
+   * enveloppe et le total se recalcule dessous.
+   */
+  "placement-prudent":
+    "[tired] Prudent. [scoffs] Vous avez rien risqué, et ils vous ont quand même tout pris.",
+  "placement-pierre":
+    "[dry] La pierre. [scoffs] Vous auriez eu des locataires, des travaux, et un impôt de plus. [flat] Mais vous auriez eu les murs.",
+  "placement-audacieux":
+    "[scoffs] Ah. [sarcastic] Vous avez pas froid aux yeux, vous. [dry] J'aime ça.",
+  "placement-cac":
+    "[scoffs] Le CAC. [sarcastic] Patriote, en plus. [dry] Vos braqueurs vont être touchés.",
+
+  /*
    * Sous le SMIC : il ne prend pas de pincettes, mais il ne blague pas non plus
    * SUR la personne. La vanne vise toujours les braqueurs, jamais celui qui est
    * assis en face : à ce niveau de salaire, un trait d'humour se prend de

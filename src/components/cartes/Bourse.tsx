@@ -2,6 +2,7 @@
 
 import { Carte, Chiffre, Commissaire, Kicker, Ligne, Reponse, Volet } from "./Carte";
 import type { Pieces } from "@/lib/images";
+import { reagir } from "@/lib/sons";
 import { texte } from "@/lib/repliques";
 import { ETIQUETTES_PLACEMENT as ETIQUETTES } from "@/lib/placements";
 import { euros, eurosSigne } from "@/lib/format";
@@ -46,6 +47,21 @@ export function taux(reel: number): string {
  * euros d'aujourd'hui. Le Livret A est négatif : c'est un fait, pas une
  * provocation, et c'est ce qui rend le choix intéressant.
  */
+/**
+ * Ce qu'il dit selon l'enveloppe choisie. Il commente le TEMPÉRAMENT, pas le
+ * produit : le livret A et le fonds en euros disent la même chose de
+ * quelqu'un. Le CAC garde la sienne, c'est la seule qui appelle une vanne
+ * française.
+ */
+const REACTION_PLACEMENT: Record<string, string> = {
+  "livret-a": "placement-prudent",
+  "fonds-euros": "placement-prudent",
+  immobilier: "placement-pierre",
+  "msci-world": "placement-audacieux",
+  sp500: "placement-audacieux",
+  cac40: "placement-cac",
+};
+
 export function Bourse({
   pieces,
   simulation,
@@ -105,7 +121,7 @@ export function Bourse({
               role="radio"
               aria-checked={actif}
               aria-label={`${c.nom}, ${taux(c.reel)} par an`}
-              onClick={() => choisirPlacement(c.id)}
+              onClick={() => { choisirPlacement(c.id); reagir(REACTION_PLACEMENT[c.id] ?? ""); }}
               className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center gap-0.5"
               style={{ left: `${pos.x}%`, top: `${pos.y}%`, width: "27%", height: `${HAUTEUR_ENVELOPPE}%` }}
             >

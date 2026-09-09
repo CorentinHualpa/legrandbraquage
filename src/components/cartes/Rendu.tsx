@@ -2,7 +2,7 @@
 
 import { Carte, Chiffre, Commissaire, Kicker, Ligne, Volet } from "./Carte";
 import type { Pieces } from "@/lib/images";
-import { texte } from "@/lib/repliques";
+import { dit } from "@/lib/repliques";
 import { euros, eurosSigne } from "@/lib/format";
 import { PALIERS, type Paliers, type PosteDuPlateau, type Simulation } from "@/lib/moteur";
 
@@ -50,10 +50,7 @@ export function Rendu({
     >
       <Kicker couleur="bleu">Et sur toute votre vie, ils vous auront rendu</Kicker>
       <Chiffre>{eurosSigne(plateauDroit.total)}</Chiffre>
-      <Commissaire>
-        « {texte("rendu")} Retraite comprise, jusqu’à 85 ans :
-        {" "}{euros(plateauDroit.pensionMensuelle)} € par mois, pension seule. »
-      </Commissaire>
+      <Commissaire>{dit("rendu")}</Commissaire>
 
       <div className="grow" />
 

@@ -3,7 +3,7 @@
 import { useState, type ReactNode } from "react";
 
 import { PIECES, type NumeroPiece, type Pieces } from "@/lib/pieces";
-import { frapper, jouer } from "@/lib/sons";
+import { frapper, jouer, reglerSons, sonsActifs } from "@/lib/sons";
 
 /**
  * Une carte du parcours : un écran, un chiffre, la nuit du commissariat.
@@ -74,9 +74,12 @@ export function Carte({
               {nature} · 43 ans
             </span>
           </div>
-          <span className={`font-mono text-[10px] tracking-[0.14em] ${teteSurClair ? "text-encre/70" : "text-ligne"}`}>
-            {numero} / {total}
-          </span>
+          <div className="flex items-center gap-2.5">
+            <BoutonSon surClair={teteSurClair} />
+            <span className={`font-mono text-[10px] tracking-[0.14em] ${teteSurClair ? "text-encre/70" : "text-ligne"}`}>
+              {numero} / {total}
+            </span>
+          </div>
         </div>
         {/* La jauge en jaune de ruban : c'est elle qui porte la langue de la
             couverture sur toutes les cartes, y compris celles sans aplat. */}
@@ -398,6 +401,52 @@ export function Reponse({
       {repere ? (
         <span className={`shrink-0 font-mono text-[12px] ${actif ? "text-encre-3" : "text-ligne"}`}>{repere}</span>
       ) : null}
+    </button>
+  );
+}
+
+/**
+ * L'INTERRUPTEUR DU SON, dans l'en-tête de chaque carte.
+ *
+ * ⚠ Il existe parce que la couverture n'est plus le seul chemin d'entrée. Un
+ * lien partagé, une actualisation (l'adresse suit la progression depuis le
+ * 09/09/2026) ou un lien vers la méthode reposent le visiteur au milieu du
+ * dossier, où la question « garder le silence ou passer sur écoute » n'a jamais
+ * été posée : il restait donc muet jusqu'à la fin, sans rien pour l'allumer, et
+ * toutes les répliques du commissaire lui passaient à côté.
+ *
+ * Il ne se souvient de rien entre deux visites, et c'est voulu : un site qui
+ * rouvre en faisant du bruit parce qu'on avait dit oui la veille se fait fermer.
+ * Le geste est redemandé à chaque fois, ici ou sur la couverture.
+ */
+function BoutonSon({ surClair }: { surClair?: boolean }) {
+  const [allume, setAllume] = useState(sonsActifs());
+  const c = surClair ? "text-encre/70" : "text-ligne";
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        const suite = !allume;
+        setAllume(suite);
+        // Le clic EST le geste que le navigateur exige pour autoriser le son.
+        reglerSons(suite);
+        if (suite) jouer("coche");
+      }}
+      aria-label={allume ? "Couper le son" : "Passer sur écoute"}
+      aria-pressed={allume}
+      className={`flex h-7 w-7 items-center justify-center ${c}`}
+    >
+      <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.6">
+        <path d="M4 7h2.5L10 4v10L6.5 11H4z" />
+        {allume ? (
+          <>
+            <path d="M12.5 6.5a3.5 3.5 0 0 1 0 5" />
+            <path d="M14.5 4.5a6 6 0 0 1 0 9" />
+          </>
+        ) : (
+          <path d="M12.5 6.5l4 5m0-5l-4 5" />
+        )}
+      </svg>
     </button>
   );
 }

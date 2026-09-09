@@ -133,7 +133,7 @@ test("chaque réplique annoncée existe vraiment sur le disque", () => {
    */
   const annonces = [...source
     .slice(source.indexOf("const AVEC_REPLIQUE"), source.indexOf("const AVANT_DE_PARLER_MS"))
-    .matchAll(/"([a-z]+)"/g)].map((m) => m[1]);
+    .matchAll(/"([a-z-]+)"/g)].map((m) => m[1]);
   assert.ok(annonces.length >= 10, `seulement ${annonces.length} écrans lus : l'extraction a cassé`);
 
   const voix = join(ici, "..", "..", "public", "voix");

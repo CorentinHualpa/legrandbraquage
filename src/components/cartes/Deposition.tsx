@@ -61,6 +61,7 @@ export function Deposition({
   regime,
   calculable,
   signer,
+  reagirAuMontant,
   retour,
   numero,
   total,
@@ -71,11 +72,41 @@ export function Deposition({
   regime: Regime | null;
   calculable: boolean;
   signer: () => void;
+  /** Le commissaire commente le montant saisi. Appelé quand la frappe s'arrête. */
+  reagirAuMontant: () => void;
   retour: () => void;
   numero: number;
   total: number;
 }) {
   const [foyerOuvert, setFoyerOuvert] = useState(false);
+
+  /**
+   * IL COMMENTE LE MONTANT QUAND LA FRAPPE S'ARRÊTE, pas au clic sur signer.
+   *
+   * Une seconde et demie : assez pour ne pas réagir entre deux chiffres d'un
+   * même nombre (« 2 », « 21 », « 219 »… donneraient quatre réactions dont
+   * trois sur des montants qui n'existent pas), assez peu pour que ça reste lié
+   * au geste. Le même arbitrage que la frappe du greffier, en plus long, parce
+   * qu'ici c'est une PHRASE qui part et qu'on ne peut pas la reprendre.
+   *
+   * ⚠ La fonction est lue dans une ref au moment où la minuterie tombe, jamais
+   * celle capturée à l'armement : le montant vient de changer, donc la version
+   * capturée classerait la personne sur l'avant-dernière frappe.
+   */
+  const derniereReaction = useRef(reagirAuMontant);
+  // Dans un effet, pas pendant le rendu : React interdit d'écrire une ref au
+  // milieu d'un rendu, qui peut être rejoué ou abandonné.
+  useEffect(() => {
+    derniereReaction.current = reagirAuMontant;
+  });
+  const minuterieMontant = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const commenterBientot = () => {
+    if (minuterieMontant.current) clearTimeout(minuterieMontant.current);
+    minuterieMontant.current = setTimeout(() => derniereReaction.current(), 1_500);
+  };
+  useEffect(() => () => {
+    if (minuterieMontant.current) clearTimeout(minuterieMontant.current);
+  }, []);
   /*
    * Le champ est GROUPÉ au repos (« 2 190 ») et BRUT pendant la saisie
    * (« 2190 »). Reformater à chaque frappe faisait sauter le curseur dès
@@ -166,6 +197,7 @@ export function Deposition({
                */
               frapper("long");
               changer({ netMensuel: nouveau });
+              if (nouveau > 0) commenterBientot();
             }}
             aria-label={ouLire.label}
             aria-describedby="net-aide"

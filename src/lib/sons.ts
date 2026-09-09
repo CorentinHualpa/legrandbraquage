@@ -352,6 +352,8 @@ const AVEC_REPLIQUE = new Set([
   "verdict", "avis",
   // Les quatre réactions à la signature (cf. `REACTIONS` de repliques.mjs).
   "signature-sous-smic", "signature-jusqu-au-median", "signature-au-dessus",
+  "cadeau-partage", "cadeau-picotte",
+  "placement-prudent", "placement-pierre", "placement-audacieux", "placement-cac",
   "signature-tres-haut",
 ]);
 

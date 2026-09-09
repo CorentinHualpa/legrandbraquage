@@ -279,6 +279,9 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
     });
   }, [ecran, etat.netMensuel, etat.statut, placementId, cadeau, simulation]);
 
+  /** La dernière tranche de salaire commentée : il ne redit pas la même phrase. */
+  const derniereTranche = useRef<string | null>(null);
+
   /**
    * Le verdict vient de tomber : le commissaire le commente, une seule fois.
    *
@@ -376,9 +379,22 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
           changer={changer}
           regime={regime}
           calculable={calculable}
-          signer={() => {
-            reagir(reactionSignature(simulation?.netAvantImpotActuel ?? etat.netMensuel));
-            aller("tabac");
+          signer={() => aller("tabac")}
+          /*
+           * ⚠ La réaction au montant part quand la FRAPPE s'arrête, plus au
+           * clic sur « Signer ». Une remarque qui arrive au moment où on quitte
+           * la carte se cogne à la réplique de la suivante, et surtout elle
+           * n'est plus une réaction : la personne a déjà tourné la page.
+           *
+           * Elle ne se répète pas tant qu'on reste dans la même tranche :
+           * saisir 2 190 puis corriger en 2 200 ne rejoue pas la même phrase,
+           * alors que passer à 6 000 en déclenche une autre.
+           */
+          reagirAuMontant={() => {
+            const nom = reactionSignature(simulation?.netAvantImpotActuel ?? etat.netMensuel);
+            if (nom === derniereTranche.current) return;
+            derniereTranche.current = nom;
+            reagir(nom);
           }}
           retour={() => aller("couverture")}
           numero={1}
