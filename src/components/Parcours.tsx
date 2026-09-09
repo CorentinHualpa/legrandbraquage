@@ -18,7 +18,7 @@ import type { Pieces } from "@/lib/images";
 import type { Cadeau } from "@/lib/lien";
 import { contexte, evenement } from "@/lib/dalevoz";
 import { jouer, parler, poserDecor, reagir, reglerSons, type Acte, type Son } from "@/lib/sons";
-import { FRAIS_DEFAUT_ID, PLACEMENT_DEFAUT_ID, casDepuisRequete } from "@/lib/lien";
+import { FRAIS_DEFAUT_ID, PLACEMENT_DEFAUT_ID, casDepuisRequete, requeteDuCas } from "@/lib/lien";
 import {
   CRANS_FRAIS,
   CRANS_RENDEMENT,
@@ -207,6 +207,34 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
     // comportement.
     parler(ecran);
   }, [ecran]);
+
+  /**
+   * L'ADRESSE SUIT LA PROGRESSION, à chaque écran et à chaque réponse.
+   *
+   * ⚠ Sans ça, tout ce qui quitte la page perd le dossier : une actualisation,
+   * un lien vers la méthode, un retour arrière, le navigateur d'un téléphone
+   * qui décharge l'onglet resté au fond. On repartait de la déposition, montant
+   * vide, quinze cartes à refaire (Coq, 09/09/2026 : « si j'actualise je dois
+   * retrouver ma progression »).
+   *
+   * On réutilise le lien de PARTAGE, qui sait déjà tout écrire et tout relire :
+   * un second format de sauvegarde finirait par diverger de celui-là, et c'est
+   * le jour où on ajoute une question qu'on s'en apercevrait.
+   *
+   * `replaceState` et pas `pushState` : chaque carte n'a pas à devenir une
+   * entrée d'historique, sinon le bouton Retour du téléphone remonte le
+   * parcours carte par carte au lieu de sortir du site.
+   */
+  const requete = useMemo(
+    () => requeteDuCas({ ...etat, perimetre, paliers, placementId, fraisId, habitudes, cadeau }),
+    [etat, perimetre, paliers, placementId, fraisId, habitudes, cadeau],
+  );
+  useEffect(() => {
+    // Rien tant que le dossier n'existe pas : une adresse écrite sur la
+    // couverture rouvrirait une déposition vide en prétendant reprendre.
+    if (ecran === "couverture" || !(etat.netMensuel > 0)) return;
+    window.history.replaceState(null, "", `${requete}#${ecran}`);
+  }, [requete, ecran, etat.netMensuel]);
 
   const placement = useMemo(() => {
     const cran = CRANS_RENDEMENT.find((c) => c.id === placementId) ?? CRANS_RENDEMENT[0];

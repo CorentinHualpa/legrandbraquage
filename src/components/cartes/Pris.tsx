@@ -110,7 +110,7 @@ export function Pris({
       <Volet titre="D’où sortent ces chiffres ?">
         <p className="text-[13px] leading-relaxed text-ligne">
           Tapez une ligne pour la sortir du total. Tout est en euros d’aujourd’hui, aux barèmes 2026 :{" "}
-          <a href="/methode" className="underline underline-offset-2">la méthode, ligne par ligne</a>.
+          <a href="/methode" target="_blank" rel="noreferrer" className="underline underline-offset-2">la méthode, ligne par ligne</a>.
         </p>
       </Volet>
     </Carte>

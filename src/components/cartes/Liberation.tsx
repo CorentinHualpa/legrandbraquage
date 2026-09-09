@@ -69,7 +69,7 @@ export function Liberation({
           Rapporté à ce qui arrive vraiment sur votre compte, la même somme vaut{" "}
           <span className="font-semibold text-papier">{liberation.partDuNet.toFixed(2).replace(".", ",")} € prélevés pour 1 € reçu</span>.
           Les deux chiffres sont exacts et ne racontent pas la même histoire :{" "}
-          <a href="/methode" className="underline underline-offset-2">la méthode dit quel dénominateur on a pris, et pourquoi</a>.
+          <a href="/methode" target="_blank" rel="noreferrer" className="underline underline-offset-2">la méthode dit quel dénominateur on a pris, et pourquoi</a>.
         </p>
       </Volet>
     </Carte>

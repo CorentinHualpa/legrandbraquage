@@ -133,7 +133,7 @@ export function Avis({
           </a>
           <p className="text-center text-[12.5px] text-ligne">
             Le lien porte votre salaire, votre statut, vos réponses et votre enveloppe, rien d’autre.{" "}
-            <a href="/methode" className="underline underline-offset-2">Comment c’est calculé.</a>
+            <a href="/methode" target="_blank" rel="noreferrer" className="underline underline-offset-2">Comment c’est calculé.</a>
           </p>
         </div>
       }

@@ -309,12 +309,22 @@ export function Ligne({
 }
 
 /** Un lien discret vers un détail ou une source. */
+/**
+ * ⚠ TOUT lien d'une carte s'ouvre dans un ONGLET, y compris `/methode`.
+ *
+ * Il ne s'agit pas de confort : un lien qui remplace la page emporte le
+ * dossier. L'adresse est bien tenue à jour à chaque écran, donc revenir en
+ * arrière restaure la progression, mais le retour arrière est un geste que
+ * personne ne fait après avoir cliqué pour comprendre un chiffre. Constaté le
+ * 09/09/2026 : « j'ai cliqué pour en savoir plus sur les quatre lignes et j'ai
+ * perdu ma page en cours ». Le lecteur veut un aparté, pas une sortie.
+ */
 export function Lien({ children, href }: { children: ReactNode; href: string }) {
   return (
     <a
       href={href}
       className="self-start text-[14px] text-ligne underline underline-offset-[3px]"
-      target={href.startsWith("http") ? "_blank" : undefined}
+      target="_blank"
       rel="noreferrer"
     >
       {children}
