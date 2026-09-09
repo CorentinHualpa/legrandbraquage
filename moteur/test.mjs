@@ -15,14 +15,14 @@ import {
   cotisationsSalariales, cotisationsPatronales, reductionRgdu,
   coefficientRgdu, brutDepuisNet, netsDepuisBrut,
 } from './salaire.js';
-import { impotSurLeRevenu, tauxEffortTva } from './impot.js';
+import { impotSurLeRevenu, tauxEffortTva, taxesConsommationAnnuelles } from './impot.js';
 import { indiceAge, deroulerCarriere } from './carriere.js';
 import {
   PALIERS_ALIBI, capitalApresRetraits, capitalPourRente, capitaliser,
 } from './capitalisation.js';
 import { simuler, salairePivot } from './index.js';
 import * as M from './index.js';
-import { RGDU_SMIC_REFERENCE_ANNUEL } from './baremes-2026.js';
+import { RGDU_SMIC_REFERENCE_ANNUEL, SALAIRES_REFERENCE } from './baremes-2026.js';
 
 const pourcent = (x) => Math.round(x * 10000) / 100;
 
@@ -280,6 +280,56 @@ test('TVA : régressive rapportée au revenu disponible', () => {
   assert.ok(tauxEffortTva(1400) > tauxEffortTva(4500), 'les bas revenus paient plus');
   assert.ok(tauxEffortTva(1000) <= 0.125);
   assert.ok(tauxEffortTva(9000) >= 0.047);
+});
+
+test('TVA : les trois valeurs PUBLIÉES du CPO sont servies telles quelles', () => {
+  const { d1, median, d9 } = SALAIRES_REFERENCE;
+  // D1 et D10 sont imprimés dans Boutchenik 2015, D2 dans le rapport CPO 2022.
+  assert.equal(tauxEffortTva(d1), 0.125, 'premier décile');
+  assert.equal(tauxEffortTva(d9 * 2), 0.047, 'dernier décile');
+  // Le deuxième décile tombe au quart du chemin entre d1 et la médiane.
+  assert.ok(Math.abs(tauxEffortTva(d1 + (median - d1) / 4) - 0.095) < 1e-9, 'deuxième décile');
+});
+
+test('TVA : la courbe a la FORME du CPO, deux falaises et un plateau', () => {
+  /*
+   * C'est ce test qui manquait, et son absence a laissé passer une
+   * interpolation linéaire pendant des semaines : l'ancienne version était
+   * monotone décroissante et bornée, donc elle passait les trois assertions
+   * ci-dessus sans avoir la bonne forme nulle part au milieu.
+   *
+   * Sur le REVENU (et non sur la consommation, où la TVA est plate), le CPO
+   * donne une chute brutale de D1 à D2, une pente très douce jusqu'à D9, puis
+   * une falaise sur le dernier décile.
+   */
+  const { d1, median, d9 } = SALAIRES_REFERENCE;
+  const auRang = (r) => (r <= 5 ? d1 + ((r - 1) * (median - d1)) / 4 : median + ((r - 5) * (d9 - median)) / 4);
+
+  const chuteD1D2 = tauxEffortTva(auRang(1)) - tauxEffortTva(auRang(2));
+  const penteD2D9 = tauxEffortTva(auRang(2)) - tauxEffortTva(auRang(9));
+  const falaiseD9D10 = tauxEffortTva(auRang(9)) - tauxEffortTva(d9 * 2);
+
+  assert.ok(chuteD1D2 > 0.025, `D1 vers D2 doit décrocher de 3 points, vu ${chuteD1D2}`);
+  assert.ok(penteD2D9 < 0.025, `D2 vers D9 doit être un plateau, vu ${penteD2D9}`);
+  assert.ok(falaiseD9D10 > 0.02, `D9 vers D10 doit décrocher, vu ${falaiseD9D10}`);
+  // La pente du milieu est plus douce que CHACUNE des deux falaises : c'est
+  // exactement ce qu'une droite entre D1 et D10 ne peut pas produire.
+  assert.ok(penteD2D9 < chuteD1D2 && penteD2D9 < falaiseD9D10, 'le plateau doit être le segment le plus plat');
+});
+
+test('TVA : le rang se lit sur le salaire AVANT impôt, la base est le disponible', () => {
+  /*
+   * Deux quantités distinctes. Passer le seul revenu disponible classait la
+   * personne un cran trop bas dans la distribution et gonflait son taux.
+   */
+  const disponible = 1900;
+  const avantImpot = 2190;
+  const avecRang = taxesConsommationAnnuelles(disponible, { salairePourRang: avantImpot });
+  const sansRang = taxesConsommationAnnuelles(disponible);
+  assert.ok(avecRang < sansRang, 'classé plus haut, donc taux plus bas');
+  assert.equal(avecRang, disponible * 12 * tauxEffortTva(avantImpot));
+  // Sans la clé, on retombe sur l'assiette : les appelants d'avant ne cassent pas.
+  assert.equal(sansRang, disponible * 12 * tauxEffortTva(disponible));
 });
 
 // ─── L'échelle des placements ────────────────────────────────────────────────

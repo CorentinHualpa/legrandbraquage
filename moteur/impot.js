@@ -3,7 +3,7 @@
  */
 
 import {
-  IR_TRANCHES, IR, TVA_TAUX_EFFORT, SALAIRES_REFERENCE,
+  IR_TRANCHES, IR, TVA_TAUX_EFFORT_DECILES, SALAIRES_REFERENCE,
 } from './baremes-2026.js';
 
 /**
@@ -80,20 +80,64 @@ export function impotSurLeRevenu(netImposableAnnuel, opts = {}) {
 }
 
 /**
- * Taux d'effort TVA rapporté au revenu disponible, interpolé entre le premier
- * et le dernier décile.
+ * Taux d'effort TVA, lu sur la courbe du CPO par décile de niveau de vie.
  *
- * ⚠ Le CPO décrit la courbe comme proportionnelle jusqu'au 8e décile puis
- * régressive au-delà, et le tableau complet n'est pas accessible. Cette
- * interpolation linéaire est donc une APPROXIMATION assumée : elle doit être
- * signalée dans la page méthodologie, et remplacée dès qu'on récupère la
- * table Boutchenik.
+ * ⚠ LA PRÉMISSE DE LA VERSION D'AVANT ÉTAIT FAUSSE. Le commentaire annonçait
+ * une courbe « proportionnelle jusqu'au 8e décile puis régressive » : cette
+ * phrase appartient au rapport CPO de 2011 et elle décrit le taux rapporté à la
+ * CONSOMMATION, où la TVA est effectivement plate et même légèrement
+ * progressive (12,6 % en D1 contre 13,4 % en D10, Boutchenik tableau 4).
+ * Rapportée au REVENU, qui est le dénominateur de ce dossier, la forme est tout
+ * autre : une chute brutale de D1 à D2 (-3 points), une pente douce jusqu'à D9
+ * (-2,3 points étalés sur sept déciles), puis une falaise sur le dernier décile
+ * (-2,5 points d'un coup). Le dénominateur tranche le débat, et il est affiché.
+ *
+ * L'interpolation linéaire d'avant ratait exactement ça : elle lissait les deux
+ * décrochages et se trompait de 2,1 points en D2, 1,8 en D3, 1,6 en D9.
+ *
+ * ⚠ DEUX APPROXIMATIONS RESTENT, et elles sont dans l'autre sens l'une de
+ * l'autre, donc on ne prétend pas les compenser :
+ *
+ * 1. Le CPO classe les MÉNAGES par niveau de vie ; ce dossier ne connaît que le
+ *    salaire d'une PERSONNE. Un célibataire et un couple au même salaire ne
+ *    sont pas au même niveau de vie, et rien ici ne le rattrape.
+ * 2. On ne dispose que de trois bornes de la distribution des salaires (INSEE
+ *    2024, privé, net EQTP) : le premier décile, la médiane et le neuvième
+ *    décile. Le rang entre ces bornes est donc interpolé, faute d'avoir les
+ *    neuf seuils. Ce sont les BORNES qui manquent, pas les taux.
  */
 export function tauxEffortTva(netMensuel) {
-  const bas = SALAIRES_REFERENCE.d1;
-  const haut = SALAIRES_REFERENCE.d9;
-  const position = Math.min(1, Math.max(0, (netMensuel - bas) / (haut - bas)));
-  return TVA_TAUX_EFFORT.d1 + position * (TVA_TAUX_EFFORT.d10 - TVA_TAUX_EFFORT.d1);
+  return tauxTvaPourRang(rangDecimal(netMensuel));
+}
+
+/**
+ * Place un salaire sur une échelle de déciles continue, entre 1 et 10.
+ *
+ * Trois ancrages publiés, et rien entre eux : d1 -> 1, médiane -> 5, d9 -> 9.
+ * Au-delà du neuvième décile la distribution est ouverte, donc il n'existe
+ * aucune borne à viser : on prolonge la dernière pente (un décile par tranche
+ * de (d9 - médiane) / 4) et on s'arrête à 10. C'est une convention, elle est
+ * écrite ici plutôt que devinée à la lecture.
+ */
+function rangDecimal(netMensuel) {
+  const { d1, median, d9 } = SALAIRES_REFERENCE;
+  if (netMensuel <= d1) return 1;
+  if (netMensuel <= median) return 1 + (4 * (netMensuel - d1)) / (median - d1);
+  if (netMensuel <= d9) return 5 + (4 * (netMensuel - median)) / (d9 - median);
+  const pasParDecile = (d9 - median) / 4;
+  return Math.min(10, 9 + (netMensuel - d9) / pasParDecile);
+}
+
+/** Lit la table du CPO au rang demandé, en interpolant entre deux déciles. */
+function tauxTvaPourRang(rang) {
+  const table = TVA_TAUX_EFFORT_DECILES;
+  if (rang <= table[0].decile) return table[0].taux;
+  const dernier = table[table.length - 1];
+  if (rang >= dernier.decile) return dernier.taux;
+  const i = Math.floor(rang) - 1;
+  const bas = table[i];
+  const haut = table[i + 1];
+  return bas.taux + (rang - bas.decile) * (haut.taux - bas.taux);
 }
 
 /**
@@ -101,7 +145,22 @@ export function tauxEffortTva(netMensuel) {
  * Couvre la TVA et, par le même taux d'effort, les accises sur les carburants,
  * le tabac, l'alcool et l'électricité, plus la taxe foncière moyenne.
  */
-export function taxesConsommationAnnuelles(netMensuel, opts = {}) {
-  const { tauxEffort = tauxEffortTva(netMensuel) } = opts;
-  return netMensuel * 12 * tauxEffort;
+export function taxesConsommationAnnuelles(revenuDisponibleMensuel, opts = {}) {
+  /*
+   * DEUX quantités différentes, et les confondre était un défaut silencieux.
+   *
+   * L'ASSIETTE est le revenu disponible : c'est le dénominateur du CPO, et
+   * c'est ce dont on vit. Le RANG, lui, dit dans quel décile on se situe, et il
+   * se lit sur le salaire AVANT impôt, parce que les bornes de SALAIRES_REFERENCE
+   * sont des nets EQTP avant impôt (INSEE 2024). Positionner un revenu après
+   * impôt contre des seuils d'avant impôt classait tout le monde un cran trop
+   * bas et gonflait son taux : même famille que l'erreur de dénominateur déjà
+   * payée en comparant le pivot à la médiane INSEE.
+   *
+   * Sans `salairePourRang`, on retombe sur l'assiette : un appelant qui n'a
+   * qu'un chiffre garde le comportement d'avant plutôt que de lever.
+   */
+  const { tauxEffort, salairePourRang } = opts;
+  const taux = tauxEffort ?? tauxEffortTva(salairePourRang ?? revenuDisponibleMensuel);
+  return revenuDisponibleMensuel * 12 * taux;
 }

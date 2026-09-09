@@ -95,10 +95,51 @@ export const IR = {
 };
 
 // ─── Consommation ────────────────────────────────────────────────────────────
-// Taux d'effort TVA rapporté au REVENU DISPONIBLE (CPO, rapport Boutchenik
-// 2015). ⚠ Rapportée à la consommation, la TVA est à peu près proportionnelle :
-// le dénominateur choisi tranche le débat, il doit être affiché.
-export const TVA_TAUX_EFFORT = { d1: 0.125, d10: 0.047 };
+/**
+ * Taux d'effort TVA rapporté au REVENU DISPONIBLE, par décile de niveau de vie.
+ *
+ * Source : Conseil des prélèvements obligatoires, « Les effets redistributifs
+ * de la taxe sur la valeur ajoutée », rapport particulier n° 2, Béatrice
+ * Boutchenik, avril 2015, Graphique 1 page 11. Modèle Ines (Insee-Drees),
+ * enquête Budget de famille 2011, législation 2014. Le revenu disponible y est
+ * net de l'impôt sur le revenu, de la taxe d'habitation et de la taxe foncière.
+ *
+ * ⚠ LA PROVENANCE EST INÉGALE, et le champ `source` de chaque ligne le dit.
+ * Le rapport ne CHIFFRE que D1 et D10 ; les huit déciles du milieu n'existent
+ * que sous forme de graphique. D2 est imprimé dans le rapport CPO de 2022, qui
+ * republie la même série. Les sept autres sont LUS sur le graphique officiel.
+ *
+ * Pourquoi on les garde quand même, alors que le dossier a retiré ses trois
+ * ordres de grandeur non sourcés : ce n'est pas le même geste. Ici la donnée
+ * EST publiée, sous forme de courbe ; la lire n'est pas l'inventer. Et la
+ * version d'avant n'était pas plus prudente, elle fabriquait déjà huit valeurs
+ * intermédiaires par interpolation linéaire, en silence et beaucoup plus faux :
+ * 11,6 % en D2 contre 9,5 % publiés, soit 2,1 points d'erreur.
+ *
+ * ⚠ Deux contradictions dans les sources elles-mêmes, tranchées ici :
+ * le CPO 2022 écrit « décroît de 9,5 % à 7,5 % » entre D2 et D9 alors que ses
+ * propres graphiques donnent 7,2 % en D9 (approximation de rédaction) ; et son
+ * redessin place D10 à 4,50 % quand son texte et l'original de 2015 disent
+ * 4,7 %. On retient les valeurs imprimées.
+ *
+ * ⚠ La série est datée (Budget de famille 2011). L'estimation INSEE la plus
+ * récente (André et Biotteau, Économie et Statistique n° 522-523, données 2016)
+ * ne publie que deux points, 13,1 % en D1 et 7,4 % en D10 : une courbe
+ * sensiblement PLUS PLATE. Le dossier retient donc l'hypothèse la plus
+ * régressive des deux, et c'est à dire.
+ */
+export const TVA_TAUX_EFFORT_DECILES = [
+  { decile: 1, taux: 0.125, source: 'publie' },
+  { decile: 2, taux: 0.095, source: 'publie-cpo-2022' },
+  { decile: 3, taux: 0.09, source: 'lu-sur-graphique' },
+  { decile: 4, taux: 0.085, source: 'lu-sur-graphique' },
+  { decile: 5, taux: 0.08, source: 'lu-sur-graphique' },
+  { decile: 6, taux: 0.08, source: 'lu-sur-graphique' },
+  { decile: 7, taux: 0.078, source: 'lu-sur-graphique' },
+  { decile: 8, taux: 0.076, source: 'lu-sur-graphique' },
+  { decile: 9, taux: 0.072, source: 'lu-sur-graphique' },
+  { decile: 10, taux: 0.047, source: 'publie' },
+];
 export const TVA_TAUX_NORMAL = 0.2;
 
 // Part des taxes dans le prix à la pompe, TVA comprise (EU Weekly Oil Bulletin)

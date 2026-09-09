@@ -220,7 +220,7 @@ export function deroulerCarriere(netMensuelActuel, opts = {}) {
     // Les droits à retraite d'un micro ne se lisent pas dans ses cotisations :
     // ils se reconstituent. Les autres régimes n'en ont pas besoin.
     const droits = R.droitsRetraite ? R.droitsRetraite(brut * 12, opts) : null;
-    const tva = taxesConsommationAnnuelles(netApresImpot, opts);
+    const tva = taxesConsommationAnnuelles(netApresImpot, { ...opts, salairePourRang: netAvantImpot });
 
     annees.push({
       age,

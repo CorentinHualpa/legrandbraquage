@@ -156,20 +156,45 @@ export default function Methode() {
           </p>
           <p className="text-[14.5px] leading-relaxed">
             <span className="font-semibold">
-              Ordres de grandeur assumés, à remplacer par un chiffrage par
-              décile :
+              Ce que le moteur refuse de chiffrer tout seul :
             </span>{" "}
-            santé (216 000 €), éducation (127 000 €), chômage (47 000 €). Ils
-            s’affichent avec leur réserve partout où ils apparaissent. Le poste
-            retraite, lui, est calculé.
+            la santé, l’école et le chômage. Ils portaient des ordres de
+            grandeur sans source opposable, et un lecteur hostile n’avait qu’à
+            demander d’où ils sortaient : ils ont été retirés du calcul. Ils
+            restent nommés, parce que leur absence donnerait prise à « vous avez
+            oublié », mais ils ne comptent que si vous les chiffrez vous-même,
+            aux paliers que le commissaire vous fait choisir. Les prix unitaires
+            de ces paliers, eux, sont sourcés : la{" "}
+            <span className="font-semibold">DEPP</span> pour le coût par élève
+            et par an, la <span className="font-semibold">DREES</span> pour la
+            dépense de santé remboursée par tranche d’âge, l’
+            <span className="font-semibold">Unédic</span> pour l’allocation
+            mensuelle. Le poste retraite, lui, est calculé.
           </p>
           <p className="text-[14.5px] leading-relaxed">
-            <span className="font-semibold">Approximation signalée :</span> le
-            taux d’effort de TVA est interpolé linéairement entre le premier et
-            le dernier décile, alors que le Conseil des prélèvements obligatoires
-            décrit une courbe proportionnelle jusqu’au huitième décile puis
-            régressive. La table complète est dans un rapport que nous n’avons
-            pas pu ouvrir. À corriger dès qu’on l’a.
+            <span className="font-semibold">Le taux d’effort de TVA</span> suit
+            la courbe du Conseil des prélèvements obligatoires par décile de
+            niveau de vie, rapportée au revenu disponible : 12,5 % pour le
+            premier décile, un plateau autour de 8 % du deuxième au neuvième,
+            puis 4,7 % pour le dernier. Le dénominateur tranche le débat et il
+            est affiché : rapportée à la{" "}
+            <span className="italic">consommation</span> et non au revenu, la
+            même TVA est plate, et même légèrement progressive.
+          </p>
+          <p className="text-[14.5px] leading-relaxed">
+            <span className="font-semibold">Provenance inégale, et on le dit :</span>{" "}
+            le rapport ne chiffre que le premier et le dernier décile ; le
+            deuxième est imprimé dans un rapport ultérieur du même conseil ; les
+            sept du milieu n’existent que sous forme de graphique et ont été lus
+            dessus. Deux approximations restent, en sens contraire : le conseil
+            classe des <span className="italic">ménages</span> par niveau de vie
+            quand cette page ne connaît que le salaire d’une{" "}
+            <span className="italic">personne</span>, et nous ne disposons que
+            de trois bornes de la distribution des salaires, le premier décile,
+            la médiane et le neuvième. La série date enfin de l’enquête Budget
+            de famille 2011 ; l’estimation INSEE la plus récente décrit une
+            courbe plus plate, donc ce dossier retient l’hypothèse la plus
+            sévère des deux.
           </p>
         </section>
 
