@@ -85,7 +85,7 @@ const VIE = [...source
  */
 const VISITE = [
   // `reaction` : ce qu'il dit AU CLIC, avant que la carte suivante n'arrive.
-  { ecran: "deposition", acte: "commissariat", geste: "long", attente: 5, reaction: "signature-au-dessus" },
+  { ecran: "deposition", acte: "commissariat", geste: "long", attente: 5, reaction: "salaire-09" },
   { ecran: "tabac", acte: "commissariat", geste: "court", attente: 3 },
   { ecran: "pris", acte: "commissariat", geste: "court", attente: 3 },
   { ecran: "butin", acte: "scelles", geste: "court", attente: 3.5 },
