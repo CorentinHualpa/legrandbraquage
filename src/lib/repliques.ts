@@ -157,6 +157,52 @@ export const REPLIQUES: Record<string, string> = {
  * c'est un tiers de la durée : elles n'en portent aucun.
  */
 export const REACTIONS: Record<string, string> = {
+  /*
+   * LES DIX TRANCHES DE SALAIRE, une par dixième de la population salariée
+   * (bornes dans `DECILES`, plus bas). Il réagit à CHAQUE montant saisi, une
+   * seconde et demie après la dernière touche.
+   *
+   * ⚠ Aucune ne se moque de la personne, et les trois premières encore moins :
+   * la vanne vise les braqueurs ou la situation. Une pique sur un petit salaire
+   * se prend de travers et on perd la personne pour les quatorze cartes qui
+   * restent.
+   *
+   * ⚠ Aucun chiffre non plus. Elles disent une POSITION (« en dessous de la
+   * moitié des Français »), jamais un montant : les fichiers sont fixes.
+   */
+
+  /* 01 · sous le premier décile. Il ne blague pas sur le montant. */
+  "salaire-01":
+    "[tired] D'accord. Installez-vous. [dry] Même là-dedans, ils ont trouvé à se servir. [scoffs] Faut le faire.",
+  /* 02 */
+  "salaire-02":
+    "[dry] Le bas de l'échelle. [scoffs] Ils descendent quand même vous chercher, hein.",
+  /* 03 */
+  "salaire-03":
+    "[flat] Un salaire de début. [dry] Le prélèvement, lui, il débute pas. [scoffs] Il est en poste.",
+  /* 04 */
+  "salaire-04":
+    "[tired] Vous gagnez moins que la moitié des Français. [dry] Vous payez pas moitié moins, remarquez.",
+  /* 05 · juste sous la médiane. */
+  "salaire-05":
+    "[dry] Juste sous la médiane. [scoffs] À deux doigts d'être quelqu'un de parfaitement moyen. [flat] Ça se fête pas.",
+  /* 06 · juste au-dessus. Formulation gardée après validation. */
+  "salaire-06":
+    "[flat] Le salaire de tout le monde. [dry] Ils ont fait pareil avec votre voisin. [scoffs] Et avec le sien.",
+  /* 07 */
+  "salaire-07":
+    "[scoffs] Ah, on monte un peu. [dry] Eux aussi, figurez-vous. [flat] Ils suivent, toujours.",
+  /* 08 */
+  "salaire-08":
+    "[dry] Le tiers du haut. [sarcastic] Félicitations. [scoffs] C'est celui qu'on tond le mieux.",
+  /* 09 · Formulation de Coq, gardée telle quelle. */
+  "salaire-09":
+    "[scoffs] Ah. Pas mal. [sarcastic] Les braqueurs ont dû se régaler. [laughs]",
+  /* 10 · au-dessus du dernier décile. */
+  "salaire-10":
+    "[whispers] Oh. [scoffs] Alors là. [tired] J'ai vu des braquages à main armée rapporter moins. "
+    + "[dry] Et eux, ils ont pris vingt ans.",
+
   /* Il cede la parole a l'avocate, sur l'aparte. Trois mots, c'est tout. */
   "aparte-concede": "[tired] Maître. [pause] Allez-y.",
 
@@ -191,40 +237,36 @@ export const REACTIONS: Record<string, string> = {
   "placement-cac":
     "[scoffs] Le CAC. [sarcastic] Patriote, en plus. [dry] Vos braqueurs vont être touchés.",
 
-  /*
-   * Sous le SMIC : il ne prend pas de pincettes, mais il ne blague pas non plus
-   * SUR la personne. La vanne vise toujours les braqueurs, jamais celui qui est
-   * assis en face : à ce niveau de salaire, un trait d'humour se prend de
-   * travers, et on perd la personne pour le reste du parcours.
-   */
-  "signature-sous-smic":
-    "[tired] D'accord. Installez-vous. [dry] Même là-dedans, ils ont trouvé à se servir. [scoffs] Faut le faire.",
-
-  /*
-   * Du SMIC au médian : le cas ordinaire, donc le ton le plus plat.
-   *
-   * ⚠ Elle NE commence PAS par « Bon ». C'est le premier mot de la carte du
-   * tabac, qui arrive deux secondes après, et on entendait « Bon… » puis
-   * « Bon… » d'affilée. Le défaut n'existe dans aucun des deux textes pris
-   * séparément, il n'apparaît qu'enchaîné : on ne le voit pas en relisant, on
-   * l'entend une fois le parcours joué. Un test garde la porte.
-   *
-   * Le voisin y était pour annoncer la carte du témoin ; elle a été retirée du
-   * parcours le 09/09/2026 et la phrase tient sans elle, c'est une façon de
-   * dire « tout le monde », pas une promesse d'écran.
-   */
-  "signature-jusqu-au-median":
-    "[flat] Le salaire de tout le monde. [dry] Ils ont fait pareil avec votre voisin. [scoffs] Et avec le sien.",
-
-  /* Au-dessus du médian. Formulation de Coq, gardée telle quelle. */
-  "signature-au-dessus":
-    "[scoffs] Ah. Pas mal. [sarcastic] Les braqueurs ont dû se régaler. [laughs]",
-
-  /* Le haut du panier : la seule fois où il se penche vraiment. */
-  "signature-tres-haut":
-    "[whispers] Oh. [scoffs] Alors là. [tired] J'ai vu des braquages à main armée rapporter moins. "
-    + "[dry] Et eux, ils ont pris vingt ans.",
 };
+
+/**
+ * LES NEUF DÉCILES DU SALAIRE NET MENSUEL, secteur privé, EQTP, 2024.
+ *
+ * Source : INSEE, « Les salaires dans le secteur privé en 2024 », Insee Première
+ * n° 2079. D1 1 492 · D2 1 669 · D3 1 823 · D4 1 992 · médiane 2 190 · D6 2 442 ·
+ * D7 2 785 · D8 3 305 · D9 4 334.
+ *
+ * ⚠ Ce sont des salaires en équivalent temps plein : quelqu'un à mi-temps se
+ * situera plus bas que ce que sa vie lui donne l'impression. On ne le lui dit
+ * pas, mais aucune réplique ne prétend le classer socialement : elles parlent
+ * de la POSITION du salaire, jamais de la personne.
+ */
+export const DECILES = [1492, 1669, 1823, 1992, 2190, 2442, 2785, 3305, 4334];
+
+/**
+ * Le nom de la réplique qui commente ce salaire. Dix tranches, une par dixième
+ * de la population salariée.
+ *
+ * ⚠ Il ne suffit pas de trois ou quatre tranches. Avec quatre, on saisit deux
+ * salaires différents et on entend deux fois la même phrase, ou rien du tout si
+ * une garde évite la répétition : c'est ce qui s'est passé (Coq, 09/09/2026,
+ * « j'ai changé plusieurs fois le salaire et le commissaire dit rien »). Le
+ * découpage doit être assez fin pour qu'un changement de salaire s'entende.
+ */
+export function reactionSalaire(net: number): string {
+  const rang = DECILES.filter((d) => net >= d).length;
+  return `salaire-${String(rang + 1).padStart(2, "0")}`;
+}
 
 export const TOUTES: Record<string, string> = { ...REPLIQUES, ...REACTIONS, ...AVOCATE };
 

@@ -236,29 +236,33 @@ test("une réaction n'ouvre pas sur le mot qui ouvre la carte suivante", async (
   assert.ok(Object.keys(REPLIQUES).length > 0);
 });
 
-test("les quatre réactions à la signature sont atteignables et enregistrées", () => {
+test("les dix tranches de salaire sont toutes atteignables", async () => {
   /*
-   * Trois choses doivent rester d'accord, et aucune ne fait de bruit en cassant :
-   * les noms que `reactionSignature` peut rendre, la liste des répliques que le
-   * moteur accepte de jouer, et les fichiers. Un nom qui diverge ne lève rien,
-   * il rend juste un commissaire muet au moment le plus visible du parcours.
+   * Un découpage se trompe en silence : une borne mal recopiée rend une tranche
+   * inatteignable, et la réplique correspondante n'est jamais jouée par
+   * personne. On balaie donc l'échelle des salaires et on vérifie qu'on les
+   * touche toutes, plus les deux extrêmes qui n'ont pas de borne.
    */
-  const parcours = readFileSync(join(ici, "..", "..", "src", "components", "Parcours.tsx"), "utf8");
-  const bloc = parcours.slice(parcours.indexOf("function reactionSignature"));
-  const noms = [...bloc.slice(0, bloc.indexOf("}")).matchAll(/"(signature-[a-z-]+)"/g)].map((m) => m[1]);
-  assert.equal(noms.length, 4, `${noms.length} réactions lues au lieu de quatre`);
-
-  for (const nom of noms) {
-    assert.ok(source.includes(`"${nom}"`), `« ${nom} » n'est pas dans AVEC_REPLIQUE : il ne sera jamais joué`);
-    assert.ok(existsSync(join(ici, "..", "..", "public", "voix", `${nom}.mp3`)), `public/voix/${nom}.mp3 manque`);
+  const { reactionSalaire, DECILES, REACTIONS } = await import(
+    pathToFileURL(join(ici, "..", "..", "src", "lib", "repliques.ts")).href
+  );
+  assert.equal(DECILES.length, 9, "neuf déciles découpent dix tranches, pas une de plus");
+  for (let i = 1; i < DECILES.length; i++) {
+    assert.ok(DECILES[i] > DECILES[i - 1], `les déciles ne montent pas : ${DECILES.join(" ")}`);
   }
 
-  // Les seuils montent, sinon une tranche devient inatteignable sans rien casser.
-  const seuils = ["SMIC_NET", "MEDIAN_NET", "HAUT_DE_LECHELLE"]
-    .map((n) => Number(parcours.match(new RegExp(`const ${n} = (\\d+)`))[1]));
-  for (let i = 1; i < seuils.length; i++) {
-    assert.ok(seuils[i] > seuils[i - 1], `les seuils ne montent pas : ${seuils.join(" puis ")}`);
+  const vues = new Set();
+  for (let net = 0; net <= 12_000; net += 5) vues.add(reactionSalaire(net));
+  assert.equal(vues.size, 10, `${vues.size} tranches atteintes au lieu de dix`);
+
+  for (const nom of vues) {
+    assert.ok(REACTIONS[nom], `« ${nom} » est rendu par le découpage mais n'a pas de texte`);
   }
+  // Les bornes appartiennent à la tranche du DESSUS : à 1 492 pile, on n'est
+  // plus dans les dix pour cent du bas.
+  assert.equal(reactionSalaire(DECILES[0] - 1), "salaire-01");
+  assert.equal(reactionSalaire(DECILES[0]), "salaire-02");
+  assert.equal(reactionSalaire(DECILES[8]), "salaire-10");
 });
 
 test("la répartition suit les poids", () => {

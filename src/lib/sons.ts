@@ -350,13 +350,14 @@ const AVEC_REPLIQUE = new Set([
   "deposition", "tabac", "carburant", "alcool", "pris", "butin",
   "liberation", "aparte", "ecole", "sante", "chomage", "rendu", "bourse",
   "verdict", "avis",
-  // Les quatre réactions à la signature (cf. `REACTIONS` de repliques.mjs).
-  "signature-sous-smic", "signature-jusqu-au-median", "signature-au-dessus",
+  // Les dix tranches de salaire, une par décile (cf. `DECILES` de repliques.ts).
+  "salaire-01", "salaire-02", "salaire-03", "salaire-04", "salaire-05",
+  "salaire-06", "salaire-07", "salaire-08", "salaire-09", "salaire-10",
+  // Les réponses cliquables : le cadeau, puis l'enveloppe de la bourse.
   "cadeau-partage", "cadeau-picotte",
   "placement-prudent", "placement-pierre", "placement-audacieux", "placement-cac",
   // L'avocate du Braqueur, sur toute la partie nuance.
   "aparte", "aparte-concede", "ecole", "sante", "chomage", "rendu",
-  "signature-tres-haut",
 ]);
 
 /**

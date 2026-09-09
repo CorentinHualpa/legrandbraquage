@@ -18,6 +18,7 @@ import { Avis } from "./cartes/Avis";
 import type { Pieces } from "@/lib/images";
 import type { Cadeau } from "@/lib/lien";
 import { contexte, evenement } from "@/lib/dalevoz";
+import { reactionSalaire } from "@/lib/repliques";
 import { jouer, parler, poserDecor, reagir, reglerSons, taire, type Acte, type Son } from "@/lib/sons";
 import { FRAIS_DEFAUT_ID, PLACEMENT_DEFAUT_ID, casDepuisRequete, requeteDuCas } from "@/lib/lien";
 import {
@@ -47,35 +48,6 @@ const ECRANS = [
   "ecole", "sante", "chomage", "rendu", "bourse", "verdict", "avis",
 ] as const;
 type Ecran = (typeof ECRANS)[number];
-
-/**
- * Ce que le commissaire répond quand on signe la déposition.
- *
- * Quatre registres, pas quatre chiffres : la réplique ne prononce jamais le
- * montant (il est déjà en gros sur le procès-verbal), elle change de TON.
- *
- * Les deux premières bornes sont celles que le site montre déjà ailleurs, sous
- * le champ de saisie et sur le mur de l'avis de recherche : le net mensuel du
- * SMIC 2026 et le salaire médian. La troisième est éditoriale et ne prétend
- * mesurer rien du tout, elle marque juste le moment où la somme prélevée cesse
- * d'être ordinaire.
- *
- * ⚠ Le seuil se compare à un NET, or un micro-entrepreneur a saisi son chiffre
- * d'affaires : le comparer tel quel classerait un artisan à trois mille euros
- * de CA « au-dessus du médian » alors qu'il vit sous le SMIC. On prend donc le
- * net que le moteur calcule quand il existe, et la saisie brute sinon (pour un
- * salarié, les deux sont le même nombre).
- */
-const SMIC_NET = 1478;
-const MEDIAN_NET = 2190;
-const HAUT_DE_LECHELLE = 5000;
-
-function reactionSignature(net: number): string {
-  if (net < SMIC_NET) return "signature-sous-smic";
-  if (net < MEDIAN_NET) return "signature-jusqu-au-median";
-  if (net < HAUT_DE_LECHELLE) return "signature-au-dessus";
-  return "signature-tres-haut";
-}
 
 /**
  * Où se passe chaque écran. Le son suit le LIEU, pas le numéro de carte : on
@@ -280,9 +252,6 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
     });
   }, [ecran, etat.netMensuel, etat.statut, placementId, cadeau, simulation]);
 
-  /** La dernière tranche de salaire commentée : il ne redit pas la même phrase. */
-  const derniereTranche = useRef<string | null>(null);
-
   /**
    * Le verdict vient de tomber : le commissaire le commente, une seule fois.
    *
@@ -349,7 +318,6 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
     setFraisId(FRAIS_DEFAUT_ID);
     setHabitudes(HABITUDES_DEFAUT);
     setCadeau(null);
-    derniereTranche.current = null;
     verdictAnnonce.current = false;
     bourseVue.current = null;
     taire();
@@ -427,12 +395,7 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
            * saisir 2 190 puis corriger en 2 200 ne rejoue pas la même phrase,
            * alors que passer à 6 000 en déclenche une autre.
            */
-          reagirAuMontant={() => {
-            const nom = reactionSignature(simulation?.netAvantImpotActuel ?? etat.netMensuel);
-            if (nom === derniereTranche.current) return;
-            derniereTranche.current = nom;
-            reagir(nom);
-          }}
+          reagirAuMontant={() => reagir(reactionSalaire(simulation?.netAvantImpotActuel ?? etat.netMensuel))}
           retour={() => aller("couverture")}
           numero={1}
           total={total}
