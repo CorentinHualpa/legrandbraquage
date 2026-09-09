@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { ContexteDossier } from "./cartes/Carte";
 import { Couverture } from "./cartes/Couverture";
 import { Deposition, type EtatSaisie } from "./cartes/Deposition";
 import { Cafe } from "./cartes/Cafe";
@@ -17,7 +18,7 @@ import { Avis } from "./cartes/Avis";
 import type { Pieces } from "@/lib/images";
 import type { Cadeau } from "@/lib/lien";
 import { contexte, evenement } from "@/lib/dalevoz";
-import { jouer, parler, poserDecor, reagir, reglerSons, type Acte, type Son } from "@/lib/sons";
+import { jouer, parler, poserDecor, reagir, reglerSons, taire, type Acte, type Son } from "@/lib/sons";
 import { FRAIS_DEFAUT_ID, PLACEMENT_DEFAUT_ID, casDepuisRequete, requeteDuCas } from "@/lib/lien";
 import {
   CRANS_FRAIS,
@@ -319,6 +320,42 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
 
   /** `bruit: null` quand l'appelant a déjà joué le sien : la porte du
    *  commissariat ne doit pas être suivie d'une page qui tourne. */
+/**
+   * RECOMMENCER : on efface le dossier et on revient à la couverture.
+   *
+   * ⚠ L'adresse doit être nettoyée AVANT de changer d'écran, sinon l'effet
+   * qui la tient à jour la réécrit avec l'ancien montant, et une
+   * actualisation rouvrirait le dossier qu'on vient de jeter.
+   *
+   * Le son n'est pas coupé : la personne l'a allumé, elle ne redemande pas à
+   * l'allumer parce qu'elle refait une simulation.
+   */
+  const recommencer = () => {
+    window.history.replaceState(null, "", window.location.pathname);
+    setEtat({
+      netMensuel: 0,
+      statut: "salarie",
+      formeTpe: undefined,
+      versant: "fpt",
+      activite: "ssi",
+      categorieMicro: "liberal",
+      versementLiberatoire: false,
+      couple: false,
+      enfants: 0,
+    });
+    setPerimetre(PERIMETRE_DEFAUT);
+    setPaliers(PALIERS_DEFAUT);
+    setPlacementId(PLACEMENT_DEFAUT_ID);
+    setFraisId(FRAIS_DEFAUT_ID);
+    setHabitudes(HABITUDES_DEFAUT);
+    setCadeau(null);
+    derniereTranche.current = null;
+    verdictAnnonce.current = false;
+    bourseVue.current = null;
+    taire();
+    setEcran("couverture");
+  };
+
   const aller = (e: Ecran, bruit: Son | null = BRUIT[e] ?? "page") => {
     if (bruit) jouer(bruit);
     if (e === "verdict") {
@@ -413,6 +450,7 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
   }
 
   return (
+    <ContexteDossier.Provider value={{ recommencer }}>
     <main className="min-h-dvh bg-nuit">
       {ecran === "tabac" || ecran === "carburant" || ecran === "alcool" ? (
         <Cafe {...commun} poste={ecran} simulation={simulation} habitudes={habitudes} choisir={choisirHabitude} />
@@ -454,5 +492,6 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
         <Avis {...commun} simulation={simulation} cas={cas} recommencer={() => aller("deposition")} />
       )}
     </main>
+    </ContexteDossier.Provider>
   );
 }

@@ -1,9 +1,16 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
 import { PIECES, type NumeroPiece, type Pieces } from "@/lib/pieces";
 import { frapper, jouer, reglerSons, sonsActifs } from "@/lib/sons";
+
+/**
+ * Ce que toutes les cartes savent faire, sans se le passer de main en main.
+ * Vide par defaut : une carte rendue hors du parcours (un banc, un test) ne
+ * casse pas, elle n'affiche simplement pas le bouton.
+ */
+export const ContexteDossier = createContext<{ recommencer?: () => void }>({});
 
 /**
  * Une carte du parcours : un écran, un chiffre, la nuit du commissariat.
@@ -47,6 +54,7 @@ export function Carte({
    */
   teteSurClair?: boolean;
 }) {
+  const { recommencer } = useContext(ContexteDossier);
   const couleurs = {
     jaune: "bg-jaune-police text-encre hover:bg-jaune-sombre",
     rouge: "bg-rouge text-papier hover:bg-rouge-sombre",
@@ -75,6 +83,7 @@ export function Carte({
             </span>
           </div>
           <div className="flex items-center gap-2.5">
+            {recommencer ? <BoutonRecommencer surClair={teteSurClair} recommencer={recommencer} /> : null}
             <BoutonSon surClair={teteSurClair} />
             <span className={`font-mono text-[10px] tracking-[0.14em] ${teteSurClair ? "text-encre/70" : "text-ligne"}`}>
               {numero} / {total}
@@ -446,6 +455,53 @@ function BoutonSon({ surClair }: { surClair?: boolean }) {
         ) : (
           <path d="M12.5 6.5l4 5m0-5l-4 5" />
         )}
+      </svg>
+    </button>
+  );
+}
+
+/**
+ * RECOMMENCER, en deux temps.
+ *
+ * ⚠ Pas de `confirm()` : une boîte de dialogue du navigateur casse net
+ * l'ambiance du dossier, et c'est le seul endroit du parcours où on verrait
+ * l'interface de Chrome. Le bouton se transforme en question, un second clic
+ * confirme, et un clic ailleurs annule au bout de quelques secondes.
+ *
+ * La confirmation n'est pas une politesse : un clic par mégarde jetterait
+ * jusqu'à quinze cartes de réponses, et il n'y a pas de retour arrière.
+ */
+function BoutonRecommencer({ surClair, recommencer }: { surClair?: boolean; recommencer: () => void }) {
+  const [demande, setDemande] = useState(false);
+  const c = surClair ? "text-encre/70" : "text-ligne";
+
+  useEffect(() => {
+    if (!demande) return;
+    const t = setTimeout(() => setDemande(false), 4_000);
+    return () => clearTimeout(t);
+  }, [demande]);
+
+  if (demande) {
+    return (
+      <button
+        type="button"
+        onClick={recommencer}
+        className={`font-mono text-[10px] tracking-[0.12em] uppercase ${surClair ? "text-rouge" : "text-rouge-clair"}`}
+      >
+        Tout effacer ?
+      </button>
+    );
+  }
+  return (
+    <button
+      type="button"
+      onClick={() => setDemande(true)}
+      aria-label="Recommencer la simulation"
+      className={`flex h-7 w-7 items-center justify-center ${c}`}
+    >
+      <svg width="15" height="15" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.6">
+        <path d="M15 9a6 6 0 1 1-1.8-4.3" />
+        <path d="M15 2v3.5h-3.5" />
       </svg>
     </button>
   );
