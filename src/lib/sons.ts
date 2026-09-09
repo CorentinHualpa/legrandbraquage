@@ -148,7 +148,36 @@ const VIE_MAX_MS = 16_000;
  * Machinerie
  * ------------------------------------------------------------------ */
 
-let actif = false;
+/**
+ * LE CHOIX D'ÉCOUTE SURVIT À LA PAGE.
+ *
+ * ⚠⚠ Il vivait dans une simple variable de module, et une variable de module
+ * repart à zéro plus souvent qu'on ne croit :
+ *
+ *  - à chaque ACTUALISATION, alors que l'adresse, elle, restaure la
+ *    progression : on rouvrait sa carte n° 12 dans le silence ;
+ *  - à chaque rechargement à chaud pendant qu'on développe, ce qui a coûté un
+ *    parcours entier à Coq le 09/09/2026 : le son se coupait « tout seul »
+ *    entre deux écrans, sans qu'il ait touché à rien, parce que je réécrivais
+ *    ce fichier pendant qu'il testait.
+ *
+ * `sessionStorage` et pas `localStorage` : la question se repose à la visite
+ * suivante. Un site qui rouvre en faisant du bruit parce qu'on avait dit oui la
+ * semaine dernière se fait fermer.
+ */
+const CLE_ECOUTE = "braquage:ecoute";
+
+function choixMemorise(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return window.sessionStorage.getItem(CLE_ECOUTE) === "1";
+  } catch {
+    // Navigation privée, cookies refusés : on repose la question, sans casser.
+    return false;
+  }
+}
+
+let actif = choixMemorise();
 let acteCourant: Acte | null = null;
 /** Un exemplaire préchargé par son de geste, cloné à chaque lecture. */
 const modeles = new Map<string, HTMLAudioElement>();
@@ -191,13 +220,42 @@ function fondre(el: HTMLAudioElement, vers: number, ms: number, apres?: () => vo
   requestAnimationFrame(pas);
 }
 
+/**
+ * ⚠ Une page RECHARGÉE n'a pas encore reçu de geste, donc le navigateur refuse
+ * de jouer, même si la personne avait dit oui il y a dix secondes. Le refus est
+ * silencieux : on se retrouve avec un interrupteur qui dit « son allumé » et
+ * une pièce muette, ce qui est pire que le silence assumé.
+ *
+ * On attend donc le premier geste, quel qu'il soit, pour reposer le décor. Le
+ * parcours en demande un à chaque carte, donc ça se rattrape tout seul.
+ */
+let gesteAttendu = false;
+
+function reposerLeDecorAuPremierGeste() {
+  if (gesteAttendu) return;
+  gesteAttendu = true;
+  const reprendre = () => {
+    gesteAttendu = false;
+    window.removeEventListener("pointerdown", reprendre);
+    if (!actif || !acteCourant) return;
+    const vise = acteCourant;
+    acteCourant = null;
+    poserDecor(vise);
+  };
+  window.addEventListener("pointerdown", reprendre, { once: true });
+}
+
 function lancerNappe(fichier: string, volume: number) {
   if (nappes.has(fichier)) return;
   const el = new Audio(`/sons/${fichier}.mp3`);
   el.loop = true;
   el.volume = 0;
   nappes.set(fichier, el);
-  void el.play().catch(() => {});
+  void el.play().catch(() => {
+    // Refusée faute de geste : on retire la nappe pour pouvoir la relancer.
+    nappes.delete(fichier);
+    reposerLeDecorAuPremierGeste();
+  });
   fondre(el, volume, 1400);
 }
 
@@ -545,6 +603,12 @@ export function frapper(genre: keyof typeof FRAPPE = "court"): void {
 export function reglerSons(oui: boolean): void {
   actif = oui;
   if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.setItem(CLE_ECOUTE, oui ? "1" : "0");
+  } catch {
+    // Sans stockage, le choix ne survit pas à l'actualisation. Tant pis : il
+    // vaut mieux un son qui marche maintenant qu'une exception.
+  }
   if (!oui) {
     for (const fichier of [...nappes.keys()]) {
       nappes.get(fichier)?.pause();
