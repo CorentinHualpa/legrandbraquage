@@ -50,3 +50,32 @@ export function contexte(valeurs: Record<string, unknown>) {
 export function evenement(nom: string, donnees?: Record<string, unknown>) {
   api()?.evenement?.(nom, donnees);
 }
+
+/** L'hôte de la plateforme. Surchargeable pour parler à une copie locale. */
+export const HOTE = process.env.NEXT_PUBLIC_DALEVOZ_HOST || "https://dalevoz.revolutionagency.ai";
+
+/**
+ * Le slug de l'agent. Surchargeable pour pointer un JUMEAU publié en local :
+ * l'API ne sert QUE la version publiée, donc un site local ne peut pas montrer
+ * un travail non publié sans ce détour.
+ */
+export const AGENT = process.env.NEXT_PUBLIC_DALEVOZ_AGENT || "le-braqueur";
+
+/**
+ * Un identifiant par NAVIGATEUR, jamais partagé.
+ *
+ * ⚠ La mémoire d'un agent Dale Voz s'accroche à cet identifiant, pas à la
+ * conversation : deux personnes qui ouvriraient le même lien avec le même `uid`
+ * se répéteraient mutuellement leurs confidences.
+ */
+export function identifiantVisiteur(): string {
+  try {
+    const connu = window.localStorage.getItem("lgb.uid");
+    if (connu) return connu;
+    const neuf = crypto.randomUUID();
+    window.localStorage.setItem("lgb.uid", neuf);
+    return neuf;
+  } catch {
+    return crypto.randomUUID();
+  }
+}

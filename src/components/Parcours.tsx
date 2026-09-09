@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { ContexteDossier } from "./cartes/Carte";
+import { Commissariat } from "./Commissariat";
 import { Couverture } from "./cartes/Couverture";
 import { Deposition, type EtatSaisie } from "./cartes/Deposition";
 import { Cafe } from "./cartes/Cafe";
@@ -444,6 +445,7 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
 
   return (
     <ContexteDossier.Provider value={{ recommencer }}>
+    <Commissariat />
     <main className="min-h-dvh bg-nuit">
       {ecran === "tabac" || ecran === "carburant" || ecran === "alcool" ? (
         <Cafe {...commun} poste={ecran} simulation={simulation} habitudes={habitudes} choisir={choisirHabitude} />
