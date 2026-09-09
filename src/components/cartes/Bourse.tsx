@@ -49,16 +49,17 @@ export function taux(reel: number): string {
  */
 /**
  * Ce qu'il dit selon l'enveloppe choisie. Il commente le TEMPÉRAMENT, pas le
- * produit : le livret A et le fonds en euros disent la même chose de
- * quelqu'un. Le CAC garde la sienne, c'est la seule qui appelle une vanne
- * française.
+ * produit : le livret A et le fonds en euros disent la même chose de quelqu'un.
+ * Les trois enveloppes actions, en revanche, ont chacune la leur : partager une
+ * réplique entre le MSCI et le S&P faisait entendre la même phrase sur deux
+ * cases différentes, ce qui trahit la machine en une seconde.
  */
 const REACTION_PLACEMENT: Record<string, string> = {
   "livret-a": "placement-prudent",
   "fonds-euros": "placement-prudent",
   immobilier: "placement-pierre",
-  "msci-world": "placement-audacieux",
-  sp500: "placement-audacieux",
+  "msci-world": "placement-monde",
+  sp500: "placement-amerique",
   cac40: "placement-cac",
 };
 

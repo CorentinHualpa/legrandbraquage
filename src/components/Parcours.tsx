@@ -9,7 +9,6 @@ import { Cafe } from "./cartes/Cafe";
 import { Pris } from "./cartes/Pris";
 import { Butin } from "./cartes/Butin";
 import { Bourse } from "./cartes/Bourse";
-import { Liberation } from "./cartes/Liberation";
 import { Aparte } from "./cartes/Aparte";
 import { PalierEcran } from "./cartes/PalierEcran";
 import { Rendu } from "./cartes/Rendu";
@@ -44,7 +43,7 @@ import { partsFiscales, regimeCalculable, regimeDe } from "@/lib/statuts";
  * chômage : la question ne lui est pas posée.
  */
 const ECRANS = [
-  "couverture", "deposition", "tabac", "carburant", "alcool", "pris", "butin", "liberation", "aparte",
+  "couverture", "deposition", "tabac", "carburant", "alcool", "pris", "butin", "aparte",
   "ecole", "sante", "chomage", "rendu", "bourse", "verdict", "avis",
 ] as const;
 type Ecran = (typeof ECRANS)[number];
@@ -54,11 +53,9 @@ type Ecran = (typeof ECRANS)[number];
  * reste dans le bureau du commissaire pendant toute la déposition, on descend
  * aux scellés quand on regarde le butin, et le verdict se rend au tribunal.
  *
- * `liberation` est dehors, et c'est un choix de mise en scène plutôt qu'une
- * évidence : l'écran calcule l'heure de la journée à partir de laquelle on
- * travaille pour soi, donc l'heure où on sort. Il donne au passage une
- * respiration au milieu du parcours, entre deux salles fermées. À déplacer
- * si ça ne va pas.
+ * Plus personne n'est dehors depuis le retrait de la carte de l'horaire
+ * (09/09/2026) : l'ambiance de rue reste dans le dossier, elle ne se joue nulle
+ * part.
  *
  * Ce qui n'est pas listé retombe sur le commissariat.
  */
@@ -68,7 +65,6 @@ const ACTE: Partial<Record<Ecran, Acte>> = {
   rendu: "tribunal",
   bourse: "tribunal",
   verdict: "tribunal",
-  liberation: "rue",
 };
 
 /**
@@ -464,8 +460,6 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
           choisirPlacement={setPlacementId}
           choisirFrais={setFraisId}
         />
-      ) : ecran === "liberation" ? (
-        <Liberation {...commun} simulation={simulation} />
       ) : ecran === "aparte" ? (
         <Aparte {...commun} />
       ) : ecran === "ecole" || ecran === "sante" || ecran === "chomage" ? (

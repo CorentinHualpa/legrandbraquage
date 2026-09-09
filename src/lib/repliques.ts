@@ -35,8 +35,8 @@
  * c'est précisément la carte la plus mise en avant qui se désaligne.
  */
 export const APARTE = {
-  fort: "Contente de vous voir aussi. Objection : je suis l'avocate des braqueurs.",
-  suite: "Vous lui montrez ce qu'on lui a pris, très bien. Vous comptez lui montrer ce qu'on lui a rendu, ou c'est pas dans le dossier ?",
+  fort: "Objection ! Je suis l'avocate des braqueurs.",
+  suite: "Contente de vous voir aussi. Vous lui montrez ce qu'on lui a pris, très bien. Vous comptez lui montrer ce qu'on lui a rendu, ou c'est pas dans le dossier ?",
 };
 
 /**
@@ -57,7 +57,16 @@ export const APARTE = {
  */
 export const AVOCATE: Record<string, string> = {
   /* Elle entre en coupant. Les deux phrases sont celles de la carte, en gros. */
-  aparte: `[sarcastic] Contente de vous voir aussi. [dry] Objection : je suis l'avocate des braqueurs. [sarcastic] ${APARTE.suite}`,
+  /*
+   * ⚠ L'ORDRE FAIT LA SCÈNE : elle plaide d'abord, sérieusement, et elle salue
+   * ensuite, en riant. L'inverse la faisait entrer en plaisantant, donc en
+   * personnage secondaire ; là elle coupe, puis elle se paie sa tête.
+   */
+  aparte:
+    "[dry] Objection ! Je suis l'avocate des braqueurs. "
+    + "[chuckles] Contente de vous voir aussi. "
+    + "[sarcastic] Vous lui montrez ce qu'on lui a pris, très bien. "
+    + "Vous comptez lui montrer ce qu'on lui a rendu, ou c'est pas dans le dossier ?",
 
   /*
    * ⚠⚠ ELLE PLAIDE POUR SES CLIENTS, pas pour le visiteur. La première version
@@ -81,9 +90,14 @@ export const AVOCATE: Record<string, string> = {
     + "[dry] Mes clients vous couvraient quand même, tous les mois. [sarcastic] Une assurance, ça a un prix.",
 
   /* Le rendu : elle conclut, et c'est le visiteur qui a fait le calcul. */
+  /*
+   * ⚠ « Et c'est vous qui venez de le chiffrer » se prononçait mal : le modèle
+   * bute sur « qui venez de le », trois mots outils d'affilée. Reformulé avec
+   * un verbe plein et une pause naturelle, il le dit du premier coup.
+   */
   rendu:
     "[dry] Voilà. [pause] Mes clients ne vous ont pas tout pris pour rien. "
-    + "[sarcastic] Et c'est vous qui venez de le chiffrer.",
+    + "[sarcastic] Et le montant, c'est vous qui l'avez calculé.",
 };
 
 /** Vrai si cette réplique est dite par l'avocate. Décide la voix ET la bulle. */
@@ -130,17 +144,6 @@ export const REPLIQUES: Record<string, string> = {
   butin:
     "[flat] Voilà le butin. [scoffs] C'est pas moi qui fixe les prix, hein. Moi je compte. "
     + "[dry] Et franchement, j'ai rarement vu un scellé aussi bien rempli.",
-
-  /* L'horaire : le moment où il devient presque bavard. */
-  /*
-   * ⚠ La version d'avant (« Vous bossez depuis janvier. Eux aussi. Sauf qu'eux,
-   * ils s'arrêtent pile là ») demandait de deviner QUI s'arrête et à quoi sert
-   * la date : « on comprend rien » (Coq). Elle dit maintenant le mécanisme dans
-   * l'ordre où on le comprend, et elle nomme les braqueurs.
-   */
-  liberation:
-    "[tired] Regardez cette date. [pause] Tout ce que vous gagnez avant, c'est pour les braqueurs. "
-    + "[dry] Après seulement, vous travaillez pour vous. [scoffs] Et le premier janvier, ça repart.",
 
   /* La bourse : l'avocat du Braqueur demande la parole. Il s'agace un peu. */
   /* Il lui reprend la parole. C'est le mot qui referme sa plaidoirie. */
@@ -252,8 +255,17 @@ export const REACTIONS: Record<string, string> = {
     "[tired] Prudent. [scoffs] Vous avez rien risqué, et ils vous ont quand même tout pris.",
   "placement-pierre":
     "[dry] La pierre. [scoffs] Vous auriez eu des locataires, des travaux, et un impôt de plus. [flat] Mais vous auriez eu les murs.",
-  "placement-audacieux":
-    "[scoffs] Ah. [sarcastic] Vous avez pas froid aux yeux, vous. [dry] J'aime ça.",
+  /* Le monde entier. Formulation de Coq, gardée telle quelle. */
+  "placement-monde":
+    "[scoffs] Le monde entier. [sarcastic] Vous avez pas froid aux yeux, vous. [dry] J'aime ça.",
+  /*
+   * ⚠ L'Amérique a la sienne. Les deux enveloppes partageaient une réplique
+   * (« placement-audacieux »), donc on entendait la même phrase en cliquant sur
+   * deux cases différentes, ce qui trahit la machine en une seconde.
+   */
+  "placement-amerique":
+    "[dry] L'Amérique. [scoffs] Le choix de ceux qui regardent les courbes plutôt que le journal. "
+    + "[sarcastic] Pas bête.",
   "placement-cac":
     "[scoffs] Le CAC. [sarcastic] Patriote, en plus. [dry] Vos braqueurs vont être touchés.",
 

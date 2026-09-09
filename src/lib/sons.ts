@@ -31,8 +31,16 @@
  */
 
 export const SONS = {
-  /** La porte du commissariat, quand on dépose plainte. */
-  porte: 0.55,
+  /**
+   * La porte du commissariat, quand on dépose plainte, et celle de l'avocate
+   * quand elle entre.
+   *
+   * ⚠ Elle était à 0,55 pour un fichier qui sort déjà à -16,5 dB, le plus fort
+   * du dossier : elle s'entendait à -21,7 dB, soit QUATRE décibels sous la voix
+   * du commissaire et vingt-trois au-dessus de la page qu'on tourne. Une porte
+   * n'est pas un événement plus important qu'une réplique.
+   */
+  porte: 0.13,
   /** Une page du dossier qu'on tourne : à chaque changement d'écran. */
   page: 0.4,
   /** Le tampon du tribunal, sur le verdict. */
@@ -437,14 +445,14 @@ const DUCK = 0.4;
  */
 const AVEC_REPLIQUE = new Set([
   "deposition", "tabac", "carburant", "alcool", "pris", "butin",
-  "liberation", "aparte", "ecole", "sante", "chomage", "rendu", "bourse",
+  "aparte", "ecole", "sante", "chomage", "rendu", "bourse",
   "verdict", "avis",
   // Les dix tranches de salaire, une par décile (cf. `DECILES` de repliques.ts).
   "salaire-01", "salaire-02", "salaire-03", "salaire-04", "salaire-05",
   "salaire-06", "salaire-07", "salaire-08", "salaire-09", "salaire-10",
   // Les réponses cliquables : le cadeau, puis l'enveloppe de la bourse.
   "cadeau-partage", "cadeau-picotte",
-  "placement-prudent", "placement-pierre", "placement-audacieux", "placement-cac",
+  "placement-prudent", "placement-pierre", "placement-monde", "placement-amerique", "placement-cac",
   // L'avocate du Braqueur, sur toute la partie nuance.
   "aparte", "aparte-commissaire", "ecole", "sante", "chomage", "rendu",
 ]);
