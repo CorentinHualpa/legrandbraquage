@@ -35,8 +35,8 @@
  * c'est précisément la carte la plus mise en avant qui se désaligne.
  */
 export const APARTE = {
-  fort: "Objection. Vous lui montrez ce qu'on lui a pris, très bien.",
-  suite: "Vous comptez lui montrer ce qu'on lui a rendu, ou c'est pas dans le dossier ?",
+  fort: "Objection. Je suis l'avocate des braqueurs.",
+  suite: "Vous lui montrez ce qu'on lui a pris, très bien. Vous comptez lui montrer ce qu'on lui a rendu, ou c'est pas dans le dossier ?",
 };
 
 /**
@@ -72,7 +72,7 @@ export const AVOCATE: Record<string, string> = {
 
   /* Le rendu : elle conclut, et c'est le visiteur qui a fait le calcul. */
   rendu:
-    "[dry] Voilà. [pause] Mon client ne vous a pas tout pris pour rien. "
+    "[dry] Voilà. [pause] Mes clients ne vous ont pas tout pris pour rien. "
     + "[sarcastic] Et c'est vous qui venez de le chiffrer.",
 };
 
@@ -122,9 +122,15 @@ export const REPLIQUES: Record<string, string> = {
     + "[dry] Et franchement, j'ai rarement vu un scellé aussi bien rempli.",
 
   /* L'horaire : le moment où il devient presque bavard. */
+  /*
+   * ⚠ La version d'avant (« Vous bossez depuis janvier. Eux aussi. Sauf qu'eux,
+   * ils s'arrêtent pile là ») demandait de deviner QUI s'arrête et à quoi sert
+   * la date : « on comprend rien » (Coq). Elle dit maintenant le mécanisme dans
+   * l'ordre où on le comprend, et elle nomme les braqueurs.
+   */
   liberation:
-    "[tired] Regardez votre montre. [pause] Vous, vous bossez depuis janvier. Eux aussi. "
-    + "[dry] Sauf qu'eux, ils s'arrêtent pile là. [flat] Tous les ans, à la minute près.",
+    "[tired] Regardez cette date. [pause] Tout ce que vous gagnez avant, c'est pour les braqueurs. "
+    + "[dry] Après seulement, vous travaillez pour vous. [scoffs] Et le premier janvier, ça repart.",
 
   /* La bourse : l'avocat du Braqueur demande la parole. Il s'agace un peu. */
   bourse:
@@ -204,7 +210,8 @@ export const REACTIONS: Record<string, string> = {
     + "[dry] Et eux, ils ont pris vingt ans.",
 
   /* Il cede la parole a l'avocate, sur l'aparte. Trois mots, c'est tout. */
-  "aparte-concede": "[tired] Maître. [pause] Allez-y.",
+  "aparte-commissaire":
+    "[tired] Oh non. [pause] Pas elle. [scoffs] On discutait bien, pourtant.",
 
   /*
    * « Content de votre cadeau ? », sur le butin. Il répond AU CLIC, pas au

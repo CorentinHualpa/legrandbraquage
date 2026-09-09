@@ -206,7 +206,7 @@ export function Commissaire({
   children,
 }: {
   qui?: string;
-  /** Le commissaire parle en rouge, l'avocate du Braqueur en bleu. */
+  /** Le commissaire parle en rouge, l'avocate des braqueurs en bleu. */
   couleur?: "rouge" | "bleu";
   children: ReactNode;
 }) {
@@ -443,19 +443,32 @@ function BoutonSon({ surClair }: { surClair?: boolean }) {
       }}
       aria-label={allume ? "Couper le son" : "Passer sur écoute"}
       aria-pressed={allume}
-      className={`flex h-7 w-7 items-center justify-center ${c}`}
+      className={`flex items-center gap-1.5 ${allume ? c : surClair ? "text-rouge" : "text-rouge-clair"}`}
     >
-      <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.6">
-        <path d="M4 7h2.5L10 4v10L6.5 11H4z" />
-        {allume ? (
-          <>
-            <path d="M12.5 6.5a3.5 3.5 0 0 1 0 5" />
-            <path d="M14.5 4.5a6 6 0 0 1 0 9" />
-          </>
-        ) : (
-          <path d="M12.5 6.5l4 5m0-5l-4 5" />
-        )}
-      </svg>
+      <span className="flex h-7 w-7 items-center justify-center">
+        <svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.6">
+          <path d="M4 7h2.5L10 4v10L6.5 11H4z" />
+          {allume ? (
+            <>
+              <path d="M12.5 6.5a3.5 3.5 0 0 1 0 5" />
+              <path d="M14.5 4.5a6 6 0 0 1 0 9" />
+            </>
+          ) : (
+            <path d="M12.5 6.5l4 5m0-5l-4 5" />
+          )}
+        </svg>
+      </span>
+      {/*
+        ⚠ Le son COUPÉ se dit en toutes lettres, en rouge. Une icône barrée de
+        seize pixels dans un bandeau sombre ne se remarque pas : on a fait tout
+        un parcours en croyant que les répliques ne marchaient pas, alors que le
+        bouton avait été effleuré (Coq, 09/09/2026 : « l'avocate on l'entend
+        jamais, ça a bugué »). Le libellé n'apparaît que dans cet état, donc il
+        ne prend de place que quand il sert.
+      */}
+      {!allume ? (
+        <span className="font-mono text-[9px] tracking-[0.12em] whitespace-nowrap uppercase">Son coupé</span>
+      ) : null}
     </button>
   );
 }

@@ -357,7 +357,7 @@ const AVEC_REPLIQUE = new Set([
   "cadeau-partage", "cadeau-picotte",
   "placement-prudent", "placement-pierre", "placement-audacieux", "placement-cac",
   // L'avocate du Braqueur, sur toute la partie nuance.
-  "aparte", "aparte-concede", "ecole", "sante", "chomage", "rendu",
+  "aparte", "aparte-commissaire", "ecole", "sante", "chomage", "rendu",
 ]);
 
 /**
@@ -395,6 +395,22 @@ function duckerLesNappes(baisser: boolean) {
  * Fait parler le commissaire. Sans effet si la personne a gardé le silence :
  * la voix suit le même interrupteur que le reste, elle n'a pas de régime à part.
  */
+/**
+ * Les cartes où DEUX personnes parlent, dans l'ordre.
+ *
+ * ⚠ L'aparté est le seul endroit du parcours où quelqu'un entre. Le
+ * commissaire la voit arriver, puis elle prend la parole : sans sa réaction à
+ * lui, l'avocate apparaît de nulle part au milieu d'un interrogatoire et on ne
+ * sait ni qui parle ni pourquoi. La porte se joue à l'arrivée sur la carte
+ * (`BRUIT` de `Parcours.tsx`), elle annonce l'entrée avant la première syllabe.
+ */
+const A_DEUX: Record<string, string[]> = {
+  aparte: ["aparte-commissaire", "aparte"],
+};
+
+/** Ce qui reste à dire sur cette carte, après la réplique en cours. */
+let suite: string[] = [];
+
 function lancerLaVoix(nom: string, delaiMs: number) {
   minuterieVoix = setTimeout(() => {
     minuterieVoix = null;
@@ -415,9 +431,16 @@ function lancerLaVoix(nom: string, delaiMs: number) {
        * disent qu'une phrase est finie et qu'une autre commence.
        */
       duckerLesNappes(false);
-      const suite = enAttente;
+      // Ce qui reste à dire sur CETTE carte passe avant la réplique de la
+      // carte suivante : les deux personnages finissent leur échange.
+      const encore = suite.shift();
+      if (encore) {
+        lancerLaVoix(encore, ENTRE_DEUX_REPLIQUES_MS);
+        return;
+      }
+      const attendue = enAttente;
       enAttente = null;
-      if (suite) lancerLaVoix(suite, ENTRE_DEUX_REPLIQUES_MS);
+      if (attendue) lancerLaVoix(attendue, ENTRE_DEUX_REPLIQUES_MS);
     };
     el.addEventListener("ended", fini);
     // Un fichier manquant ne doit pas laisser le décor baissé pour toujours :
@@ -443,7 +466,9 @@ export function parler(ecran: string): void {
   // sa phrase de la carte précédente par-dessus la nouvelle.
   taire();
   if (!actif || !AVEC_REPLIQUE.has(ecran)) return;
-  lancerLaVoix(ecran, AVANT_DE_PARLER_MS);
+  const sequence = A_DEUX[ecran] ?? [ecran];
+  suite = sequence.slice(1);
+  lancerLaVoix(sequence[0], AVANT_DE_PARLER_MS);
 }
 
 /**
@@ -470,6 +495,7 @@ export function taire(): void {
   minuterieVoix = null;
   protegee = false;
   enAttente = null;
+  suite = [];
   if (!voixEnCours) return;
   voixEnCours.pause();
   voixEnCours = null;
@@ -532,6 +558,7 @@ export function reglerSons(oui: boolean): void {
     minuterieVoix = null;
     protegee = false;
     enAttente = null;
+    suite = [];
     if (voixEnCours) { voixEnCours.pause(); voixEnCours = null; }
     ducking = false;
     return;

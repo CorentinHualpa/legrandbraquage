@@ -285,7 +285,16 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
    * La couverture est absente : c'est elle qui joue la porte, dans le geste
    * qui allume le son.
    */
-  const BRUIT: Partial<Record<Ecran, "ruban" | "tampon">> = { butin: "ruban", verdict: "tampon" };
+  /*
+   * ⚠ La porte de l'aparté n'est pas un ornement : c'est elle qui annonce
+   * qu'un TROISIÈME personnage entre dans la pièce. Sans elle, l'avocate
+   * apparaît de nulle part au milieu d'un interrogatoire.
+   */
+  const BRUIT: Partial<Record<Ecran, "ruban" | "tampon" | "porte">> = {
+    butin: "ruban",
+    verdict: "tampon",
+    aparte: "porte",
+  };
 
   /** `bruit: null` quand l'appelant a déjà joué le sien : la porte du
    *  commissariat ne doit pas être suivie d'une page qui tourne. */

@@ -5,12 +5,12 @@
   "alcool": "e4fd744c587e",
   "pris": "3d876b6f5cff",
   "butin": "75758f6b61f6",
-  "liberation": "d5685765c274",
-  "aparte": "ef18f65cf40b",
+  "liberation": "e28190387ad3",
+  "aparte": "6f3f9867bcd0",
   "ecole": "58fea7151592",
   "sante": "ab56f5ad879c",
   "chomage": "a39cf2f2030d",
-  "rendu": "1e351683987a",
+  "rendu": "1a6ca7b3b8d9",
   "bourse": "4842318bf741",
   "verdict": "f2b636b14927",
   "avis": "295e90b47544",
@@ -20,7 +20,6 @@
   "placement-pierre": "fa78a848e98d",
   "placement-audacieux": "b42e66da86e2",
   "placement-cac": "414401c401c0",
-  "aparte-concede": "7e88b9aa4377",
   "salaire-01": "05181fd09238",
   "salaire-02": "d7187ca5ceaf",
   "salaire-03": "52878c9d68ad",
@@ -30,5 +29,6 @@
   "salaire-07": "9398e184b411",
   "salaire-08": "6a6aa8f4bd6e",
   "salaire-09": "53621e4a709f",
-  "salaire-10": "8ebbc16932b2"
+  "salaire-10": "8ebbc16932b2",
+  "aparte-commissaire": "6ce1e2196dea"
 }

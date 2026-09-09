@@ -45,7 +45,7 @@ export const PIECES = {
   /* Plus affichée depuis le retrait de la carte du témoin (09/09/2026). Gardée :
      le fichier existe, il a coûté une génération, et la scène peut revenir. */
   27: { fichier: "27-temoin", nom: "Le témoin, derrière la vitre" },
-  28: { fichier: "28-avocate-couloir", nom: "L’avocate du Braqueur, dans le couloir" },
+  28: { fichier: "28-avocate-couloir", nom: "L’avocate des braqueurs, dans le couloir" },
 } as const;
 
 export type NumeroPiece = keyof typeof PIECES;

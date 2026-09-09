@@ -50,7 +50,7 @@ export function Rendu({
     >
       <Kicker couleur="bleu">Et sur toute votre vie, ils vous auront rendu</Kicker>
       <Chiffre>{eurosSigne(plateauDroit.total)}</Chiffre>
-      <Commissaire qui="L’avocate du Braqueur" couleur="bleu">{dit("rendu")}</Commissaire>
+      <Commissaire qui="L’avocate des braqueurs" couleur="bleu">{dit("rendu")}</Commissaire>
 
       <div className="grow" />
 
