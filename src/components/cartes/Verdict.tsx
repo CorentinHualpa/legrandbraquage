@@ -61,7 +61,7 @@ export function Verdict({
     <Carte
       numero={numero}
       total={total}
-      nature="Tribunal des prélèvements"
+      nature="Le verdict"
       retour={retour}
       photo={{ numero: 24, pieces, hauteur: 300, legende: "CLICHÉ 24 · IL SORT", position: "50% 30%" }}
       action={{ libelle: "Placarder l’avis de recherche", onClick: suivant }}
@@ -69,25 +69,55 @@ export function Verdict({
       {/* Le flash : il tombe sur le verdict, une seule fois, et s’efface. */}
       <div aria-hidden className="flash-verdict pointer-events-none fixed inset-0 z-30 bg-papier" />
 
+      {/*
+        ⚠ LE TAMPON DOIT DIRE QUI EST COUPABLE. Un aplat rouge « COUPABLE » sur
+        l'écran de quelqu'un qui vient de raconter sa vie se lit comme un
+        verdict sur LUI : c'est le contresens le plus cher du parcours, et il
+        arrive sur la carte qui porte la conclusion. La ligne du dessous nomme
+        l'accusé, elle n'est pas décorative.
+
+        Le titre du tribunal était écrit deux fois, dans le bandeau et dans le
+        tampon. Une seule suffit, et c'est celle du tampon qui compte.
+      */}
       <Papier rotation={0.8} className="-mt-10 flex flex-col items-center gap-2.5 px-4 pt-4 pb-3.5 text-center">
         <div className={`tampon rounded-[5px] border-[3px] px-5 py-2 ${verdict.braquage ? "border-rouge text-rouge" : "border-bleu text-bleu"}`}>
           <p className="font-mono text-[8.5px] tracking-[0.16em]">TRIBUNAL DES PRÉLÈVEMENTS</p>
           <p className="text-[38px] leading-[1.05] font-extrabold">{verdict.braquage ? "COUPABLE" : "RELAXE"}</p>
         </div>
-        <p className="text-[15.5px] leading-snug text-encre-2">
-          Placé en {cran.nom} à {taux(cran.reel)}, votre argent aurait fait {eurosSigne(capital)}.
-          Ils vous auront rendu {eurosSigne(plateauDroit.total)}.
+        <p className="font-mono text-[10px] tracking-[0.12em] text-encre-3 uppercase">
+          {verdict.braquage ? "Les prélèvements, sur votre cas" : "Les prélèvements, sur votre cas · non retenu"}
         </p>
+
+        {/*
+          Le calcul est POSÉ, en soustraction, au lieu d'être raconté en prose.
+          Les deux montants ne sont pas comparables de tête (l'un est un capital
+          sur quarante-trois ans, l'autre une somme de prestations) : les mettre
+          l'un sous l'autre avec un trait fait le travail qu'une phrase ne
+          faisait pas.
+        */}
+        <div className="flex w-full flex-col gap-1 pt-0.5 text-left">
+          <div className="flex items-baseline justify-between gap-3">
+            <span className="text-[13.5px] leading-tight text-encre-2">
+              Ce que les {eurosSigne(simulation.plateauGauche.total)} pris vous auraient rapporté,
+              placés en {cran.nom} à {taux(cran.reel)}
+            </span>
+            <span className="chiffres shrink-0 font-mono text-[14px] font-semibold text-encre">{euros(capital)} €</span>
+          </div>
+          <div className="flex items-baseline justify-between gap-3 border-b border-encre pb-1.5">
+            <span className="text-[13.5px] leading-tight text-encre-2">
+              Moins ce qu’ils vous ont rendu, en retraite, école, soins et chômage
+            </span>
+            <span className="chiffres shrink-0 font-mono text-[14px] font-semibold text-encre">
+              − {euros(plateauDroit.total)} €
+            </span>
+          </div>
+        </div>
         <span className={`chiffres font-mono text-[40px] leading-none font-semibold tracking-[-0.03em] ${verdict.braquage ? "text-rouge" : "text-bleu"}`}>
           {eurosSigne(verdict.ecart)}
         </span>
         <p className="text-[16px] leading-snug text-encre-2">
-          {verdict.braquage ? "de manque à gagner, pour vous." : "de mieux, grâce à eux."}
+          {verdict.braquage ? "de manque à gagner, pour vous." : "de mieux pour vous, grâce à eux."}
         </p>
-        <div className="flex w-full justify-between border-t border-ligne pt-2">
-          <span className="font-mono text-[10px] tracking-[0.1em] text-rouge-texte">PLACÉ {euros(capital)} €</span>
-          <span className="font-mono text-[10px] tracking-[0.1em] text-bleu">RENDU {euros(plateauDroit.total)} €</span>
-        </div>
       </Papier>
 
       <Commissaire>{dit("verdict")}</Commissaire>
@@ -95,13 +125,20 @@ export function Verdict({
       {/* Sa propre réponse, ressortie. Rien si la question a été sautée. */}
       {cadeau ? <Commissaire>{RAPPEL[cadeau]}</Commissaire> : null}
 
+      {/*
+        ⚠ Le seuil est la phrase la plus dense de la carte, et elle arrivait
+        sans dire de qui elle parle : « en dessous de tant, vous seriez gagnant »
+        laisse croire à une autre version du SIEN de verdict. Elle parle d'une
+        AUTRE personne, celle qui gagne moins. L'information passe avant la
+        formule de sortie, qui reste parce que c'est le personnage.
+      */}
       <Commissaire qui="Le commissaire, en sortant">
         {pivot ? (
-          <>« En dessous de {euros(pivot)} € par mois, vous seriez gagnant. Au-dessus, vous savez déjà. Ne me citez pas. »</>
+          <>« Quelqu’un qui gagne moins de {euros(pivot)} € net par mois, lui, reçoit plus qu’on ne lui prend. Vous, vous savez déjà. Ne me citez pas. »</>
         ) : verdict.braquage ? (
-          <>« Avec ce placement, il n’y a pas de seuil : ça penche de leur côté à tous les niveaux de revenu. Ne me citez pas. »</>
+          <>« Avec ce placement, personne n’est gagnant, à aucun salaire. Ne me citez pas. »</>
         ) : (
-          <>« Avec ce placement, il n’y a pas de seuil : ça penche de votre côté à tous les niveaux de revenu. Vous pouvez me citer. »</>
+          <>« Avec ce placement, tout le monde est gagnant, à tous les salaires. Vous pouvez me citer. »</>
         )}
       </Commissaire>
 

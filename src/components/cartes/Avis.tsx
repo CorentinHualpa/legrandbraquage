@@ -57,7 +57,7 @@ export function Avis({
   const annees = anneesSansTravailler(plateauGauche.total, simulation.netApresImpotActuel);
   const objet =
     plateauGauche.total >= SEUIL_ANNEES
-      ? `${annees.toFixed(1).replace(".", ",")} années de vie sans travailler`
+      ? `${annees.toFixed(1).replace(".", ",")} années de votre vie, à votre niveau de vie`
       : objetPour(plateauGauche.total).nom;
 
   /*
@@ -161,11 +161,23 @@ export function Avis({
               className="flex flex-col gap-1 bg-[#ece5d5] px-2 py-2 text-encre shadow-[0_10px_20px_rgba(0,0,0,0.5)]"
               style={{ transform: `rotate(${[-2, 1.5, -1][i]}deg)` }}
             >
-              <span className="border-b border-cadre-bord pb-0.5 font-mono text-[7.5px] tracking-[0.12em] text-encre-3 uppercase">En bref</span>
-              <span className="text-[12px] leading-tight font-semibold">{m.nom}</span>
+              {/*
+                ⚠ Les deux montants arrivaient nus, l'un sous l'autre, sans dire
+                lequel est le vol et lequel est l'écart : « 483 831 € / RELAXE ·
+                300 629 € » ne se déchiffre pas. Et « relaxe » est un mot de
+                prétoire, pas un mot de tous les jours : il est doublé de ce
+                qu'il veut dire ici.
+              */}
+              <span className="border-b border-cadre-bord pb-0.5 font-mono text-[7.5px] tracking-[0.12em] text-encre-3 uppercase">{m.nom}</span>
+              <span className="font-mono text-[7px] tracking-[0.1em] text-encre-3 uppercase">Braqué de</span>
               <span className="chiffres font-mono text-[12px] leading-none font-semibold text-rouge-texte">{euros(m.pris)} €</span>
-              <span className={`font-mono text-[7.5px] tracking-[0.1em] ${m.braquage ? "text-rouge-texte" : "text-bleu"}`}>
-                {m.braquage ? "COUPABLE" : "RELAXE"} · {eurosSigne(m.ecart)}
+              <span className={`font-mono text-[7.5px] leading-tight tracking-[0.1em] ${m.braquage ? "text-rouge-texte" : "text-bleu"}`}>
+                {m.braquage ? "COUPABLE" : "RELAXE"}
+              </span>
+              <span className="text-[9.5px] leading-tight text-encre-2">
+                {m.braquage
+                  ? <>{eurosSigne(m.ecart)} de manque à gagner</>
+                  : <>reçoit {eurosSigne(m.ecart)} de plus qu’on ne lui prend</>}
               </span>
             </div>
           ))}

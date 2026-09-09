@@ -101,14 +101,20 @@ export function CarteAvis({
             <p className="border-b border-cadre-bord pb-0.5 text-[10.5px] leading-tight text-encre-2 italic">
               Placé en {placement}
             </p>
+            {/*
+              ⚠ « Oublié sur place » était un jeu de mots qui se retournait :
+              on lit « oublié » comme « perdu », alors que c'est la ligne qui
+              joue POUR la victime. Les deux libellés disent maintenant ce
+              qu'ils comptent, et le calcul se lit de haut en bas.
+            */}
             <div className="flex justify-between gap-2">
-              <span className="text-[12px] leading-tight">Ça faisait</span>
+              <span className="text-[12px] leading-tight">Ça aurait fait</span>
               <span className="chiffres shrink-0 font-mono text-[12px] font-semibold">{euros(capital)} €</span>
             </div>
             {/* En vert : c'est la seule ligne de la une qui joue pour la victime. */}
             <div className="flex justify-between gap-2 text-vert">
-              <span className="text-[12px] leading-tight">Oublié sur place</span>
-              <span className="chiffres shrink-0 font-mono text-[12px] font-semibold">{euros(recu)} €</span>
+              <span className="text-[12px] leading-tight">Rendu en services</span>
+              <span className="chiffres shrink-0 font-mono text-[12px] font-semibold">− {euros(recu)} €</span>
             </div>
             <div className="mt-0.5 flex items-baseline justify-between gap-2 border-t border-encre pt-1">
               <span className="text-[12.5px] leading-tight font-bold">
@@ -123,10 +129,15 @@ export function CarteAvis({
           </div>
         </div>
 
-        {/* Le second titre : ce que ça fait, en vrai. */}
+        {/*
+          ⚠ « En pièces détachées » annonçait une liste et n'avait qu'un seul
+          article, et l'article ne disait pas de quoi il était la mesure : on
+          lisait « 40,5 années de vie sans travailler » sans savoir si c'était
+          le vol, le rendu ou l'écart. Le titre dit maintenant ce qu'on compte.
+        */}
         <div className="border-b-[3px] border-double border-encre py-2">
           <p className="font-mono text-[8px] tracking-[0.14em] text-rouge-texte uppercase">
-            En pièces détachées
+            Ce qu’ils ont pris, autrement dit
           </p>
           <p className="text-[16px] leading-tight font-bold sm:text-[19px]">{objet}</p>
         </div>
