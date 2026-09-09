@@ -19,7 +19,7 @@ import type { Pieces } from "@/lib/images";
 import type { Cadeau } from "@/lib/lien";
 import { contexte, evenement } from "@/lib/dalevoz";
 import { reactionSalaire } from "@/lib/repliques";
-import { jouer, parler, poserDecor, reagir, reglerSons, taire, type Acte, type Son } from "@/lib/sons";
+import { etatDuSon, jouer, parler, poserDecor, reagir, reglerSons, taire, type Acte, type Son } from "@/lib/sons";
 import { FRAIS_DEFAUT_ID, PLACEMENT_DEFAUT_ID, casDepuisRequete, requeteDuCas } from "@/lib/lien";
 import {
   CRANS_FRAIS,
@@ -159,6 +159,16 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
     } else {
       setEcran("deposition");
     }
+  }, []);
+
+  /*
+   * Une trappe de diagnostic, en DÉVELOPPEMENT seulement : trois pannes de son
+   * de suite se ressemblaient vues de la salle et ne se distinguaient que par
+   * l'état interne du module.
+   */
+  useEffect(() => {
+    if (process.env.NODE_ENV === "production") return;
+    (window as unknown as { __son?: unknown }).__son = etatDuSon;
   }, []);
 
   /* Chaque carte s'ouvre en haut : on vient de changer d'écran, pas de page. */

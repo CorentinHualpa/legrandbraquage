@@ -272,6 +272,26 @@ export function sonsActifs(): boolean {
 }
 
 /**
+ * L'état de la machine à parler, pour DIAGNOSTIQUER.
+ *
+ * Trois pannes de suite se sont ressemblées vues de la salle (« il s'est tu »,
+ * « il a parlé sur la mauvaise carte ») et ne se distinguent que par ces cinq
+ * variables. Sans elles on raisonne sur du vide, et raisonner sur du son est
+ * exactement ce qui a coûté le plus cher dans ce dossier.
+ */
+export function etatDuSon() {
+  return {
+    actif,
+    protegee,
+    enAttente,
+    suite: [...suite],
+    parle: voixEnCours?.src.split("/").pop() ?? null,
+    minuterie: minuterieVoix !== null,
+    acte: acteCourant,
+  };
+}
+
+/**
  * Pose le décor de l'acte en cours. Idempotent : appelable à chaque rendu,
  * il ne fait rien tant que l'acte ne change pas.
  */
@@ -470,10 +490,20 @@ const A_DEUX: Record<string, string[]> = {
 let suite: string[] = [];
 
 function lancerLaVoix(nom: string, delaiMs: number) {
+  /*
+   * ⚠ `voixEnCours` est posé TOUT DE SUITE, avant le délai, parce que le garde
+   * de `parler` teste `protegee && voixEnCours`. Quand l'élément n'était créé
+   * qu'à l'expiration de la minuterie, une réplique déclenchée au même instant
+   * qu'un changement de carte tombait dans un trou : le garde ne voyait pas de
+   * voix en cours, `taire()` annulait la minuterie, et la réaction au salaire
+   * disparaissait sans laisser de trace.
+   */
+  const el = new Audio(`/voix/${nom}.mp3`);
+  voixEnCours = el;
+
   minuterieVoix = setTimeout(() => {
     minuterieVoix = null;
-    const el = new Audio(`/voix/${nom}.mp3`);
-    voixEnCours = el;
+    if (voixEnCours !== el) return;
     duckerLesNappes(true);
     const fini = () => {
       if (voixEnCours !== el) return;
@@ -540,7 +570,19 @@ export function parler(ecran: string): void {
 export function reagir(nom: string): void {
   if (typeof window === "undefined") return;
   taire();
-  if (!actif || !AVEC_REPLIQUE.has(nom)) return;
+  if (!actif) return;
+  if (!AVEC_REPLIQUE.has(nom)) {
+    /*
+     * ⚠ Un nom inconnu ne doit PAS se taire poliment. C'est exactement ce qui
+     * rend une panne de son indiagnosticable : on renomme une réplique d'un
+     * côté, l'autre côté demande l'ancien nom, personne ne parle plus et rien
+     * ne le dit. En développement, ça hurle.
+     */
+    if (process.env.NODE_ENV !== "production") {
+      console.warn(`[son] réplique inconnue : « ${nom} ». Personne ne parlera.`);
+    }
+    return;
+  }
   protegee = true;
   lancerLaVoix(nom, 0);
 }

@@ -104,8 +104,18 @@ export function Deposition({
     if (minuterieMontant.current) clearTimeout(minuterieMontant.current);
     minuterieMontant.current = setTimeout(() => derniereReaction.current(), 1_500);
   };
+  /*
+   * ⚠ En quittant la carte, une réaction EN ATTENTE est jouée au lieu d'être
+   * jetée. Le cas courant est justement celui-là : on tape le montant et on
+   * clique « Signer » dans la foulée, donc en moins d'une seconde et demie. La
+   * réaction au salaire, qui est le seul moment où il commente ce qu'on vient
+   * d'écrire, disparaissait précisément quand on va vite.
+   */
   useEffect(() => () => {
-    if (minuterieMontant.current) clearTimeout(minuterieMontant.current);
+    if (!minuterieMontant.current) return;
+    clearTimeout(minuterieMontant.current);
+    minuterieMontant.current = null;
+    derniereReaction.current();
   }, []);
   /*
    * Le champ est GROUPÉ au repos (« 2 190 ») et BRUT pendant la saisie
