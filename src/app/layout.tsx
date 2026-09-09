@@ -1,7 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Mono, Newsreader } from "next/font/google";
 import "./globals.css";
+import { euros } from "@/lib/format";
+import { casDepuisRequete, REQUETE_UNE_PAR_DEFAUT } from "@/lib/lien";
 import { SITE_URL } from "@/lib/site";
+import { uneDuCas } from "@/lib/une";
 
 const serif = Newsreader({
   subsets: ["latin"],
@@ -36,12 +39,30 @@ const DESCRIPTION =
  * `og.png` ne sert qu'à celui qui arrive sans paramètre : il montre le
  * salarié médian. On le refait avec `node scripts/og/rendre.mjs`, qui appelle
  * la même route ; il n'y a plus deux mises en page à tenir d'accord.
+ *
+ * ⚠ LE TEXTE DE REMPLACEMENT SE CALCULE, il ne se recopie pas. Il a porté
+ * pendant des semaines quatre montants tapés à la main, qui décrivaient une
+ * image que le moteur ne produisait plus : un lecteur d'écran entendait un
+ * dossier, ses voisins voyants en voyaient un autre. Il sort maintenant de
+ * `uneDuCas`, la même fonction que l'image et que l'écran de fin, sur le même
+ * cas par défaut. Un barème qui bouge le met à jour tout seul.
  */
+// La MÊME requête que le repli de `/api/avis`, sinon le texte décrit une
+// image que personne ne voit. Un `null` ici est une erreur de build, pas un
+// cas à rattraper en silence.
+const CAS_PAR_DEFAUT = casDepuisRequete(REQUETE_UNE_PAR_DEFAUT);
+if (!CAS_PAR_DEFAUT) throw new Error("REQUETE_UNE_PAR_DEFAUT ne résout aucun dossier");
+const UNE_PAR_DEFAUT = uneDuCas(CAS_PAR_DEFAUT);
+
 const PARTAGE = {
   url: "/og.png",
   width: 1200,
   height: 630,
-  alt: "La Gazette des Prélèvements : braqué de 1 017 844 € sur une carrière au salaire médian, 2 190 € net avant impôt par mois. Placés en fonds euros à 0,7 %, ils auraient fait 1 160 777 €, contre 1 040 463 € rendus. Manque à gagner : 120 314 €. Coupable.",
+  alt:
+    `La Gazette des Prélèvements : braqué de ${UNE_PAR_DEFAUT.preleve} sur une carrière au salaire médian, `
+    + `${euros(CAS_PAR_DEFAUT.netMensuel)} € net avant impôt par mois. Placés en ${UNE_PAR_DEFAUT.placement}, `
+    + `ils auraient fait ${UNE_PAR_DEFAUT.capital}, contre ${UNE_PAR_DEFAUT.recu} rendus. `
+    + `Manque à gagner : ${UNE_PAR_DEFAUT.ecart}. ${UNE_PAR_DEFAUT.braquage ? "Coupable" : "Relaxe"}.`,
 } as const;
 
 export const metadata: Metadata = {

@@ -26,7 +26,7 @@ import path from "node:path";
 
 import { ImageResponse } from "next/og";
 
-import { casDepuisRequete } from "@/lib/lien";
+import { casDepuisRequete, REQUETE_UNE_PAR_DEFAUT } from "@/lib/lien";
 import { SITE_HOTE } from "@/lib/site";
 import { uneDuCas, type Une } from "@/lib/une";
 
@@ -255,7 +255,7 @@ export async function GET(requete: Request) {
   /* Sans dossier valable dans l'URL, on montre le salarié médian : c'est le
      cas type de la page d'accueil, et c'est lui que l'aperçu doit annoncer
      quand quelqu'un partage l'adresse nue. */
-  const cas = casDepuisRequete(recherche) ?? casDepuisRequete("?n=2190");
+  const cas = casDepuisRequete(recherche) ?? casDepuisRequete(REQUETE_UNE_PAR_DEFAUT);
   let une: Une;
   try {
     if (!cas) throw new Error("cas par défaut illisible");

@@ -135,6 +135,15 @@ export function requeteDuCas(cas: Cas): string {
  * se comporter comme une visite normale. Chaque champ est validé contre sa
  * liste : une valeur inconnue retombe sur le défaut, jamais sur une erreur.
  */
+/**
+ * Le dossier servi quand l'adresse ne porte aucun paramètre : le salarié au
+ * salaire médian. Il vit ICI parce que DEUX endroits en dépendent, la route
+ * qui dessine l'image de partage et le texte de remplacement de cette image.
+ * Écrite en double, la valeur finit par diverger, et l'image dit alors autre
+ * chose que ce qu'un lecteur d'écran entend.
+ */
+export const REQUETE_UNE_PAR_DEFAUT = "?n=2190";
+
 export function casDepuisRequete(recherche: string): Cas | null {
   const q = new URLSearchParams(recherche);
 
