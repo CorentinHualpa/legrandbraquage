@@ -7,12 +7,12 @@ import type { Pieces } from "@/lib/images";
 import { euros } from "@/lib/format";
 import { dit } from "@/lib/repliques";
 import { frapper, jouer } from "@/lib/sons";
+import { NET_MAXIMUM } from "@/lib/lien";
 import type { Statut } from "@/lib/moteur";
 import {
   ACTIVITES,
   CATEGORIES_MICRO,
   FORMES_TPE,
-  NOMS_REGIME,
   OU_LIRE_SON_NET,
   STATUTS,
   VERSANTS,
@@ -160,7 +160,19 @@ export function Deposition({
       retour={retour}
       photo={{ numero: 18, pieces, hauteur: 250, legende: "CLICHÉ 18 · LE COMMISSARIAT, 23 H 40" }}
       action={{
-        libelle: vide ? "Le montant, d’abord" : "Signer la déposition",
+        /*
+         * ⚠ Le bouton doit dire CE QUI MANQUE, et il y a DEUX manques.
+         * Jusqu'au 10/09/2026 il n'en nommait qu'un : « Patron de TPE » coché
+         * sans forme juridique laissait « Signer la déposition » en gris, sans
+         * un mot d'explication. Le message censé le dire, plus bas, ne pouvait
+         * jamais s'afficher : l'écran d'entrée du parcours avait donc un état
+         * bloqué muet, sur le seul chemin où l'on ne peut rien faire d'autre.
+         */
+        libelle: vide
+          ? "Le montant, d’abord"
+          : !calculable
+            ? "Votre société, d’abord"
+            : "Signer la déposition",
         onClick: signer,
         disabled: !pret,
       }}
@@ -206,7 +218,17 @@ export function Deposition({
                * parfaitement normal.
                */
               const chiffres = e.target.value.replace(/\D/g, "").slice(0, 7);
-              const nouveau = chiffres === "" ? 0 : Number(chiffres);
+              /*
+               * ⚠ BORNÉ AU MÊME PLAFOND QUE LA RELECTURE. Le champ tronquait à
+               * sept chiffres, donc jusqu’à 9 999 999, quand `casDepuisRequete`
+               * rejette tout net au-dessus d’un million. Un dossier saisi entre
+               * les deux se calculait, écrivait son URL, et une actualisation le
+               * jetait entièrement ; partagé, son aperçu affichait le cas par
+               * défaut, donc les chiffres de quelqu’un d’autre. La saisie s’aligne
+               * sur la lecture, jamais l’inverse : c’est la lecture qui décide de
+               * ce qu’un lien peut porter.
+               */
+              const nouveau = chiffres === "" ? 0 : Math.min(NET_MAXIMUM, Number(chiffres));
               // La machine ne frappe qu'à l'écriture : au retour arrière, rien.
               if (String(nouveau).length > String(etat.netMensuel).length) jouer("machine");
               /*
@@ -348,10 +370,24 @@ export function Deposition({
         </fieldset>
       ) : null}
 
-      {regime && !calculable ? (
+      {/*
+        * ⚠ CE BLOC ÉTAIT DU CODE MORT, et il couvrait précisément le seul état
+        * bloqué non expliqué du parcours. Sa condition était
+        * `regime && !calculable` : `REGIMES_DISPONIBLES` contient les cinq
+        * régimes du type `Regime`, donc `calculable` n'est faux QUE si `regime`
+        * vaut `null`, et `regime &&` est alors faux lui aussi. Il ne pouvait
+        * jamais s'afficher, et jamais dire à un patron de TPE ce qui manquait.
+        */}
+      {!vide && !calculable ? (
         <p className="border-l-2 border-rouge-clair pl-3 text-[13.5px] leading-relaxed text-papier-2">
-          <span className="font-semibold">Le régime {NOMS_REGIME[regime]} n’est pas encore instruit.</span>{" "}
-          Lui servir le barème d’un régime voisin donnerait un chiffre faux. On préfère le dire.
+          <span className="font-semibold">
+            {etat.statut === "tpe"
+              ? "Il manque la forme de votre société."
+              : "Ce régime n’est pas encore instruit."}
+          </span>{" "}
+          {etat.statut === "tpe"
+            ? "Un gérant majoritaire de SARL et un président de SAS ne cotisent pas du tout pareil : l’un est un travailleur non salarié, l’autre est assimilé salarié, sans l’assurance chômage. Choisissez juste au-dessus."
+            : "Lui servir le barème d’un régime voisin donnerait un chiffre faux. On préfère le dire."}
         </p>
       ) : null}
     </Carte>

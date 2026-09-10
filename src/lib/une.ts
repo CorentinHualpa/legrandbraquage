@@ -53,11 +53,31 @@ export function uneDuCas(cas: Cas): Une {
       fraisVersement: frais.versement,
     },
   });
+  /*
+   * ⚠ LE PÉRIMÈTRE VOYAGE AVEC LA UNE. Décocher les quatre lignes de l’écran
+   * « pièce à conviction » est autorisé et c’est même l’intérêt du site : on
+   * compte ce qu’on veut bien compter. Mais l’image partagée n’en disait rien.
+   * Un dossier à périmètre vide produisait une une parfaitement crédible qui
+   * annonçait « BRAQUÉ DE 0 € » et « en votre faveur 1 040 463 € », avec le
+   * tampon RELAXE, sans qu’un lecteur puisse deviner qu’il manquait trois
+   * lignes sur quatre. Le dossier se défend en montrant son périmètre, pas en
+   * le taisant. Constaté le 10/09/2026.
+   */
+  const postes = [
+    cas.perimetre.salariales,
+    cas.perimetre.patronales,
+    cas.perimetre.impotRevenu,
+    cas.perimetre.consommation,
+  ];
+  const comptes = postes.filter(Boolean).length;
+  const mention =
+    comptes === postes.length ? "" : ` · ${comptes} POSTE${comptes > 1 ? "S" : ""} SUR ${postes.length}`;
+
   const preleve = s.plateauGauche.total;
   const annees = anneesSansTravailler(preleve, s.netApresImpotActuel);
   return {
     preleve: `${euros(preleve)} €`,
-    placement: `${ETIQUETTES_PLACEMENT[cran.id] ?? cran.nom} à ${tauxReel(cran.reel)}`,
+    placement: `${ETIQUETTES_PLACEMENT[cran.id] ?? cran.nom} à ${tauxReel(cran.reel)}${mention}`,
     capital: `${euros(s.opportunite?.capital ?? preleve)} €`,
     recu: `${euros(s.plateauDroit.total)} €`,
     ecart: eurosSigne(s.verdict.ecart),

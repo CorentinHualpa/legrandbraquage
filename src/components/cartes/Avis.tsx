@@ -119,7 +119,15 @@ export function Avis({
       retour={retour}
       photo={{ numero: 6, pieces, hauteur: 220 }}
       action={{ libelle: copie ? "Lien copié" : "Partager", onClick: partager }}
-      actionSecondaire={{ libelle: "Refaire la déposition", onClick: recommencer }}
+      /*
+       * ⚠ CE BOUTON N’EFFACE RIEN, et son ancien nom « Refaire la déposition »
+       * promettait l’inverse. Il ramène à la déposition en GARDANT le montant,
+       * le statut, les paliers, l’enveloppe et le cadeau : c’est le geste utile
+       * (on vient changer un chiffre, pas tout reprendre). Le vrai « tout
+       * effacer » est le bouton de l’en-tête, en deux temps, et les deux se
+       * ressemblaient assez pour qu’on clique le mauvais. Renommé le 10/09/2026.
+       */
+      actionSecondaire={{ libelle: "Modifier ma déposition", onClick: recommencer }}
       pied={
         <div className="flex flex-col gap-2">
           <a

@@ -144,11 +144,24 @@ export function requeteDuCas(cas: Cas): string {
  */
 export const REQUETE_UNE_PAR_DEFAUT = "?n=2190";
 
+/**
+ * Le plus gros net mensuel qu'un lien peut porter.
+ *
+ * ⚠ EXPORTÉ pour que la SAISIE et la RELECTURE s'accordent. Le champ de la
+ * déposition acceptait sept chiffres quand cette borne en refuse plus de sept
+ * au-delà d'un million : un dossier saisi entre 1 000 001 et 9 999 999 se
+ * calculait, s'affichait, écrivait son URL... et une simple actualisation le
+ * jetait entièrement. Le même lien partagé n'ouvrait rien chez le destinataire,
+ * pendant que son APERÇU affichait les chiffres du cas par défaut, c'est-à-dire
+ * ceux de quelqu'un d'autre. Constaté le 10/09/2026.
+ */
+export const NET_MAXIMUM = 1_000_000;
+
 export function casDepuisRequete(recherche: string): Cas | null {
   const q = new URLSearchParams(recherche);
 
   const net = Number(q.get("n"));
-  if (!Number.isFinite(net) || net <= 0 || net > 1_000_000) return null;
+  if (!Number.isFinite(net) || net <= 0 || net > NET_MAXIMUM) return null;
 
   const statutBrut = q.get("s") as Statut | null;
   const statut = statutBrut && STATUTS_VALIDES.includes(statutBrut) ? statutBrut : "salarie";
@@ -183,7 +196,16 @@ export function casDepuisRequete(recherche: string): Cas | null {
     categorieMicro,
     versementLiberatoire: q.get("vl") === "1",
     couple: q.get("cp") === "1",
-    enfants: Math.min(6, Math.max(0, Number(q.get("e")) || 0)),
+    /*
+     * ⚠ BORNÉ À 3, comme le bloc foyer de la déposition, qui ne propose que
+     * 0, 1, 2 et « 3+ » (littéralement 3). La lecture acceptait jusqu’à 6 :
+     * un lien `?e=5` posait cinq enfants, donc 4 parts fiscales, sans qu’AUCUN
+     * bouton n’apparaisse actif à l’écran. La personne voyait un foyer sans
+     * réponse cochée et ne pouvait quitter cet état qu’en cliquant une valeur
+     * inférieure ou égale à 3. Un état qui change le calcul doit être visible
+     * et reproductible à la main, sinon il ne doit pas exister.
+     */
+    enfants: Math.min(3, Math.max(0, Number(q.get("e")) || 0)),
     perimetre: litPerimetre(q.get("p")) ?? PERIMETRE_DEFAUT,
     paliers: {
       ecole: litPalier("ecole", q.get("pe")) as Paliers["ecole"],

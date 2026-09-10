@@ -149,9 +149,24 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
     setFraisId(cas.fraisId);
     setHabitudes(cas.habitudes);
     setCadeau(cas.cadeau);
-    const ouvrable = regimeCalculable(regimeDe(cas.statut, cas.formeTpe, cas.activite));
+    const regimeOuvert = regimeDe(cas.statut, cas.formeTpe, cas.activite);
+    const ouvrable = regimeCalculable(regimeOuvert);
     const ancre = window.location.hash.slice(1) as Ecran;
-    if (ouvrable && (ECRANS as readonly string[]).includes(ancre) && ancre !== "couverture") {
+    /*
+     * ⚠ L’ancre se valide contre les écrans DE CE RÉGIME, pas contre la liste
+     * complète. Elle testait `ECRANS`, qui porte les quinze entrées, alors que
+     * la navigation utilise `ecrans`, filtrée à quatorze pour un fonctionnaire.
+     * Conséquence, avec `#chomage&s=fonctionnaire` : l’écran s’affichait quand
+     * même, `indexOf` rendait -1 donc le bandeau annonçait « 0 / 13 » avec une
+     * jauge vide, le titre disait « 3 sur 3 » là où il n’y a que deux questions,
+     * et les deux boutons mentaient sur leur destination (« Voir ce qu’ils
+     * m’auront rendu » repartait à la déposition). L’URL était réécrite avec
+     * l’ancre, donc actualiser reproduisait l’état. Vérifié en production le
+     * 10/09/2026 avant correction.
+     */
+    const ecransDuRegime =
+      regimeOuvert === "fonctionnaire" ? ECRANS.filter((e) => e !== "chomage") : ECRANS;
+    if (ouvrable && (ecransDuRegime as readonly string[]).includes(ancre) && ancre !== "couverture") {
       setEcran(ancre);
     } else {
       setEcran("deposition");
@@ -445,7 +460,16 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
 
   return (
     <ContexteDossier.Provider value={{ recommencer }}>
-    <Commissariat />
+    {/*
+      * ⚠ PAS SUR L’ÉCRAN FINAL. L’avis porte déjà son propre widget, embarqué
+      * dans le volet « Parler au commissaire » : monter le lanceur flottant
+      * par-dessus faisait DEUX widgets du même agent sur la même page, donc
+      * deux conversations et une bulle en double. Constaté le 10/09/2026.
+      * L’entrée en conversation ne disparaît pas pour autant, elle change de
+      * forme : sur cet écran c’est le volet, et il est plus visible qu’une
+      * pastille dans un coin.
+      */}
+    {ecran === "avis" ? null : <Commissariat />}
     <main className="min-h-dvh bg-nuit">
       {ecran === "tabac" || ecran === "carburant" || ecran === "alcool" ? (
         <Cafe {...commun} poste={ecran} simulation={simulation} habitudes={habitudes} choisir={choisirHabitude} />

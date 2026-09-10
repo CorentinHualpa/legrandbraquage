@@ -27,7 +27,10 @@ export function Commissariat() {
 
   useEffect(() => {
     if (!cle) return;
-    if (document.querySelector("script[data-dalevoz-lanceur]")) return;
+    // ⚠ L’audition de l’écran final monte le MÊME agent en mode embarqué.
+    // Deux widgets sur une page, c’est deux conversations et une bulle en
+    // double : on renonce si l’un ou l’autre est déjà là.
+    if (document.querySelector("script[data-dalevoz-lanceur],script[data-dalevoz-audition]")) return;
 
     const script = document.createElement("script");
     script.src = `${HOTE}/dalevoz-widget.js`;

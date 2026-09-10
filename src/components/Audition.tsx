@@ -83,6 +83,17 @@ export function Audition({
     const script = document.createElement("script");
     script.src = `${HOTE}/dalevoz-widget.js`;
     script.async = true;
+    /*
+     * ⚠ SA PROPRE MARQUE, et elle compte. `Commissariat` se garde des
+     * doublons en cherchant `script[data-dalevoz-lanceur]` ; cette injection
+     * n’écrivait aucun attribut, donc rien n’empêchait les deux de coexister
+     * sur l’écran final : bulle flottante ET cadre embarqué, deux widgets,
+     * deux conversations, exactement le symptôme que le commentaire de
+     * `Commissariat` décrit. La vraie parade est en amont, `Parcours` ne monte
+     * plus le lanceur flottant sur l’écran de l’avis ; cet attribut est là
+     * pour que la garde d’en face puisse voir celui-ci si l’ordre s’inverse.
+     */
+    script.setAttribute("data-dalevoz-audition", "1");
     script.setAttribute("data-agent", AGENT);
     script.setAttribute("data-key", cle);
     script.setAttribute("data-host", HOTE);

@@ -1614,3 +1614,99 @@ test('moteur : aucun chiffre non sourçable, aucun tutoiement', () => {
     );
   }
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+/*
+ * Les huit défauts de bord relevés à l’audit du 10/09/2026.
+ *
+ * Aucun ne bloquait le parcours normal : le moteur passe 1001 combinaisons de
+ * régime, de montant, de périmètre, de paliers, d’habitudes, de placement, de
+ * famille et d’âge sans une exception ni un NaN. Ils vivaient tous sur les
+ * chemins d’ENTRÉE et de PARTAGE, que rien ne testait.
+ */
+const SRC = (f) => readFileSync(new URL(`../${f}`, import.meta.url), 'utf8');
+
+test('saisie et relecture s’accordent sur le montant maximum', () => {
+  /*
+   * Le champ tronquait à sept chiffres (9 999 999), la relecture rejette
+   * au-dessus d’un million : un dossier saisi entre les deux se calculait, puis
+   * une actualisation le jetait, et son aperçu partagé montrait le cas par
+   * défaut, c’est-à-dire les chiffres de quelqu’un d’autre.
+   */
+  const lien = SRC('src/lib/lien.ts');
+  const depo = SRC('src/components/cartes/Deposition.tsx');
+  assert.match(lien, /export const NET_MAXIMUM = 1_000_000;/, 'la borne est exportée');
+  assert.match(lien, /net > NET_MAXIMUM/, 'la relecture cite la borne');
+  assert.match(depo, /Math\.min\(NET_MAXIMUM, Number\(chiffres\)\)/, 'la saisie cite la MÊME borne');
+});
+
+test('l’ancre se valide contre les écrans du régime, pas contre la liste complète', () => {
+  // `#chomage` avec un fonctionnaire affichait un écran hors parcours, un
+  // compteur à « 0 / 13 » et deux boutons qui repartaient à la déposition.
+  const p = SRC('src/components/Parcours.tsx');
+  assert.match(p, /ecransDuRegime/, 'la liste filtrée existe');
+  assert.ok(
+    !/\(ECRANS as readonly string\[\]\)\.includes\(ancre\)/.test(p),
+    'l’ancre ne doit plus être validée contre ECRANS',
+  );
+});
+
+test('le blocage de la déposition dit toujours CE QUI MANQUE', () => {
+  /*
+   * Deux manques, deux libellés. « Patron de TPE » sans forme juridique laissait
+   * « Signer la déposition » en gris sans un mot, et le message censé l’expliquer
+   * était du code mort : sa condition `regime && !calculable` ne peut jamais être
+   * vraie, `calculable` n’étant faux que quand `regime` vaut null.
+   */
+  const depo = SRC('src/components/cartes/Deposition.tsx');
+  assert.match(depo, /Votre société, d’abord/, 'le bouton nomme le second manque');
+  assert.match(depo, /Il manque la forme de votre société/, 'et le message l’explique');
+  assert.ok(!/\{regime && !calculable \?/.test(depo), 'la condition morte est partie');
+});
+
+test('un seul widget par page', () => {
+  // L’écran final montait le lanceur flottant ET le cadre embarqué du volet :
+  // deux widgets du même agent, donc deux conversations et une bulle en double.
+  const parcours = SRC('src/components/Parcours.tsx');
+  const audition = SRC('src/components/Audition.tsx');
+  const commissariat = SRC('src/components/Commissariat.tsx');
+  assert.match(parcours, /ecran === "avis" \? null : <Commissariat \/>/, 'pas de lanceur sur l’avis');
+  assert.match(audition, /data-dalevoz-audition/, 'l’embed porte sa marque');
+  assert.match(commissariat, /data-dalevoz-audition/, 'et la garde d’en face la voit');
+});
+
+test('les frais ne sont plus cachés derrière un clic', () => {
+  // Ils entrent dans le calcul du capital, donc dans le verdict, et ils vivaient
+  // dans un volet replié dont le titre n’annonçait pas un réglage.
+  const bourse = SRC('src/components/cartes/Bourse.tsx');
+  assert.match(bourse, /l’avocate des braqueurs demande la parole" ouvertParDefaut/);
+});
+
+test('le bouton de l’écran final ne promet plus d’effacer', () => {
+  const avis = SRC('src/components/cartes/Avis.tsx');
+  assert.match(avis, /Modifier ma déposition/, 'il dit ce qu’il fait');
+  // La chaîne survit dans le commentaire qui raconte le défaut : on vise le
+  // LIBELLÉ, pas le mot.
+  assert.ok(!/libelle: "Refaire la déposition"/.test(avis), 'et plus ce qu’il ne fait pas');
+});
+
+test('la une dit quand le périmètre est réduit', () => {
+  /*
+   * Décocher les quatre lignes est autorisé, c’est même l’intérêt du site. Mais
+   * l’image partagée annonçait « BRAQUÉ DE 0 € » et « en votre faveur » avec le
+   * tampon RELAXE, sans qu’un lecteur puisse deviner qu’il manquait trois postes
+   * sur quatre.
+   */
+  const une = SRC('src/lib/une.ts');
+  assert.match(une, /POSTE\$\{comptes > 1 \? "S" : ""\} SUR/, 'la mention existe');
+  assert.match(une, /\$\{tauxReel\(cran\.reel\)\}\$\{mention\}/, 'et elle voyage avec la une');
+});
+
+test('le foyer accepte exactement ce que l’écran propose', () => {
+  // `?e=5` posait cinq enfants, donc 4 parts, sans qu’aucun bouton du bloc foyer
+  // n’apparaisse actif : un état qui change l’impôt et qu’on ne peut pas refaire.
+  const lien = SRC('src/lib/lien.ts');
+  const depo = SRC('src/components/cartes/Deposition.tsx');
+  assert.match(lien, /Math\.min\(3, Math\.max\(0, Number\(q\.get\("e"\)\) \|\| 0\)\)/);
+  assert.match(depo, /\[0, 1, 2, 3\]\.map/, 'et l’écran propose bien ces quatre valeurs');
+});

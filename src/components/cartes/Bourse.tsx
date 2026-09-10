@@ -167,7 +167,17 @@ export function Bourse({
 
       <div className="grow" />
 
-      <Volet titre="Sauf que… l’avocate des braqueurs demande la parole">
+      {/*
+        * ⚠ OUVERT PAR DÉFAUT depuis le 10/09/2026. Les quatre crans de FRAIS
+        * vivent dans ce volet, et ils entrent directement dans le calcul du
+        * capital, donc dans le verdict : sur quarante-trois ans, les frais
+        * pèsent plus lourd que la performance, `capitalisation.js` le dit lui-
+        * même. Un réglage qui change la conclusion ne peut pas être derrière un
+        * titre qui n’annonce pas un réglage. On garde la mise en scène (la
+        * plaidoirie de l’avocate amène les frais, c’est elle qui les réclame),
+        * on retire seulement le clic qui les cachait.
+        */}
+      <Volet titre="Sauf que… l’avocate des braqueurs demande la parole" ouvertParDefaut>
         {pieces[28] ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={`/images/${pieces[28]}`} alt="L’avocate des braqueurs, dans le couloir" className="-mx-5 aspect-[16/9] w-[calc(100%+2.5rem)] max-w-none object-cover object-[50%_30%] saturate-[0.8] sm:-mx-6 sm:w-[calc(100%+3rem)]" decoding="async" />
