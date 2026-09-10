@@ -145,15 +145,21 @@ function contreparties(pensionMensuelle, regime = 'salarie', paliers = null) {
       /*
        * ⚠ Cette ligne a porté « 91 % des carrières connaissent un épisode
        * indemnisé » jusqu'au 09/09/2026. CE CHIFFRE N'EXISTE NULLE PART :
-       * recherche menée sur l'Unédic (162 publications), la Dares, France
-       * Travail, l'INSEE, la DREES, le COR, France Stratégie et la Cnav, sans
-       * un seul document qui l'imprime. Il vient d'une confusion avec l'INSEE
-       * Références « Emploi, chômage, revenus du travail » 2025, qui écrit
-       * qu'en décembre 2023 « 91 % des personnes INDEMNISABLES l'ont été au
-       * titre de l'assurance chômage » : une part des droits ouverts à une
-       * DATE, pas une part des carrières. Une étude de la Dares donne même un
-       * 91 % de sens inverse (91 % des salariés en contrat court en 2010
-       * n'ont ouvert aucun droit entre 2010 et 2012).
+       * l'Unédic a été crawlée en entier (351 publications du catalogue), plus
+       * la Dares, France Travail, l'INSEE, la DREES, le COR, France Stratégie
+       * et la Cnav, sans un seul document qui l'imprime.
+       *
+       * DEUX origines possibles, et aucune ne dit ce qu'on lui faisait dire. La plus probable est un
+       * chiffre d'OPINION du Baromètre Unédic, dont la formulation est presque
+       * mot pour mot la nôtre : « 94 à 96 % des Français estiment que tout le
+       * monde peut connaître une période de chômage AU COURS DE SA CARRIÈRE »,
+       * et « neuf cadres sur dix » dans le volet Apec. C'est ce que les gens
+       * pensent, pas ce qui leur arrive. La seconde est l'INSEE Références
+       * « Emploi, chômage, revenus du travail » 2025 : en décembre 2023, « 91 %
+       * des personnes INDEMNISABLES l'ont été au titre de l'assurance
+       * chômage », une part des droits ouverts à une DATE. Et la Dares publie
+       * un 91 % de sens exactement inverse (91 % des salariés en contrat court
+       * en 2010 n'ont ouvert aucun droit entre 2010 et 2012).
        *
        * Le seul chiffre officiel de PORTÉE CARRIÈRE trouvé : 42 % des
        * prestataires du régime général ont au moins une période assimilée
