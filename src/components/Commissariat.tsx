@@ -12,7 +12,13 @@ import { AGENT, HOTE, identifiantVisiteur } from "@/lib/dalevoz";
  * n'ouvre après avoir lu son verdict : le seul endroit du parcours où on peut
  * poser une question arrivait quand on n'en a plus (Coq, 09/09/2026, « ça
  * devrait être accessible tout le temps »). Le lanceur du widget vit donc en
- * bas à droite, sur les quatorze cartes.
+ * bas à droite, de la déposition à la bourse.
+ *
+ * ⚠ TREIZE cartes sur quatorze, pas quatorze : l'avis en est exclu, il porte son
+ * propre widget embarqué. Et ce commentaire a dit « les quatorze » pendant un
+ * jour alors que la déposition n'en avait pas, parce que `Parcours` sort par
+ * trois `return` différents et qu'un seul montait ce composant. C'est
+ * `scripts/parcours/test-lanceur.mjs` qui compte maintenant, pas cette phrase.
  *
  * Le script est injecté UNE fois pour toute la visite, pas à chaque carte : le
  * widget monte son propre lanceur, garde son fil ouvert d'un écran à l'autre,

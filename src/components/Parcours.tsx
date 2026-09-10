@@ -423,30 +423,45 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
   // dossier ouvrable retombe dessus, sans rien casser.
   if (ecran === "deposition" || !simulation) {
     return (
-      <main className="min-h-dvh bg-nuit">
-        <Deposition
-          pieces={pieces}
-          etat={etat}
-          changer={changer}
-          regime={regime}
-          calculable={calculable}
-          signer={() => aller("tabac")}
-          /*
-           * ⚠ La réaction au montant part quand la FRAPPE s'arrête, plus au
-           * clic sur « Signer ». Une remarque qui arrive au moment où on quitte
-           * la carte se cogne à la réplique de la suivante, et surtout elle
-           * n'est plus une réaction : la personne a déjà tourné la page.
-           *
-           * Elle ne se répète pas tant qu'on reste dans la même tranche :
-           * saisir 2 190 puis corriger en 2 200 ne rejoue pas la même phrase,
-           * alors que passer à 6 000 en déclenche une autre.
-           */
-          reagirAuMontant={() => reagir(reactionSalaire(simulation?.netAvantImpotActuel ?? etat.netMensuel))}
-          retour={() => aller("couverture")}
-          numero={1}
-          total={total}
-        />
-      </main>
+      <>
+        {/*
+         * ⚠ ICI AUSSI, ET C’EST LE PIÈGE. La déposition sort par SON PROPRE
+         * `return`, bien avant celui du bas : le lanceur monté là-bas ne la
+         * voyait pas, et la carte 1 sur 14 était la seule du parcours sans
+         * commissaire joignable (Coq, 10/09/2026, « je vois pas le launcher »).
+         * Trois `return` dans ce composant, un seul portait le lanceur.
+         *
+         * Le script s’injecte UNE fois pour toute la visite et survit au
+         * démontage, donc le poser dès la première carte suffit aux suivantes.
+         * `scripts/parcours/test-lanceur.mjs` interdit qu’un `return` reparte
+         * un jour sans lui.
+         */}
+        <Commissariat />
+        <main className="min-h-dvh bg-nuit">
+          <Deposition
+            pieces={pieces}
+            etat={etat}
+            changer={changer}
+            regime={regime}
+            calculable={calculable}
+            signer={() => aller("tabac")}
+            /*
+             * ⚠ La réaction au montant part quand la FRAPPE s'arrête, plus au
+             * clic sur « Signer ». Une remarque qui arrive au moment où on
+             * quitte la carte se cogne à la réplique de la suivante, et surtout
+             * elle n'est plus une réaction : la personne a déjà tourné la page.
+             *
+             * Elle ne se répète pas tant qu'on reste dans la même tranche :
+             * saisir 2 190 puis corriger en 2 200 ne rejoue pas la même phrase,
+             * alors que passer à 6 000 en déclenche une autre.
+             */
+            reagirAuMontant={() => reagir(reactionSalaire(simulation?.netAvantImpotActuel ?? etat.netMensuel))}
+            retour={() => aller("couverture")}
+            numero={1}
+            total={total}
+          />
+        </main>
+      </>
     );
   }
 

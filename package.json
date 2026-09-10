@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test moteur/test.mjs scripts/sons/test-vie.mjs"
+    "test": "node --test moteur/test.mjs scripts/sons/test-vie.mjs scripts/parcours/test-lanceur.mjs"
   },
   "dependencies": {
     "next": "16.3.4",
