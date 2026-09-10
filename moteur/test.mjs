@@ -1571,3 +1571,46 @@ test('non-salariés : les deux courbes sont normalisées sur le même âge que l
     );
   }
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+test('moteur : aucun chiffre non sourçable, aucun tutoiement', () => {
+  /*
+   * Deux gardes sur les mêmes chaînes, celles des contreparties non chiffrées.
+   *
+   * Le « 91 % des carrières connaissent un épisode indemnisé » a vécu dans ce
+   * moteur jusqu'au 09/09/2026 sans exister nulle part : ni l'Unédic, ni la
+   * Dares, ni le COR ne l'impriment, et une étude de la Dares en donne même un
+   * de sens inverse. Il n'était affiché sur aucun écran, mais le dépôt est
+   * PUBLIC et la page méthode invite à le lire : un chiffre inventé y est aussi
+   * coûteux qu'à l'écran.
+   *
+   * Le tutoiement, lui, est la troisième fuite du même genre après la
+   * description OpenGraph et les aides des indépendants (09/09/2026). Le produit
+   * vouvoie partout depuis `f455ef9`.
+   */
+  const sansPaliers = M.simuler({
+    netMensuel: 2190, statut: 'salarie', perimetre: M.PERIMETRE_COMPLET,
+  });
+  const textes = Object.values(sansPaliers.plateauDroit.lignes)
+    .flatMap((l) => [l?.libelle, l?.note, l?.pourquoi])
+    .filter(Boolean);
+
+  assert.ok(textes.length >= 8, 'préalable : on lit bien les libellés des quatre lignes');
+  for (const t of textes) {
+    /*
+     * PAS de \b : en JavaScript il est ASCII, \w valant [A-Za-z0-9_]. Le mot
+     * « êtes » se lit donc comme une frontière suivie de « tes », et
+     * /\btes\b/ y trouve un tutoiement inexistant. C'est exactement ce que ce
+     * test a fait au premier essai, sur une phrase impeccablement vouvoyée.
+     * Le repli qui marche : deux regards négatifs sur \p{L}, avec le drapeau u.
+     */
+    assert.ok(
+      !/(?<!\p{L})(tu|ton|ta|tes|toi|tienne)(?!\p{L})/iu.test(t),
+      `« ${t} » tutoie, alors que le produit vouvoie partout`,
+    );
+    assert.ok(
+      !/91 ?%/.test(t),
+      `« ${t} » porte le 91 % qui n’a aucune source publique`,
+    );
+  }
+});

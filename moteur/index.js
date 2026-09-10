@@ -141,8 +141,28 @@ function contreparties(pensionMensuelle, regime = 'salarie', paliers = null) {
   // porterait au crédit du fonctionnaire une contrepartie qu'il n'a pas payée.
   if (regime !== 'fonctionnaire') {
     sortie.chomage = nonChiffre(
-      'Un filet, le jour où tu es tombé',
-      '91 % des carrières connaissent un épisode indemnisé, aucune n’est la tienne',
+      'Un filet, le jour où vous êtes tombé',
+      /*
+       * ⚠ Cette ligne a porté « 91 % des carrières connaissent un épisode
+       * indemnisé » jusqu'au 09/09/2026. CE CHIFFRE N'EXISTE NULLE PART :
+       * recherche menée sur l'Unédic (162 publications), la Dares, France
+       * Travail, l'INSEE, la DREES, le COR, France Stratégie et la Cnav, sans
+       * un seul document qui l'imprime. Il vient d'une confusion avec l'INSEE
+       * Références « Emploi, chômage, revenus du travail » 2025, qui écrit
+       * qu'en décembre 2023 « 91 % des personnes INDEMNISABLES l'ont été au
+       * titre de l'assurance chômage » : une part des droits ouverts à une
+       * DATE, pas une part des carrières. Une étude de la Dares donne même un
+       * 91 % de sens inverse (91 % des salariés en contrat court en 2010
+       * n'ont ouvert aucun droit entre 2010 et 2012).
+       *
+       * Le seul chiffre officiel de PORTÉE CARRIÈRE trouvé : 42 % des
+       * prestataires du régime général ont au moins une période assimilée
+       * chômage dans leur carrière (COR, document de travail n° 17, document
+       * Cnav, données 2015). Il compte le chômage indemnisé ET non indemnisé,
+       * donc il ne dit pas tout à fait la même chose : c'est écrit ici, et la
+       * ligne ne chiffre toujours rien.
+       */
+      'quatre carrières sur dix touchent le chômage, aucune ne ressemble à la vôtre',
     );
   }
   /*

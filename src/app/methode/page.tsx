@@ -463,12 +463,21 @@ export default function Methode() {
                 Ce que la santé, l’école et le chômage vous ont rendu.
               </span>{" "}
               Ces trois postes ne portent aucun montant par défaut, et ce n’est
-              pas un oubli : le coût public par élève, la dépense de santé
-              remboursée par tranche d’âge et l’allocation chômage moyenne sont
-              publiés, mais ce qu’ils font sur une vie dépend de la vôtre, et
-              aucun organisme ne publie ce cumul. Ils ne comptent donc que si
-              vous les chiffrez vous-même, aux paliers. Quelqu’un qui traverse le
-              parcours sans y répondre voit un braquage plus lourd que le sien.
+              pas un oubli. Pour la <span className="font-semibold">santé</span>{" "}
+              et le <span className="font-semibold">chômage</span>, aucun
+              organisme ne publie ce qu’une vie reçoit : ni la DREES, ni la
+              Cnam, ni l’Unédic, ni le COR, ni l’OCDE. Pour l’
+              <span className="font-semibold">école</span>, un cumul existe, et
+              nous ne l’utilisons pas : la DEPP a chiffré une scolarité complète
+              à 114 460 € jusqu’au bac et 168 300 € jusqu’au master, mais c’était
+              en 2012 sur des données 2011, la série est arrêtée depuis, elle
+              compte <span className="italic">tous les financeurs</span> et non
+              la seule dépense publique, et la note précise elle-même qu’il
+              s’agit de coûts «&nbsp;instantanés&nbsp;», c’est-à-dire vingt années
+              facturées au tarif d’une seule. Ces trois postes ne comptent donc
+              que si vous les chiffrez vous-même, aux paliers. Quelqu’un qui
+              traverse le parcours sans y répondre voit un braquage plus lourd
+              que le sien.
             </li>
             {restant.length > 0 ? (
               <li className="border-l-[3px] border-cadre-bord pl-3">
