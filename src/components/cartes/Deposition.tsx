@@ -137,6 +137,14 @@ export function Deposition({
   const champ = useRef<HTMLInputElement>(null);
   /* Tant que la ligne est vide, elle bat, et rien d'autre ne peut se faire. */
   const vide = !(etat.netMensuel > 0);
+  /*
+   * ⚠ Le repli `?? "salarie"` sert l’aide d’un SALARIÉ (« la ligne net à payer
+   * de votre fiche de paie ») au seul moment où `regime` vaut `null`, c’est-à-
+   * dire à un patron de TPE qui n’a pas encore dit s’il est en SARL ou en SAS.
+   * Il en faut un pour l’étiquette du champ, mais on n’AFFIRME rien tant que le
+   * régime n’est pas résolu : la phrase d’aide se tait, elle reviendra dès le
+   * clic sur la forme juridique.
+   */
   const ouLire = OU_LIRE_SON_NET[regime ?? "salarie"];
   const micro = etat.statut === "independant" && etat.activite === "micro";
   const pret = calculable && etat.netMensuel > 0;
@@ -270,7 +278,7 @@ export function Deposition({
           ) : null}
         </div>
         <p id="net-aide" className="text-[13px] leading-snug text-encre-2">
-          {ouLire.aide} On rejoue toute votre carrière avec :{" "}
+          {regime ? `${ouLire.aide} ` : ""}On rejoue toute votre carrière avec :{" "}
           <strong className="text-encre">43 ans, de 22 à 64 ans</strong>, sur la courbe moyenne des salaires.
         </p>
       </Papier>

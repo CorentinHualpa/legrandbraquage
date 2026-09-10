@@ -1662,6 +1662,9 @@ test('le blocage de la déposition dit toujours CE QUI MANQUE', () => {
   assert.match(depo, /Votre société, d’abord/, 'le bouton nomme le second manque');
   assert.match(depo, /Il manque la forme de votre société/, 'et le message l’explique');
   assert.ok(!/\{regime && !calculable \?/.test(depo), 'la condition morte est partie');
+  // Et l’aide de lecture ne sert plus la fiche de paie d’un salarié à quelqu’un
+  // dont on ne connaît pas encore le régime.
+  assert.match(depo, /\{regime \? `\$\{ouLire\.aide\} ` : ""\}/, 'l’aide se tait sans régime');
 });
 
 test('un seul widget par page', () => {
