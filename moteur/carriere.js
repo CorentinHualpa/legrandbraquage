@@ -46,6 +46,15 @@ const REGIMES = {
       + pat.lignes.cegT1 + pat.lignes.cegT2,
   },
   tns: {
+    /*
+     * La carrière d'un non-salarié « classique », depuis le 09/09/2026 : neuf
+     * tranches quinquennales de l'INSEE, et non plus la courbe du privé.
+     * ⚠ Aucune source ne croise l'âge avec la CATÉGORIE (artisan, commerçant,
+     * libéral) : l'INSEE ne ventile que par secteur d'activité, et seulement en
+     * quatre tranches. Le TNS et la CIPAV partagent donc la même courbe, celle
+     * de la population à laquelle ils appartiennent tous les deux.
+     */
+    courbeAge: () => COURBES_AGE.nonSalarie,
     // Bénéfice BIC ou BNC : pas d'abattement de 10 % pour frais professionnels.
     fraisProfessionnels: false,
     brutDepuisNet: tns.brutDepuisNet,
@@ -57,6 +66,9 @@ const REGIMES = {
     vieillesse: (sal) => sal.lignes.retraiteBase + sal.lignes.retraiteComplementaire,
   },
   cipav: {
+    // Même courbe que le TNS, et pour la raison écrite juste au-dessus : le
+    // croisement âge x profession n'est publié nulle part.
+    courbeAge: () => COURBES_AGE.nonSalarie,
     // Bénéfice BIC ou BNC : pas d'abattement de 10 % pour frais professionnels.
     fraisProfessionnels: false,
     brutDepuisNet: cipav.brutDepuisNet,
@@ -67,6 +79,12 @@ const REGIMES = {
     vieillesse: (sal) => sal.lignes.retraiteBase + sal.lignes.retraiteComplementaire,
   },
   micro: {
+    /*
+     * La SEULE courbe qui ne ressemble à aucune autre : elle culmine à 35-39 ans
+     * puis décline jusqu'à la fin. Lui servir celle du privé, qui monte jusqu'à
+     * 60 ans, inversait la tendance sur toute la seconde moitié de sa carrière.
+     */
+    courbeAge: () => COURBES_AGE.micro,
     // Bénéfice BIC ou BNC : pas d'abattement de 10 % pour frais professionnels.
     fraisProfessionnels: false,
     /*

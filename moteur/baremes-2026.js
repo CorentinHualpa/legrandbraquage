@@ -280,14 +280,111 @@ const COURBE_FPE = [[23, 73.5], [28, 85.3], [35.5, 99.2], [45.5, 115.7], [55.5, 
 const COURBE_FPT = [[23, 85.5], [28, 90.6], [35.5, 99.5], [45.5, 109.5], [55.5, 109.7], [64, 110.9]];
 const COURBE_FPH = [[23, 74.6], [28, 83.1], [35.5, 99.9], [45.5, 102.0], [55.5, 106.2], [64, 107.4]];
 
+/*
+ * Non-salariés : INSEE, Insee Résultats, « Effectifs et revenus d'activité des
+ * non-salariés en 2021 » (15/11/2023), tableau NA_TABNAT_2, revenu mensuel
+ * MOYEN par tranche d'âge, base Non-salariés, données 2021. Fichier :
+ * https://www.insee.fr/fr/statistiques/fichier/7676317/NA_TABNAT_2.xlsx
+ *
+ * ⚠ Jusqu'au 09/09/2026 ces trois régimes empruntaient la courbe du PRIVÉ, et
+ * la page méthode le déclarait faute de source. La source existe : neuf tranches
+ * quinquennales, micro-entrepreneurs sur une LIGNE SÉPARÉE des non-salariés
+ * « classiques ». C'est cette séparation qui la rend utilisable, parce que les
+ * deux populations n'ont pas la même forme de carrière du tout.
+ *
+ * ⚠⚠ CE N'EST PAS DE L'EQTP, et c'est le vrai défaut de ces deux courbes.
+ * L'INSEE le dit : « Le revenu n'est pas rapporté à la durée d'affiliation dans
+ * l'année. Il peut correspondre à une activité à temps complet ou à temps
+ * partiel. » La courbe du privé, elle, est en équivalent temps plein. Le biais
+ * est donc DIRIGÉ : les tranches où les années incomplètes sont fréquentes (les
+ * plus jeunes, les plus âgés) sont écrasées vers le bas. Aucune version EQTP du
+ * revenu des non-salariés n'existe, chez personne.
+ *
+ * ⚠ La moyenne INCLUT les revenus nuls et déficitaires, comptés à zéro (les
+ * quantiles, eux, les excluent). Sur la tranche 60-64 ans, 12,6 % de revenus
+ * nuls contre 9,3 % à 40-44 : la fin de courbe mesure autant l'extinction
+ * d'activité que le niveau de revenu. La moyenne est retenue quand même, parce
+ * que c'est ce qu'est la série privée EQTP03 à laquelle elle est comparée.
+ *
+ * ⚠ Champ : France hors Mayotte, hors agriculture, hors taxés d'office pour le
+ * revenu. Les dirigeants ASSIMILÉS SALARIÉS en sont exclus par construction
+ * (« gérants minoritaires de SARL, dirigeants de SAS, de SA »), ce qui tombe
+ * juste : le président de SAS part déjà sur le régime salarié dans ce moteur.
+ *
+ * ⚠ La première tranche publiée est « moins de 30 ans », point posé à 26 ans
+ * (milieu de 22-29, l'intervalle que la projection couvre réellement). La
+ * projection commence à 22 ans et lit donc la même valeur de 22 à 26 ans. Les
+ * autres points sont au milieu de leur tranche quinquennale. Convention de
+ * NOTRE part, comme dans le public, et pour la même raison : la source ne
+ * descend pas plus fin.
+ */
+
+/**
+ * Non-salariés « classiques » (entrepreneurs individuels au réel et gérants
+ * majoritaires de SARL). Sert au TNS et à la CIPAV. Indice 100 = 3 705 €/mois.
+ *
+ * ⚠ LA TRANCHE 60-64 EST PLAFONNÉE, exactement comme dans le privé et dans les
+ * trois versants publics. Publiée, elle vaut 121,7, soit le point le PLUS HAUT
+ * de toute la courbe, alors que c'est la tranche où 12,6 % des non-salariés
+ * déclarent un revenu nul. Ce n'est pas une accélération de carrière, c'est la
+ * même sélection des survivants que le privé plafonne déjà : ceux dont l'affaire
+ * n'a pas tenu ont cessé, et ne sont plus dans la moyenne des non nuls. On
+ * applique donc la pente de fin de carrière du privé, 117,5 / 116,2 = +1,12 %
+ * de 57 à 64 ans, soit 120,2 au lieu de 121,7. La valeur publiée reste écrite
+ * ici, elle n'est pas jetée.
+ *
+ * ⚠ Le revenu non salarié est net des cotisations PAYÉES mais avant CSG non
+ * déductible, CRDS et impôt, quand le salaire net de l'INSEE est déjà net de
+ * CSG-CRDS. L'écart est quasi proportionnel, donc presque sans effet sur une
+ * courbe normalisée, mais il interdit de comparer les NIVEAUX des deux séries.
+ */
+const COURBE_NON_SALARIE = [
+  [26, 68.2], [32, 88.8], [37, 102.8], [42, 113.3],
+  [47, 118.3], [52, 119.5], [57, 118.9], [64, 120.2],
+];
+
+/**
+ * Micro-entrepreneurs économiquement actifs. Indice 100 = 712 €/mois.
+ *
+ * ⚠ Sa FORME est l'inverse de celle du privé, et c'est ce qui rend l'ancien
+ * emprunt indéfendable : elle culmine à 35-39 ans puis décline sans
+ * interruption jusqu'à la fin, quand la courbe du privé monte jusqu'à 60 ans.
+ * Prêter le privé à un micro-entrepreneur n'était pas une approximation, c'était
+ * une inversion de tendance sur toute la seconde moitié de la carrière.
+ *
+ * Le plafond de fin de carrière NE MORD PAS ici : la pente observée de 57 à 62
+ * ans est déjà négative (78,3), très en dessous des 88,4 qu'autoriserait la
+ * pente du privé. On garde donc les valeurs publiées telles quelles, et le
+ * dernier point vaut jusqu'à 64 ans.
+ *
+ * ⚠ Le « revenu » d'un micro dans cette série est son chiffre d'affaires APRÈS
+ * abattement forfaitaire, quand le simulateur, lui, fait saisir le chiffre
+ * d'affaires BRUT. L'abattement étant un pourcentage fixe par catégorie, les
+ * deux ont exactement la même forme : seule la forme est utilisée.
+ *
+ * ⚠ Champ « économiquement actifs » : les inscrits à chiffre d'affaires nul sur
+ * toute l'année sont hors série. La population visée est donc un peu plus aisée
+ * que l'ensemble des micro-entrepreneurs immatriculés.
+ */
+const COURBE_MICRO = [
+  [26, 69.6], [32, 98.7], [37, 100.3], [42, 98.7],
+  [47, 95.8], [52, 92.5], [57, 87.4], [62, 78.3],
+];
+
 export const COURBES_AGE = {
   prive: COURBE_PRIVE,
   fpe: COURBE_FPE,
   fpt: COURBE_FPT,
   fph: COURBE_FPH,
+  nonSalarie: COURBE_NON_SALARIE,
+  micro: COURBE_MICRO,
 };
 
-/** La courbe par défaut reste celle du privé, et c'est un choix DÉCLARÉ. */
+/**
+ * La courbe par défaut reste celle du privé, et c'est un choix DÉCLARÉ.
+ * ⚠ Depuis le 09/09/2026 elle ne sert plus qu'au salarié : les six régimes
+ * portent tous la leur, et `deroulerCarriere` ne retombe plus sur ce défaut.
+ */
 export const COURBE_AGE = COURBE_PRIVE;
 
 export const CARRIERE = {

@@ -176,13 +176,33 @@ export default function Methode() {
             partout.</span>{" "}
             Le salaire ne reste pas figé pendant quarante-trois ans : il suit une
             courbe par âge, et cette page en utilise{" "}
-            <span className="font-semibold">quatre</span>, une pour le privé et une
-            par versant de la fonction publique (INSEE, séries longues, salaires nets
-            annuels moyens par tranche d’âge). Elles ne se ressemblent pas : la
-            territoriale est nettement plus plate que le privé, l’État plus pentu.
-            Servir la courbe du privé à un fonctionnaire, ce que faisait cette page
-            jusqu’au 9 septembre 2026, faussait sa pension, qui se calcule sur le
-            traitement de fin de carrière.
+            <span className="font-semibold">six</span>, une par régime. Le privé et
+            les trois versants de la fonction publique viennent des séries longues
+            de l’INSEE, salaires nets annuels moyens par tranche d’âge. Les
+            non-salariés viennent d’une autre publication de l’INSEE, la base
+            Non-salariés, qui sépare les indépendants «&nbsp;classiques&nbsp;» des
+            micro-entrepreneurs. Aucune ne ressemble aux autres : la territoriale
+            est nettement plus plate que le privé, l’État plus pentu, et la courbe
+            du micro-entrepreneur{" "}
+            <span className="italic">descend</span> à partir de trente-cinq ans
+            quand toutes les autres montent. Servir la courbe du privé à tout le
+            monde, ce que faisait cette page jusqu’au 9 septembre 2026, faussait la
+            pension d’un fonctionnaire, qui se calcule sur son traitement de fin de
+            carrière, et surestimait de 14 % ce qu’un micro-entrepreneur verse sur
+            une vie.
+          </p>
+          <p className="text-[14.5px] leading-relaxed">
+            <span className="font-semibold">Ce que les courbes des non-salariés ne
+            savent pas faire.</span>{" "}
+            Elles ne sont pas en équivalent temps plein, contrairement à celle du
+            privé : l’INSEE écrit que ce revenu «&nbsp;n’est pas rapporté à la durée
+            d’affiliation dans l’année&nbsp;». Les âges où les années incomplètes
+            sont fréquentes, les plus jeunes et les plus âgés, sont donc tassés vers
+            le bas, et aucune version en équivalent temps plein n’existe nulle part.
+            Elles ne distinguent pas non plus l’artisan du commerçant ni du libéral :
+            l’INSEE ventile par secteur d’activité, jamais par catégorie de régime,
+            si bien que l’indépendant au réel et le libéral partagent ici la même
+            courbe.
           </p>
           <p className="text-[14.5px] leading-relaxed">
             <span className="font-semibold">Deux conventions, et elles sont de nous.</span>{" "}
@@ -427,18 +447,16 @@ export default function Methode() {
             </li>
             <li className="border-l-[3px] border-cadre-bord pl-3">
               <span className="font-semibold">
-                La courbe de carrière des indépendants.
+                L’artisan, le commerçant et le libéral partagent une courbe.
               </span>{" "}
-              L’INSEE publie un salaire moyen par tranche d’âge pour le privé et
-              pour chacun des trois versants de la fonction publique, et cette
-              page les utilise. Elle n’en publie pas pour les non-salariés :
-              l’artisan au réel, le libéral et le micro-entrepreneur sont donc
-              projetés sur la courbe du privé, ce qui leur donne une forme de
-              carrière plausible et pas nécessairement la bonne pente. Comme la
-              pension d’un indépendant se calcule sur les points acquis chaque
-              année et non sur son revenu de fin de carrière, l’effet est plus
-              faible que celui qu’avait la même approximation chez le
-              fonctionnaire.
+              L’INSEE ventile le revenu des non-salariés par âge, et séparément
+              par secteur d’activité, mais il ne croise jamais les deux au-delà
+              de quatre tranches d’âge et sept secteurs, sur une partition qui
+              n’est pas celle des régimes. Plutôt que de faire correspondre à la
+              main des secteurs à des catégories, l’indépendant au réel et le
+              libéral reçoivent la même courbe, celle des non-salariés
+              « classiques », à laquelle ils appartiennent tous les deux. Le
+              micro-entrepreneur, lui, a bien la sienne.
             </li>
             <li className="border-l-[3px] border-cadre-bord pl-3">
               <span className="font-semibold">

@@ -1436,19 +1436,25 @@ test('méthode : une limite corrigée dans le moteur disparaît de la page', () 
 
 test('méthode : une limite RÉELLE du moteur est listée sur la page', () => {
   /*
-   * Le pendant du test précédent, et il est le plus utile des deux : le jour où
-   * une source donne une courbe de carrière aux non-salariés, ce test rougit et
-   * force à retirer la limite au lieu de la laisser traîner.
+   * Ce test a fait son travail le 09/09/2026. Il exigeait que la page déclare
+   * l'emprunt de la courbe du privé par les non-salariés TANT QUE `courbeAge`
+   * leur manquait ; la source INSEE trouvée, il est passé au rouge dans la
+   * minute et a forcé à retirer la limite au lieu de la laisser traîner.
+   *
+   * Il garde la même forme, sur la limite qui SUBSISTE : aucune source ne croise
+   * l'âge et la catégorie, donc le TNS et la CIPAV partagent une courbe.
    */
-  for (const id of ['tns', 'cipav', 'micro']) {
-    assert.equal(
-      regimeDe(id).courbeAge, undefined,
-      `préalable : ${id} emprunte encore la courbe du privé`,
-    );
-  }
+  assert.equal(
+    regimeDe('tns').courbeAge(), regimeDe('cipav').courbeAge(),
+    'préalable : les deux régimes lisent bien la MÊME courbe',
+  );
   assert.ok(
-    /courbe de carrière des indépendants/i.test(PAGE_METHODE),
-    'les non-salariés empruntent la courbe du privé : la page doit le dire',
+    /partagent une courbe/i.test(PAGE_METHODE),
+    'le TNS et la CIPAV partagent une courbe : la page doit le dire',
+  );
+  assert.ok(
+    !/courbe de carrière des indépendants/i.test(PAGE_METHODE),
+    'les non-salariés ont leur courbe : cette limite ne doit plus être listée',
   );
 });
 
@@ -1468,4 +1474,100 @@ test('méthode : les trois contreparties non chiffrées sont annoncées comme te
     /ne comptent (donc )?que si vous les chiffrez vous-même/i.test(PAGE_METHODE),
     'la page doit dire que ces trois postes ne comptent qu’une fois chiffrés',
   );
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+/*
+ * Les courbes des non-salariés, branchées le 09/09/2026 (INSEE, base
+ * Non-salariés 2021, tableau NA_TABNAT_2).
+ *
+ * ⚠ LE TEST COMPARE DES PENTES, JAMAIS DES TOTAUX. La leçon vient du
+ * branchement des courbes publiques : un test sur le total passait encore avec
+ * la courbe du privé partout, parce que les taux de cotisation diffèrent déjà
+ * d'un régime à l'autre. Le rapport du dernier revenu au premier, lui, ne dépend
+ * que de la courbe et de la croissance générale, qui est commune.
+ */
+/*
+ * ⚠ La sonde est le NET, jamais le brut. Le brut est reconstitué en inversant
+ * le barème de chaque régime, qui n'est pas linéaire : TNS et CIPAV, qui lisent
+ * pourtant la MÊME courbe, rendent 2,2596 et 2,2550 de pente en brut. Sonder le
+ * brut ferait donc échouer une assertion d'identité parfaitement vraie, et on
+ * conclurait à un défaut de branchement inexistant.
+ */
+const pente = (regime, opts = {}) => {
+  const { annees } = deroulerCarriere(2600, { regime, ...opts });
+  return annees[annees.length - 1].netAvantImpot / annees[0].netAvantImpot;
+};
+
+test('non-salariés : chaque régime lit SA courbe, pas celle du privé', () => {
+  const salarie = pente('salarie');
+  const tnsPente = pente('tns');
+  const microPente = pente('micro');
+
+  assert.notEqual(
+    Math.round(tnsPente * 1000), Math.round(salarie * 1000),
+    'le TNS ne doit plus dérouler la carrière du privé',
+  );
+  // Le micro n'est pas seulement différent, il est BEAUCOUP plus plat : sa
+  // courbe décline après 35-39 ans quand celle du privé monte jusqu'à 60.
+  assert.ok(
+    microPente < salarie * 0.7,
+    `la pente du micro (${microPente.toFixed(2)}) doit être très en dessous de celle du privé (${salarie.toFixed(2)})`,
+  );
+  // Le TNS et la CIPAV partagent la même courbe : à net égal, la pente est
+  // rigoureusement identique, même si leurs cotisations ne le sont pas du tout.
+  assert.equal(
+    Math.round(tnsPente * 100000), Math.round(pente('cipav') * 100000),
+    'TNS et CIPAV lisent la même courbe, donc la même pente en net',
+  );
+});
+
+test('micro-entrepreneur : sa carrière DESCEND là où le privé monte', () => {
+  /*
+   * Le fait qui rendait l'ancien emprunt indéfendable, et la seule assertion de
+   * ce lot qui porte sur la FORME plutôt que sur le branchement. La courbe du
+   * micro culmine à 35-39 ans puis décline ; celle du privé monte jusqu'à 60.
+   * Un emprunt inversait donc la tendance sur toute la seconde moitié.
+   */
+  const indice = (age) => indiceAge(age, COURBES_AGE.micro);
+  assert.ok(indice(37) > indice(30), 'elle monte jusqu’au sommet');
+  assert.ok(indice(37) > indice(50), 'puis elle redescend');
+  assert.ok(indice(62) < indice(37) * 0.85, 'et la fin est nettement sous le sommet');
+  // Le privé fait exactement l'inverse sur le même segment.
+  const prive = (age) => indiceAge(age, COURBES_AGE.prive);
+  assert.ok(prive(62) > prive(37), 'la courbe du privé, elle, monte jusqu’au bout');
+});
+
+test('non-salariés classiques : la fin de carrière est plafonnée, comme partout', () => {
+  /*
+   * La tranche 60-64 publiée vaut 121,7, le point le PLUS HAUT de la courbe,
+   * dans la tranche où 12,6 % des non-salariés déclarent un revenu nul. Même
+   * sélection de survivants que le privé et le public plafonnent déjà, donc même
+   * traitement : la pente de fin de carrière du privé, +1,12 % de 57 à 64 ans.
+   * Sans ce test, un futur millésime réintroduirait la valeur publiée sans que
+   * rien ne le signale.
+   */
+  const c = COURBES_AGE.nonSalarie;
+  const i57 = c.find(([a]) => a === 57)[1];
+  const dernier = c[c.length - 1];
+  assert.equal(dernier[0], 64, 'le dernier point est posé à 64 ans');
+  const penteFinPrive = 117.5 / 116.2;
+  assert.equal(
+    Math.round(dernier[1] * 10), Math.round(i57 * penteFinPrive * 10),
+    'la fin suit la pente du privé, pas la valeur publiée de 121,7',
+  );
+  assert.ok(dernier[1] < 121.7, 'et elle est donc SOUS la valeur publiée');
+});
+
+test('non-salariés : les deux courbes sont normalisées sur le même âge que les autres', () => {
+  // Base 100 à 36 ans, comme le privé et les trois versants publics. Si une
+  // courbe est normalisée ailleurs, les niveaux ne se comparent plus entre
+  // régimes et personne ne s'en aperçoit.
+  for (const nom of ['prive', 'fpe', 'fpt', 'fph', 'nonSalarie', 'micro']) {
+    const i = indiceAge(36, COURBES_AGE[nom]);
+    assert.ok(
+      Math.abs(i - 100) < 0.6,
+      `la courbe ${nom} doit valoir ~100 à 36 ans, elle vaut ${i.toFixed(1)}`,
+    );
+  }
 });
