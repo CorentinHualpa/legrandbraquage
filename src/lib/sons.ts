@@ -39,20 +39,31 @@ export const SONS = {
    * du dossier : elle s'entendait à -21,7 dB, soit QUATRE décibels sous la voix
    * du commissaire et vingt-trois au-dessus de la page qu'on tourne. Une porte
    * n'est pas un événement plus important qu'une réplique.
+   *
+   * ⚠ Baissée une seconde fois le 10/09/2026, de 0,13 à 0,07 (Coq : « la porte
+   * qui grince est encore trop forte »). Le grincement dure et il a du corps :
+   * il tient l'attention bien plus longtemps qu'un tampon ou qu'une page, donc
+   * il doit sortir plus bas qu'eux, pas au même niveau.
+   *
+   * ⚠⚠ TOUT LE RESTE DU SOUND DESIGN A ÉTÉ BAISSÉ DE 25 % le même jour, gestes,
+   * décors, rumeur et bruits de vie compris. La VOIX n'a pas bougé : c'est elle
+   * l'échelle, et c'est par rapport à elle que tout le reste se règle. Refaire
+   * une passe de mixage veut dire toucher à ces facteurs, jamais au volume des
+   * répliques.
    */
-  porte: 0.13,
+  porte: 0.07,
   /** Une page du dossier qu'on tourne : à chaque changement d'écran. */
-  page: 0.4,
+  page: 0.3,
   /** Le tampon du tribunal, sur le verdict. */
-  tampon: 0.7,
+  tampon: 0.525,
   /** Le flash du photographe, sur le verdict. */
-  flash: 0.5,
+  flash: 0.375,
   /** Une frappe de machine à écrire : la déposition qui s'écrit. */
-  machine: 0.28,
+  machine: 0.21,
   /** Le ruban qu'on déchire : le scellé du butin. */
-  ruban: 0.5,
+  ruban: 0.375,
   /** Le stylo qui coche : une réponse choisie. */
-  coche: 0.45,
+  coche: 0.338,
 } as const;
 
 export type Son = keyof typeof SONS;
@@ -81,10 +92,10 @@ export type Acte = "commissariat" | "scelles" | "tribunal" | "rue";
  * et un commissariat au même plan.
  */
 const DECORS: Record<Acte, { fichier: string; volume: number }> = {
-  commissariat: { fichier: "ambiance-commissariat", volume: 0.72 },
-  scelles: { fichier: "ambiance-scelles", volume: 0.57 },
-  tribunal: { fichier: "ambiance-tribunal", volume: 0.41 },
-  rue: { fichier: "ambiance-rue", volume: 0.62 },
+  commissariat: { fichier: "ambiance-commissariat", volume: 0.54 },
+  scelles: { fichier: "ambiance-scelles", volume: 0.427 },
+  tribunal: { fichier: "ambiance-tribunal", volume: 0.307 },
+  rue: { fichier: "ambiance-rue", volume: 0.465 },
 };
 
 /**
@@ -98,7 +109,7 @@ const DECORS: Record<Acte, { fichier: string; volume: number }> = {
  * quatre fois plus bas que celui du commissariat pour un résultat cinq
  * décibels dessous. Le nombre ne se compare pas à ceux d'au-dessus.
  */
-const RUMEUR = { fichier: "ambiance-rumeur", volume: 0.15 };
+const RUMEUR = { fichier: "ambiance-rumeur", volume: 0.113 };
 const ACTES_AVEC_RUMEUR: Acte[] = ["commissariat"];
 
 /* ------------------------------------------------------------------ *
@@ -136,18 +147,18 @@ const VIE: BruitDeVie[] = [
    * lasse le plus vite. Quatre décibels sous les autres, et un poids de 1 contre
    * 4 ou 5 : il passe une fois toutes les cinq à dix minutes.
    */
-  { fichier: "bruit-telephone", volume: 0.129, actes: ["commissariat"], poids: 1 },
-  { fichier: "bruit-tiroir", volume: 0.288, actes: ["commissariat", "scelles"], poids: 4 },
-  { fichier: "bruit-chaise", volume: 0.146, actes: ["commissariat", "tribunal"], poids: 4 },
-  { fichier: "bruit-briquet", volume: 0.295, actes: ["commissariat", "rue"], poids: 3 },
-  { fichier: "bruit-clavier-court", volume: 0.191, actes: ["commissariat"], poids: 5 },
-  { fichier: "bruit-clavier-long", volume: 0.164, actes: ["commissariat"], poids: 3 },
+  { fichier: "bruit-telephone", volume: 0.097, actes: ["commissariat"], poids: 1 },
+  { fichier: "bruit-tiroir", volume: 0.216, actes: ["commissariat", "scelles"], poids: 4 },
+  { fichier: "bruit-chaise", volume: 0.109, actes: ["commissariat", "tribunal"], poids: 4 },
+  { fichier: "bruit-briquet", volume: 0.221, actes: ["commissariat", "rue"], poids: 3 },
+  { fichier: "bruit-clavier-court", volume: 0.143, actes: ["commissariat"], poids: 5 },
+  { fichier: "bruit-clavier-long", volume: 0.123, actes: ["commissariat"], poids: 3 },
   /*
    * La mécanique claque plus fort et date la pièce autrement : le dossier a
    * déjà une machine à écrire, deux époques de clavier dans la même pièce se
    * remarquent. Gardée, mais rare et discrète.
    */
-  { fichier: "bruit-clavier-mecanique", volume: 0.186, actes: ["commissariat"], poids: 2 },
+  { fichier: "bruit-clavier-mecanique", volume: 0.14, actes: ["commissariat"], poids: 2 },
 ];
 
 /**
@@ -637,8 +648,8 @@ export function taire(): void {
  * on ne tape pas la même chose pour une case cochée et pour un chiffre.
  */
 const FRAPPE = {
-  court: { fichier: "bruit-clavier-court", volume: 0.22, apres: 260 },
-  long: { fichier: "bruit-clavier-long", volume: 0.2, apres: 700 },
+  court: { fichier: "bruit-clavier-court", volume: 0.124, apres: 260 },
+  long: { fichier: "bruit-clavier-long", volume: 0.113, apres: 700 },
 } as const;
 
 let minuterieFrappe: ReturnType<typeof setTimeout> | null = null;

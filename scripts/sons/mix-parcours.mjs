@@ -89,7 +89,12 @@ const VISITE = [
   { ecran: "tabac", acte: "commissariat", geste: "court", attente: 3 },
   { ecran: "pris", acte: "commissariat", geste: "court", attente: 3 },
   { ecran: "butin", acte: "scelles", geste: "court", attente: 3.5 },
-  { ecran: "liberation", acte: "rue", geste: "court", attente: 3 },
+  /*
+   * ⚠ La ligne « liberation » vivait ici, sur l’acte `rue`. L’écran de
+   * l’horaire a été RETIRÉ du parcours, sa réplique avec, et personne n’est
+   * revenu ici : le seul outil qui sert à JUGER le mixage plantait donc à
+   * son ouverture, sur un fichier absent. Retirée le 10/09/2026.
+   */
   { ecran: "verdict", acte: "tribunal", geste: null, attente: 4 },
 ];
 
