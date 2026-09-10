@@ -522,10 +522,26 @@ test('un régime non instruit LÈVE, il ne retombe pas sur le salarié', () => {
 
 test('un patron de TPE doit dire sa forme juridique, sinon on refuse', () => {
   assert.throws(() => M.simuler({ netMensuel: 4000, statut: 'tpe' }), /forme/);
-  // Un président de SAS est un assimilé salarié : même moteur que le privé.
+  /*
+   * ⚠ CE TEST EXIGEAIT L'ÉGALITÉ, et il verrouillait donc un défaut.
+   *
+   * « Un président de SAS est un assimilé salarié : même moteur que le privé »
+   * est vrai pour le RÉGIME et faux pour le TOTAL. Assimilé salarié veut dire
+   * qu'il relève du régime général de la sécurité sociale ; il reste mandataire
+   * social, sans contrat de travail, donc hors de l'assurance chômage et hors
+   * de l'AGS. Le moteur lui facturait les deux, l'égalité passait, et le bouton
+   * du parcours annonçait pourtant « sans l'assurance chômage » depuis le début.
+   */
   const sas = M.simuler({ netMensuel: 4000, statut: 'tpe', formeTpe: 'sas' });
   const salarie = M.simuler({ netMensuel: 4000, statut: 'salarie' });
-  assert.equal(Math.round(sas.plateauGauche.total), Math.round(salarie.plateauGauche.total));
+  assert.ok(
+    sas.plateauGauche.total < salarie.plateauGauche.total,
+    'le président de SAS ne cotise ni au chômage ni à l’AGS',
+  );
+  // Mais il reste au régime général : l'écart est celui des DEUX lignes, pas
+  // celui d'un autre régime. Au-delà de 10 %, c'est qu'autre chose a bougé.
+  const ecart = (salarie.plateauGauche.total - sas.plateauGauche.total) / salarie.plateauGauche.total;
+  assert.ok(ecart > 0.03 && ecart < 0.10, `écart de ${(ecart * 100).toFixed(1)} %, attendu entre 3 et 10 %`);
 });
 
 test('fonctionnaire : le taux de remplacement reste dans la fourchette du COR', () => {
@@ -1331,4 +1347,49 @@ test('carrière : indiceAge retombe sur le privé quand aucune courbe n’est do
   // Le défaut est un CHOIX déclaré, pas un hasard : les régimes non instruits
   // sur ce point (TNS, CIPAV, micro) gardent le comportement d'avant.
   assert.equal(indiceAge(45), indiceAge(45, COURBES_AGE.prive));
+});
+
+// ─── Le mandataire social ne cotise pas au chômage ───────────────────────────
+test('président de SAS : ni chômage ni AGS du côté patronal', () => {
+  /*
+   * Un président de SAS ou de SASU est assimilé salarié pour la sécurité
+   * sociale, mais il est mandataire social : sans contrat de travail, il est
+   * hors du champ de l'assurance chômage, et hors du champ de l'AGS, qui
+   * garantit des créances SALARIALES qu'il n'a pas.
+   *
+   * Le moteur les lui facturait quand même, alors que le bouton du parcours
+   * annonce depuis toujours « vous cotisez comme un salarié, SANS l'assurance
+   * chômage ». Le site se contredisait, et dans le sens qui gonfle le braquage.
+   */
+  const brut = 3900;
+  const avec = cotisationsPatronales(brut);
+  const sans = cotisationsPatronales(brut, { sansChomage: true });
+  assert.ok(avec.lignes.chomage > 0, 'un salarié ordinaire cotise bien au chômage');
+  assert.ok(avec.lignes.ags > 0, 'et à l’AGS');
+  assert.equal(sans.lignes.chomage, 0);
+  assert.equal(sans.lignes.ags, 0);
+  // Rien d'AUTRE ne bouge : c'est le retrait de deux lignes, pas un régime.
+  for (const cle of Object.keys(avec.lignes)) {
+    if (cle === 'chomage' || cle === 'ags') continue;
+    assert.equal(sans.lignes[cle], avec.lignes[cle], `la ligne ${cle} ne doit pas bouger`);
+  }
+});
+
+test('président de SAS : le drapeau descend depuis la forme juridique', () => {
+  /*
+   * La garde qui compte vraiment. Si le fil se coupe entre `formeTpe` et
+   * `cotisationsPatronales`, le test ci-dessus reste vert et le site continue
+   * de facturer le chômage à un mandataire social.
+   */
+  const p = M.PERIMETRE_COMPLET;
+  const sas = M.simuler({ netMensuel: 3000, statut: 'tpe', formeTpe: 'sas', perimetre: p });
+  const sal = M.simuler({ netMensuel: 3000, statut: 'salarie', perimetre: p });
+  assert.ok(
+    sas.plateauGauche.total < sal.plateauGauche.total,
+    'un président de SAS doit être moins prélevé qu’un salarié au même net',
+  );
+  // Un gérant majoritaire de SARL part sur le régime des indépendants : il ne
+  // doit pas hériter du drapeau au passage.
+  const sarl = M.simuler({ netMensuel: 3000, statut: 'tpe', formeTpe: 'sarl-majoritaire', perimetre: p });
+  assert.notEqual(Math.round(sarl.plateauGauche.total), Math.round(sas.plateauGauche.total));
 });

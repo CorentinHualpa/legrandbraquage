@@ -209,6 +209,13 @@ export function simuler(entree) {
   const opts = {
     cadre, effectif, parts, couple, ageActuel, regime, versant,
     categorieMicro, versementLiberatoire,
+    /*
+     * Un président de SAS ou de SASU cotise comme un salarié, MOINS l'assurance
+     * chômage et l'AGS : il est mandataire social, sans contrat de travail, donc
+     * hors du champ des deux. Le drapeau descend jusqu'à
+     * `cotisationsPatronales`, qui met les deux lignes à zéro.
+     */
+    sansChomage: formeTpe === 'sas',
   };
   const carriere = deroulerCarriere(netMensuel, opts);
 

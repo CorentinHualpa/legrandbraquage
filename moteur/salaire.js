@@ -71,10 +71,10 @@ export function reductionRgdu(brut, opts = {}) {
 /**
  * Cotisations patronales mensuelles, RGDU déduite.
  * @param {number} brut brut mensuel
- * @param {{cadre?: boolean, effectif?: number, tauxAtmp?: number}} [opts]
+ * @param {{cadre?: boolean, effectif?: number, tauxAtmp?: number, sansChomage?: boolean}} [opts]
  */
 export function cotisationsPatronales(brut, opts = {}) {
-  const { cadre = false, effectif = 10, tauxAtmp = PATRONAL.atmpMoyen } = opts;
+  const { cadre = false, effectif = 10, tauxAtmp = PATRONAL.atmpMoyen, sansChomage = false } = opts;
   const { t1, t2 } = tranches(brut);
   const plafondChomage = (4 * PASS_ANNUEL) / 12;
   const assietteChomage = Math.min(brut, plafondChomage);
@@ -85,8 +85,19 @@ export function cotisationsPatronales(brut, opts = {}) {
     vieillessePlafonnee: t1 * PATRONAL.vieillessePlafonnee,
     vieillesseDeplafonnee: brut * PATRONAL.vieillesseDeplafonnee,
     atmp: brut * tauxAtmp,
-    chomage: assietteChomage * PATRONAL.chomage,
-    ags: assietteChomage * PATRONAL.ags,
+    /*
+     * ⚠ UN MANDATAIRE SOCIAL N'EST PAS ASSURÉ CONTRE LE CHÔMAGE, donc il ne
+     * cotise pas. Un président de SAS ou de SASU est assimilé salarié pour la
+     * sécurité sociale, mais il est hors du champ de l'assurance chômage faute
+     * de contrat de travail, et hors du champ de l'AGS pour la même raison :
+     * l'AGS garantit des créances SALARIALES, il n'en a pas.
+     *
+     * Le moteur les lui facturait quand même, alors que le bouton du parcours
+     * annonce « vous cotisez comme un salarié, SANS l'assurance chômage » : le
+     * site se contredisait, et dans le sens qui gonfle le braquage.
+     */
+    chomage: sansChomage ? 0 : assietteChomage * PATRONAL.chomage,
+    ags: sansChomage ? 0 : assietteChomage * PATRONAL.ags,
     retraiteCompT1: t1 * PATRONAL.retraiteCompT1,
     retraiteCompT2: t2 * PATRONAL.retraiteCompT2,
     cegT1: t1 * PATRONAL.cegT1,

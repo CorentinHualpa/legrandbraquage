@@ -366,7 +366,9 @@ export default function Methode() {
               formation professionnelle. Les sept points de la table des moins de
               cinquante tombent au centième, donc le doute porte sur la ligne de
               référence. L’application reste sur l’effectif inférieur à cinquante
-              en attendant.
+              en attendant. Le moteur sait calculer les deux : l’écart pèse
+              <span className="font-semibold"> 1,4 %</span> du total prélevé,
+              soit environ 11 500 € sur une carrière au salaire médian.
             </li>
             <li className="border-l-[3px] border-rouge pl-3">
               <span className="font-semibold">
