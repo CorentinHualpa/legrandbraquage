@@ -427,21 +427,30 @@ export default function Methode() {
             </li>
             <li className="border-l-[3px] border-cadre-bord pl-3">
               <span className="font-semibold">
-                Le président de SAS et l’assurance chômage.
+                La courbe de carrière des indépendants.
               </span>{" "}
-              Il n’y cotise pas, alors que le moteur lui applique aujourd’hui le
-              calcul complet du salarié. L’écart est de quelques dixièmes de
-              point, et il joue en sa défaveur : son prélèvement est légèrement
-              surestimé.
+              L’INSEE publie un salaire moyen par tranche d’âge pour le privé et
+              pour chacun des trois versants de la fonction publique, et cette
+              page les utilise. Elle n’en publie pas pour les non-salariés :
+              l’artisan au réel, le libéral et le micro-entrepreneur sont donc
+              projetés sur la courbe du privé, ce qui leur donne une forme de
+              carrière plausible et pas nécessairement la bonne pente. Comme la
+              pension d’un indépendant se calcule sur les points acquis chaque
+              année et non sur son revenu de fin de carrière, l’effet est plus
+              faible que celui qu’avait la même approximation chez le
+              fonctionnaire.
             </li>
             <li className="border-l-[3px] border-cadre-bord pl-3">
               <span className="font-semibold">
-                La courbe de carrière du secteur public.
+                Ce que la santé, l’école et le chômage vous ont rendu.
               </span>{" "}
-              Elle existe à l’INSEE et nous ne l’avons pas encore. Le
-              fonctionnaire est donc projeté sur la courbe de salaire par âge du
-              privé, ce qui donne la bonne forme de carrière et pas
-              nécessairement la bonne pente.
+              Ces trois postes ne portent aucun montant par défaut, et ce n’est
+              pas un oubli : le coût public par élève, la dépense de santé
+              remboursée par tranche d’âge et l’allocation chômage moyenne sont
+              publiés, mais ce qu’ils font sur une vie dépend de la vôtre, et
+              aucun organisme ne publie ce cumul. Ils ne comptent donc que si
+              vous les chiffrez vous-même, aux paliers. Quelqu’un qui traverse le
+              parcours sans y répondre voit un braquage plus lourd que le sien.
             </li>
             {restant.length > 0 ? (
               <li className="border-l-[3px] border-cadre-bord pl-3">

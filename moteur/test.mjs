@@ -10,13 +10,14 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 
 import {
   cotisationsSalariales, cotisationsPatronales, reductionRgdu,
   coefficientRgdu, brutDepuisNet, netsDepuisBrut,
 } from './salaire.js';
 import { impotSurLeRevenu, tauxEffortTva, taxesConsommationAnnuelles } from './impot.js';
-import { indiceAge, deroulerCarriere } from './carriere.js';
+import { indiceAge, deroulerCarriere, regimeDe } from './carriere.js';
 import {
   PALIERS_ALIBI, capitalApresRetraits, capitalPourRente, capitaliser,
 } from './capitalisation.js';
@@ -1392,4 +1393,79 @@ test('président de SAS : le drapeau descend depuis la forme juridique', () => {
   // doit pas hériter du drapeau au passage.
   const sarl = M.simuler({ netMensuel: 3000, statut: 'tpe', formeTpe: 'sarl-majoritaire', perimetre: p });
   assert.notEqual(Math.round(sarl.plateauGauche.total), Math.round(sas.plateauGauche.total));
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+/*
+ * La liste « CE QUI RESTE OUVERT » de /methode contre l'état RÉEL du moteur.
+ *
+ * Ces trois tests ne mesurent aucun euro : ils empêchent une limite CORRIGÉE de
+ * survivre à sa correction sur la page qui répond au lecteur hostile. Le
+ * 09/09/2026 la page a affirmé pendant une journée que le fonctionnaire était
+ * projeté sur la courbe du privé et que le président de SAS payait le chômage,
+ * alors que le moteur faisait déjà l'inverse dans les deux cas, et un paragraphe
+ * plus haut sur la MÊME page disait le contraire. Rien ne pouvait le voir : ni
+ * le typecheck, ni le build, ni les 108 tests de valeurs.
+ */
+const PAGE_METHODE = readFileSync(
+  new URL('../src/app/methode/page.tsx', import.meta.url),
+  'utf8',
+);
+
+test('méthode : une limite corrigée dans le moteur disparaît de la page', () => {
+  // Le fonctionnaire a ses trois courbes depuis le 09/09/2026.
+  assert.equal(
+    typeof regimeDe('fonctionnaire').courbeAge, 'function',
+    'préalable : le régime public porte bien sa propre courbe',
+  );
+  assert.ok(
+    !/courbe de carrière du secteur public/i.test(PAGE_METHODE),
+    'le fonctionnaire a sa courbe : cette limite ne doit plus être listée',
+  );
+
+  // Le président de SAS ne cotise plus au chômage depuis le 09/09/2026.
+  const p = M.PERIMETRE_COMPLET;
+  const sas = M.simuler({ netMensuel: 3000, statut: 'tpe', formeTpe: 'sas', perimetre: p });
+  const sal = M.simuler({ netMensuel: 3000, statut: 'salarie', perimetre: p });
+  assert.ok(sas.plateauGauche.total < sal.plateauGauche.total, 'préalable : le correctif est en place');
+  assert.ok(
+    !/le moteur lui applique aujourd’hui le calcul complet du salarié/i.test(PAGE_METHODE),
+    'le chômage du président de SAS est retiré : cette limite ne doit plus être listée',
+  );
+});
+
+test('méthode : une limite RÉELLE du moteur est listée sur la page', () => {
+  /*
+   * Le pendant du test précédent, et il est le plus utile des deux : le jour où
+   * une source donne une courbe de carrière aux non-salariés, ce test rougit et
+   * force à retirer la limite au lieu de la laisser traîner.
+   */
+  for (const id of ['tns', 'cipav', 'micro']) {
+    assert.equal(
+      regimeDe(id).courbeAge, undefined,
+      `préalable : ${id} emprunte encore la courbe du privé`,
+    );
+  }
+  assert.ok(
+    /courbe de carrière des indépendants/i.test(PAGE_METHODE),
+    'les non-salariés empruntent la courbe du privé : la page doit le dire',
+  );
+});
+
+test('méthode : les trois contreparties non chiffrées sont annoncées comme telles', () => {
+  // Sans paliers, santé / école / chômage restent nommées sans montant.
+  const sansPaliers = M.simuler({
+    netMensuel: 2190, statut: 'salarie', perimetre: M.PERIMETRE_COMPLET,
+  });
+  const nonChiffrees = Object.entries(sansPaliers.plateauDroit.lignes)
+    .filter(([, l]) => l && l.calcule === false)
+    .map(([cle]) => cle);
+  assert.deepEqual(
+    nonChiffrees.sort(), ['chomage', 'education', 'sante'],
+    'préalable : trois lignes restent sans montant tant que rien n’est chiffré',
+  );
+  assert.ok(
+    /ne comptent (donc )?que si vous les chiffrez vous-même/i.test(PAGE_METHODE),
+    'la page doit dire que ces trois postes ne comptent qu’une fois chiffrés',
+  );
 });
