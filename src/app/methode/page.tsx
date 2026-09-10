@@ -218,6 +218,42 @@ export default function Methode() {
             au lieu de 1 614 €.
           </p>
           <p className="text-[14.5px] leading-relaxed">
+            <span className="font-semibold">L’objection la plus sérieuse, et elle vise le cœur du
+            verdict.</span>{" "}
+            Depuis le 8 septembre 2026, le verdict ne compare plus ce qui a été pris à ce qui a
+            été rendu : il compare ce que l’argent pris <span className="italic">serait devenu</span>,
+            placé, à ce qui a été rendu. C’est un raisonnement en coût d’opportunité, et il est
+            contestable. L’économiste{" "}
+            <span className="font-semibold">Antoine Bozio</span>, de l’Institut des politiques
+            publiques, l’a formulé en une image : traiter une cotisation en préjudice parce qu’on
+            aurait pu la placer, c’est traiter une prime d’assurance automobile en préjudice. Une
+            cotisation vieillesse achète une rente ; une cotisation maladie achète le droit d’être
+            soigné sans payer. Ce ne sont pas des sommes qu’on aurait pu garder.
+          </p>
+          <p className="text-[14.5px] leading-relaxed">
+            <span className="font-semibold">Ce que cette page y répond.</span>{" "}
+            L’objection est juste contre un calcul qui ne déduirait rien. Ici, le capital placé est
+            comparé à <span className="italic">tout</span> ce qui revient : la pension jusqu’à
+            85 ans, et l’école, les soins et le chômage aux montants que vous avez choisis
+            vous-même. Une prime d’assurance n’est un préjudice que si l’on oublie l’indemnité ;
+            l’indemnité est ici comptée, ligne à ligne, et c’est elle qui fait basculer le verdict
+            en relaxe dans une bonne partie des cas. Reste que le placement est une hypothèse et
+            non un fait : c’est pourquoi l’enveloppe se change en un clic, que le Livret A donne un
+            verdict opposé aux actions, et que l’ancien seuil, celui qui ne place rien, reste
+            affiché plus haut sur cette page. Si vous jugez le raisonnement illégitime, ce seuil-là
+            est le vôtre.
+          </p>
+          <p className="text-[14.5px] leading-relaxed">
+            <span className="font-semibold">Le salaire ne reste pas figé, et c’est ce qui sépare ce
+            calcul d’une multiplication.</span>{" "}
+            Multiplier un prélèvement mensuel par quarante-trois ans fait gagner à quelqu’un de
+            vingt-deux ans le salaire qu’il aura à quarante. Sur le cas médian, cette méthode rend
+            environ 20 % de plus que la nôtre, sur un périmètre pourtant plus étroit puisqu’elle
+            ignore les taxes à la consommation. Les six courbes de carrière décrites plus haut
+            existent pour cette raison, et l’écart qu’elles produisent joue
+            <span className="italic"> contre</span> le montant que cette page annonce.
+          </p>
+          <p className="text-[14.5px] leading-relaxed">
             <span className="font-semibold">Le taux d’effort de TVA</span> suit
             la courbe du Conseil des prélèvements obligatoires par décile de
             niveau de vie, rapportée au revenu disponible : 12,5 % pour le

@@ -1713,3 +1713,28 @@ test('le foyer accepte exactement ce que l’écran propose', () => {
   assert.match(lien, /Math\.min\(3, Math\.max\(0, Number\(q\.get\("e"\)\) \|\| 0\)\)/);
   assert.match(depo, /\[0, 1, 2, 3\]\.map/, 'et l’écran propose bien ces quatre valeurs');
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+test('méthode : le coût d’opportunité est nommé, et son objection avec', () => {
+  /*
+   * Le verdict se juge sur le coût d'opportunité depuis le 08/09/2026, et la
+   * page qui répond au lecteur hostile n'en disait RIEN jusqu'au 10/09. C'est
+   * exactement le raisonnement qu'un fact-check de franceinfo a démonté chez un
+   * essai paru la même semaine, en citant Antoine Bozio (IPP) : une cotisation
+   * n'est pas un préjudice au motif qu'on aurait pu la placer, sauf à traiter
+   * une prime d'assurance en dommage.
+   *
+   * La règle du dossier est de concéder ce qui est juste chez la partie
+   * adverse. Ce test empêche que la concession disparaisse à la première
+   * réécriture de la page.
+   */
+  const page = SRC('src/app/methode/page.tsx');
+  assert.match(page, /coût d’opportunité/, 'le raisonnement est nommé');
+  assert.match(page, /Antoine Bozio/, 'l’objection est attribuée');
+  assert.match(page, /prime d’assurance/, 'et elle est exposée dans ses termes');
+  assert.match(page, /Institut des politiques\s*\n?\s*publiques/, 'avec son institution');
+
+  // Le seuil SANS placement doit rester affiché : c'est la sortie offerte à
+  // qui refuse le raisonnement, et la réponse cesse d'être honnête sans lui.
+  assert.match(page, /pension seule en face et argent non placé/, 'l’ancien seuil reste publié');
+});
