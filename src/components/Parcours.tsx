@@ -106,6 +106,24 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
   /* « Content de votre cadeau ? » : aucun effet sur les chiffres, ressorti au verdict. */
   const [cadeau, setCadeau] = useState<Cadeau>(null);
   const [ecran, setEcran] = useState<Ecran>("couverture");
+  /*
+   * Ce qu'on a DÉJÀ vu, pour que les flèches du clavier puissent y revenir
+   * sans jamais ouvrir une carte qu'on n'a pas encore méritée.
+   *
+   * ⚠ Se remplit depuis l'ÉCRAN AFFICHÉ, jamais depuis `aller()`. Toutes les
+   * cartes ne s'atteignent pas par là : un lien partagé pose le visiteur sur
+   * la sienne par un `setEcran` direct, et une carte ainsi ouverte restait
+   * alors inconnue de la borne, donc interdite à la flèche avant alors qu'on
+   * en venait. Ce qui compte est ce qu'on a EU SOUS LES YEUX.
+   *
+   * On retient les NOMS et pas un index : la liste des écrans dépend du régime
+   * (un fonctionnaire n'a pas la carte chômage), donc un index retenu
+   * désignerait une autre carte après un changement de statut.
+   */
+  const [vus, setVus] = useState<Set<Ecran>>(() => new Set<Ecran>(["couverture"]));
+  useEffect(() => {
+    setVus((v) => (v.has(ecran) ? v : new Set(v).add(ecran)));
+  }, [ecran]);
 
   const changer = (patch: Partial<EtatSaisie>) => setEtat((e) => ({ ...e, ...patch }));
 
@@ -396,6 +414,43 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
     taire();
     aller(ecrans[Math.max(0, indexEcran - 1)]);
   };
+  /**
+   * LES FLÈCHES DU CLAVIER, avec la seule règle qui compte : on revient
+   * librement en arrière, on ne va JAMAIS plus loin qu'une carte déjà vue.
+   *
+   * Avancer sans borne ouvrirait le butin d'une déposition qu'on n'a pas
+   * remplie : les cartes se lisent dans l'ordre parce que chacune a besoin de
+   * ce que la précédente a fait dire. La borne se lit dans `vus`, jamais dans
+   * l'index : la liste des écrans dépend du régime.
+   *
+   * ⚠ On ne vole les flèches ni à qui écrit, ni au commissaire. Un champ de
+   * saisie s'en sert pour déplacer le curseur, et le widget du chat vit dans
+   * un shadow root : au niveau du document, l'événement y est reciblé sur son
+   * HÔTE, qu'on reconnaît à ce qu'il porte un `shadowRoot`.
+   */
+  useEffect(() => {
+    const surTouche = (ev: KeyboardEvent) => {
+      if (ev.defaultPrevented || ev.metaKey || ev.ctrlKey || ev.altKey) return;
+      if (ev.key !== "ArrowLeft" && ev.key !== "ArrowRight") return;
+      const cible = ev.target as (HTMLElement & { shadowRoot?: ShadowRoot | null }) | null;
+      if (cible?.closest?.("input, textarea, select, [contenteditable]")) return;
+      if (cible?.shadowRoot) return;
+
+      if (ev.key === "ArrowLeft") {
+        if (indexEcran === 0) return;
+        ev.preventDefault();
+        retour();
+        return;
+      }
+      const apres = ecrans[indexEcran + 1];
+      if (!apres || !vus.has(apres)) return;
+      ev.preventDefault();
+      aller(apres);
+    };
+    window.addEventListener("keydown", surTouche);
+    return () => window.removeEventListener("keydown", surTouche);
+  });
+
   const choisirPalier = (poste: PosteDuPlateau, id: string) =>
     setPaliers((p) => ({ ...p, [poste]: id }));
   const choisirHabitude = (poste: PosteHabitude, id: string) =>
