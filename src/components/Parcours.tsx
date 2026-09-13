@@ -542,7 +542,22 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
     {ecran === "avis" ? null : <Commissariat />}
     <main className="min-h-dvh bg-nuit">
       {ecran === "tabac" || ecran === "carburant" || ecran === "alcool" ? (
-        <Cafe {...commun} poste={ecran} simulation={simulation} habitudes={habitudes} choisir={choisirHabitude} />
+        <Cafe
+          {...commun}
+          poste={ecran}
+          simulation={simulation}
+          habitudes={habitudes}
+          choisir={choisirHabitude}
+          /*
+           * La sortie : on peut couper court aux questions de consommation à
+           * tout moment. Elles sont facultatives par nature (elles affinent une
+           * estimation, elles ne conditionnent aucun autre écran), et personne
+           * ne doit subir un interrogatoire sur sa vie privée pour voir son
+           * verdict. Les réponses non posées gardent leur valeur par défaut,
+           * comme aujourd'hui quand on ne touche à rien.
+           */
+          passer={() => aller("pris")}
+        />
       ) : ecran === "pris" ? (
         <Pris {...commun} simulation={simulation} perimetre={perimetre} setPerimetre={setPerimetre} />
       ) : ecran === "butin" ? (
