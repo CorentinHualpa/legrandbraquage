@@ -1,6 +1,7 @@
 ---
 nom: "L'unité : des euros d'aujourd'hui, jamais un cumul nominal"
 etiquettes: ["dossier", "methode"]
+source: "https://www.insee.fr"
 ---
 Tous les montants de ce dossier sont en euros constants, inflation corrigée, sur une inflation moyenne de 1,84 % par an mesurée sur trente-neuf ans.
 

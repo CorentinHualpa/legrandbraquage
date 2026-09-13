@@ -1,6 +1,7 @@
 ---
 nom: "Le salaire-pivot : où la balance bascule"
 etiquettes: ["dossier", "verdict"]
+source: "https://www.insee.fr"
 ---
 Le point de bascule du simulateur, périmètre complet (cotisations salariales, cotisations patronales, impôt sur le revenu, TVA et taxes de consommation), carrière de 22 à 64 ans, célibataire, non-cadre, en euros d'aujourd'hui : 2 219 € net par mois.
 

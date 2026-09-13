@@ -1,6 +1,7 @@
 ---
 nom: "La TVA : régressive ou proportionnelle selon le dénominateur"
 etiquettes: ["dossier", "methode", "mecanique"]
+source: "https://www.insee.fr"
 ---
 La TVA est le prélèvement dont on peut dire deux choses opposées sans mentir, et le paramétrage tranche le débat.
 

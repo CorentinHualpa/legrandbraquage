@@ -1,6 +1,7 @@
 ---
 nom: "La méthode : ce qui est calculé, ce qui ne l'est pas"
 etiquettes: ["dossier", "methode"]
+source: "https://mon-entreprise.urssaf.fr"
 ---
 Le moteur de calcul est public, sans aucune dépendance, et couvert par une suite de tests. Les taux sont vérifiés contre l'API publique du simulateur officiel de l'URSSAF, mon-entreprise.urssaf.fr, sur sept points de salaire. Les sept tombent au centième. Si un de ces tests casse, c'est le moteur qui a tort, pas l'URSSAF.
 

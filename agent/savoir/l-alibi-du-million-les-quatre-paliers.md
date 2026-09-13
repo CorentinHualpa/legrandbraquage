@@ -1,6 +1,7 @@
 ---
 nom: "L'alibi du million : les quatre paliers"
 etiquettes: ["dossier", "alibi"]
+source: "https://www.cor-retraites.fr/sites/default/files/2026-07/RA_2026_def_1.pdf"
 ---
 L'argument adverse dit : sans ces cotisations, vous auriez été millionnaire. Le calcul est exact sur ses propres hypothèses, et sur la vraie série du CAC 40 on trouve même un peu plus que lui. Il n'y a pas de fraude à l'expertise. Il tient sur trois hypothèses, et voici ce qu'il reste quand on les retire dans l'ordre.
 

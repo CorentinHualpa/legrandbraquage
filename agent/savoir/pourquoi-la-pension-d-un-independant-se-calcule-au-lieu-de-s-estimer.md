@@ -1,6 +1,7 @@
 ---
 nom: "Pourquoi la pension d'un indépendant se calcule au lieu de s'estimer"
 etiquettes: ["dossier", "independant", "methode"]
+source: "https://drees.solidarites-sante.gouv.fr"
 ---
 Il n'existe AUCUN taux de remplacement publié pour les indépendants, et ce n'est pas un oubli. La DREES les exclut explicitement de son champ et écrit pourquoi : son panel ne contient aucun revenu non salarié, donc la mesure est impossible. Le COR n'a jamais eu de cas type artisan ni commerçant.
 Le simulateur calcule donc leur pension par les règles : la moitié du revenu annuel moyen des vingt-cinq meilleures années plafonnées, plus les points du régime complémentaire.

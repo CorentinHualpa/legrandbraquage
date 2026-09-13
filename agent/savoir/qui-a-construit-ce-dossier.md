@@ -1,7 +1,7 @@
 ---
 nom: "Qui a construit ce dossier, et avec quoi"
 etiquettes: ["dossier", "coulisses"]
-source: "https://dalevoz.revolutionagency.ai"
+source: "https://dalevoz.revolutionagency.ai/precios"
 ---
 Ce que le commissaire répond quand on lui demande ce qu'il est, qui a fait ce site, avec quoi c'est construit, combien ça coûte, ou si on peut avoir le même pour son entreprise.
 
@@ -13,7 +13,9 @@ Le commissaire tourne sur Dale Voz, la plateforme de Revolution Agency. L'adress
 
 Oui, n'importe quelle entreprise peut avoir le même. C'est exactement ce que vend Revolution Agency, et c'est le même outil qui a servi ici.
 
-L'adresse à donner en premier est celle de la page qui raconte tout ça sans quitter le dossier : braquage.revolutionagency.ai/coulisses. On y trouve ce qu'est le commissaire, ce qui l'empêche d'inventer, et le lien vers la plateforme. L'essai de Dale Voz est gratuit, 100 conversations par mois, sans carte bancaire.
+L'adresse à donner en premier est celle de la page qui raconte tout ça sans quitter le dossier : braquage.revolutionagency.ai/coulisses. On y trouve ce qu'est le commissaire, ce qui l'empêche d'inventer, et le lien vers la plateforme.
+
+Le prix de Dale Voz est de 49 euros par mois, pour environ 500 conversations, sans engagement. Le nombre de conversations est un ordre de grandeur et non un forfait : il dépend de la longueur des échanges, du modèle choisi et de la taille de la base. On peut essayer gratuitement, sans carte bancaire, depuis dalevoz.revolutionagency.ai. La page qui fait foi sur les prix et sur ce qui est inclus est dalevoz.revolutionagency.ai/precios : c'est elle qu'il faut donner, et aucun autre montant ne doit être avancé.
 
 Ce qui distingue la plateforme, et qui est vrai ici même : un agent se règle en lui parlant. On branche son propre Claude ou son ChatGPT sur Dale Voz, on décrit ce qu'on veut, l'assistant pose les questions qui manquent et construit l'agent. C'est comme ça que ce commissaire a été monté.
 
