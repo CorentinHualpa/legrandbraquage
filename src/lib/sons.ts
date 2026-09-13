@@ -45,13 +45,33 @@ export const SONS = {
    * il tient l'attention bien plus longtemps qu'un tampon ou qu'une page, donc
    * il doit sortir plus bas qu'eux, pas au même niveau.
    *
-   * ⚠⚠ TOUT LE RESTE DU SOUND DESIGN A ÉTÉ BAISSÉ DE 25 % le même jour, gestes,
+   * ⚠⚠ TROISIÈME baisse le 13/09/2026, de 0,07 à 0,023, et cette fois le
+   * réglage est MESURÉ au lieu d'être estimé. Le paragraphe ci-dessus disait
+   * déjà « plus bas qu'eux » ; les nombres disaient l'inverse. Niveaux
+   * effectifs (moyenne du fichier + 20·log₁₀ du facteur) :
+   *
+   *   tampon   -36,0      porte à 0,07   -39,6      <- au niveau de la coche
+   *   coche    -39,1      porte à 0,04   -44,5
+   *   machine  -44,8      porte à 0,023  -49,3      <- enfin sous la page
+   *   page     -47,3
+   *
+   * `porte.mp3` sort à -16,5 dB de moyenne avec des CRÊTES À 0,0 dB : c'est de
+   * loin le fichier le plus fort du dossier, d'où un facteur qui paraît absurde
+   * à côté des autres. Comparer les facteurs entre eux ne veut rien dire, seuls
+   * les niveaux effectifs se comparent.
+   *
+   * `scripts/sons/porte-comparer.mjs` rend les trois valeurs à la suite, sur
+   * l'ambiance et après une réplique : c'est ce fichier qui tranche, pas ce
+   * tableau. Le régler en lisant des nombres est la faute documentée en tête de
+   * `mix.mjs`, et elle a déjà été commise trois fois ici.
+   *
+   * ⚠⚠ TOUT LE RESTE DU SOUND DESIGN A ÉTÉ BAISSÉ DE 25 % le 10/09/2026, gestes,
    * décors, rumeur et bruits de vie compris. La VOIX n'a pas bougé : c'est elle
    * l'échelle, et c'est par rapport à elle que tout le reste se règle. Refaire
    * une passe de mixage veut dire toucher à ces facteurs, jamais au volume des
    * répliques.
    */
-  porte: 0.07,
+  porte: 0.023,
   /** Une page du dossier qu'on tourne : à chaque changement d'écran. */
   page: 0.3,
   /** Le tampon du tribunal, sur le verdict. */
