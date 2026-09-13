@@ -93,11 +93,37 @@ export function Avis({
    */
   const image = `/api/avis${requete}`;
 
+  const texte = verdict.braquage
+    ? `Placé en ${cran.nom}, mon argent aurait fait plus que ce qu’ils m’auront rendu. Chiffré sur les barèmes officiels.`
+    : `Placé en ${cran.nom}, mon argent aurait fait moins que ce qu’ils m’auront rendu. Vérifie le tien.`;
+
+  /*
+   * DEUX RÉSEAUX EN CLAIR, À CÔTÉ DU PARTAGE DU SYSTÈME.
+   *
+   * Le bouton « Partager » passe par `navigator.share` : sur téléphone il ouvre
+   * la feuille du système, qui contient déjà WhatsApp, LinkedIn et Instagram.
+   * Mais `navigator.share` N'EXISTE PAS sur la plupart des navigateurs de
+   * bureau (vérifié : absent sur Chromium/Windows), donc là il se contente de
+   * copier le lien, et rien à l'écran ne dit vers quoi on peut partager.
+   *
+   * ⚠ Les deux réseaux ne prennent PAS la même chose, et les traiter pareil
+   * fait perdre la phrase du verdict :
+   *   - WhatsApp n'a qu'un champ, `text` : on y met la phrase ET le lien ;
+   *   - LinkedIn IGNORE tout texte pré-rempli depuis 2023 (`title`, `summary`
+   *     et `text` sont sans effet sur `share-offsite`), il ne lit que `url`.
+   *     C'est l'aperçu du lien qui doit porter le message, et c'est déjà le
+   *     travail de `/api/avis`.
+   *
+   * Instagram n'a AUCUN partage de lien depuis le web : le seul chemin est
+   * l'image, et il est déjà là, juste en dessous.
+   */
+  const versWhatsapp = lien ? `https://wa.me/?text=${encodeURIComponent(`${texte}\n${lien}`)}` : "";
+  const versLinkedin = lien
+    ? `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(lien)}`
+    : "";
+
   async function partager() {
     if (!lien) return;
-    const texte = verdict.braquage
-      ? `Placé en ${cran.nom}, mon argent aurait fait plus que ce qu’ils m’auront rendu. Chiffré sur les barèmes officiels.`
-      : `Placé en ${cran.nom}, mon argent aurait fait moins que ce qu’ils m’auront rendu. Vérifie le tien.`;
     try {
       if (navigator.share) {
         await navigator.share({ title: "Le Grand Braquage", text: texte, url: lien });
@@ -130,6 +156,24 @@ export function Avis({
       actionSecondaire={{ libelle: "Modifier ma déposition", onClick: recommencer }}
       pied={
         <div className="flex flex-col gap-2">
+          <div className="flex gap-2">
+            <a
+              href={versWhatsapp}
+              target="_blank"
+              rel="noopener"
+              className="flex flex-1 items-center justify-center border border-papier/30 px-4 py-2.5 text-center text-[14.5px] text-papier-2 transition-colors hover:bg-papier/10"
+            >
+              WhatsApp
+            </a>
+            <a
+              href={versLinkedin}
+              target="_blank"
+              rel="noopener"
+              className="flex flex-1 items-center justify-center border border-papier/30 px-4 py-2.5 text-center text-[14.5px] text-papier-2 transition-colors hover:bg-papier/10"
+            >
+              LinkedIn
+            </a>
+          </div>
           <a
             href={image}
             target="_blank"
