@@ -357,9 +357,25 @@ export const PALIERS_ALIBI = PALIERS_ALIBI_JS as PalierAlibi[];
 export const PALIERS = PALIERS_JS as Record<PosteDuPlateau, DefinitionPalier>;
 export const HABITUDES = HABITUDES_JS as Record<PosteHabitude, { question: string; defaut: string; choix: ChoixHabitude[] }>;
 export const HABITUDES_DEFAUT = HABITUDES_DEFAUT_JS as Habitudes;
-export const TABAC = TABAC_JS as { prixPaquet: number; partTaxes: number; source: string };
-export const CARBURANT = CARBURANT_JS as { prixPlein: number; litres: number; ticpeParLitre: number; source: string };
-export const ALCOOL = ALCOOL_JS as { parSemaineParAn: number; chaqueSoirParAn: number; source: string };
+export const TABAC = TABAC_JS as {
+  prixPaquet: number;
+  partProportionnelle: number;
+  specifiqueParPaquet: number;
+  minimumParPaquet: number;
+  source: string;
+};
+export const CARBURANT = CARBURANT_JS as {
+  litres: number;
+  prixLitre: number;
+  acciseParLitre: number;
+  source: string;
+};
+export const ALCOOL = ALCOOL_JS as {
+  droitsParVerre: number;
+  parSemaineParAn: number;
+  chaqueSoirParAn: number;
+  source: string;
+};
 export const ELECTRICITE = ELECTRICITE_JS as {
   acciseParMWh: number;
   sansChauffageMWh: number;

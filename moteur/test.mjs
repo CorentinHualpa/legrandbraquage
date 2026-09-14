@@ -1251,18 +1251,44 @@ test('un poste absent retombe sur son défaut, une réponse inconnue LÈVE', () 
   assert.throws(() => M.accisesAnnuelles({ ...CONSO_MINIMALE, avion: 'fusée' }), /Habitude inconnue/);
 });
 
-test('un paquet par jour ajoute 365 fois les taxes du paquet, chaque année', () => {
+test('un paquet par jour ajoute 365 fois l’accise du paquet, chaque année', () => {
+  /*
+   * ⚠ L'ACCISE SEULE, PAS LA TVA. Elle est déjà dans le taux d'effort par
+   * décile, qui est un taux d'effort TVA et rien d'autre : la compter ici la
+   * comptait DEUX FOIS, 2,25 € par paquet, pendant que le volet affirmait le
+   * contraire à l'écran (corrigé le 14/09/2026).
+   *
+   * Et ce n'est pas un pourcentage : taux proportionnel plus montant fixe, avec
+   * un minimum de perception. Le banc refait la formule du barème.
+   */
+  const parPaquet = Math.max(0.55 * 13.5 + 1.466, 7.638);
+  assert.ok(Math.abs(parPaquet - 8.891) < 1e-9, parPaquet);
+  const parAn = 365 * parPaquet;
   const sans = simuler({ netMensuel: 2190, habitudes: CONSO_MINIMALE });
   const avec = simuler({ netMensuel: 2190, habitudes: { ...CONSO_MINIMALE, tabac: 'jour' } });
-  const parAn = 365 * 13 * 0.825;
   assert.ok(Math.abs((avec.carriere.totaux.taxesConsommation - sans.carriere.totaux.taxesConsommation) - parAn * avec.carriere.annees.length) < 1e-6);
   assert.ok(Math.abs(M.accisesAnnuelles({ ...CONSO_MINIMALE, tabac: 'jour' }) - PLANCHER_CONSO - parAn) < 1e-9);
 });
 
-test('un plein par mois : TICPE sur 50 litres plus la TVA du plein', () => {
-  const parPlein = 50 * 0.6702 + (98.5 - 98.5 / 1.2);
+test('un plein par mois : l’accise sur 50 litres, et la TVA n’est PAS recomptée', () => {
+  const parPlein = 50 * 0.6702;
   const total = M.accisesAnnuelles({ ...CONSO_MINIMALE, carburant: 'mois' });
   assert.ok(Math.abs(total - PLANCHER_CONSO - 12 * parPlein) < 1e-9);
+  // Le garde-fou de la double compte : un plein à plus de 40 € de taxes, c'est
+  // que la TVA est revenue dans le calcul.
+  assert.ok(parPlein < 40, 'la TVA du plein est recomptée');
+});
+
+test('AUCUN poste ne compte la TVA : elle est dans le taux d’effort', () => {
+  /*
+   * Le contrôle qui tient toute la méthode. Chaque poste ajoute une accise ou
+   * un droit, jamais une part de TVA. On le vérifie par les ORDRES DE GRANDEUR,
+   * qui sont ce qui bouge quand la TVA se glisse dans un poste : un paquet
+   * porte 8,89 € d'accise et 11,14 € avec la TVA, un plein 33,51 € contre 50,90.
+   */
+  const d = M.detailAccises(M.HABITUDES_DEFAUT);
+  assert.ok(Math.abs(d.taxesParPaquet - 8.891) < 1e-9, d.taxesParPaquet);
+  assert.ok(Math.abs(d.taxesParPlein - 33.51) < 1e-9, d.taxesParPlein);
 });
 
 test('énergie et avion : la taxe propre, jamais la TVA, et un aller-retour ne compte qu’un départ', () => {

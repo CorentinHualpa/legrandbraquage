@@ -2,51 +2,104 @@
  * Les accises, déclarées par la personne : tabac, carburant, alcool.
  *
  * Le taux d'effort TVA par décile (CPO, Boutchenik) ne couvre que la TVA.
- * Les accises dépendent d'habitudes que personne ne peut deviner : un paquet
- * par jour, c'est près de quatre mille euros de taxes par an, et rien pour
- * un non-fumeur. Le site ne fournit donc que le PRIX UNITAIRE, sourcé, et la
- * personne dit ce qu'elle consomme. Demande de Coq, 08/09/2026 au soir.
+ * Les ACCISES, elles, n'y sont pas, et elles dépendent d'habitudes que
+ * personne ne peut deviner : un paquet par jour, c'est plus de trois mille
+ * euros d'accise par an, et rien pour un non-fumeur. Le site ne fournit donc
+ * que le barème, sourcé, et la personne dit ce qu'elle consomme. Demande de
+ * Coq, 08/09/2026 au soir.
  *
  * ⚠ Sans profil, `simuler` n'ajoute RIEN : c'est le comportement de
  * référence des anciens tests, où les accises étaient supposées couvertes par
  * le taux d'effort. Tout est en euros d'aujourd'hui, constant sur la carrière.
  */
 
-/** Paquet de 20 : prix modal 13,00 € au 01/09/2026, dont 82,5 % de taxes (droits de consommation et TVA). */
-export const TABAC = {
-  prixPaquet: 13.0,
-  partTaxes: 0.825,
-  source: 'DGDDI, prix modal du paquet de 20 au 01/09/2026 ; part des taxes, Conseil des prélèvements obligatoires',
-};
+/*
+ * ⚠⚠ ON NE COMPTE QUE L'ACCISE, JAMAIS LA TVA, SUR AUCUN POSTE.
+ *
+ * `TVA_TAUX_EFFORT_DECILES` (baremes-2026.js) est un taux d'effort **TVA**, et
+ * rien d'autre : la TVA de tout le budget y est déjà, tabac, carburant et
+ * alcool compris. Les accises, elles, n'y sont pas, et c'est ce qui justifie de
+ * les demander à la personne.
+ *
+ * Le tabac et le carburant comptaient pourtant leur TVA en plus jusqu'au
+ * 14/09/2026 : 2,25 € par paquet et 17,39 € par plein comptés DEUX FOIS. Et le
+ * volet affirmait l'inverse à l'écran (« on ne compte QUE la taxe propre à
+ * chacun, jamais la TVA »). La page se contredisait elle-même, en faveur de sa
+ * propre thèse, ce qui est la pire direction possible pour une erreur.
+ *
+ * Conséquence assumée : les montants BAISSENT. Un paquet par jour passe de
+ * 3 916 à 3 245 € par an, un plein par mois de 599 à 402 €.
+ */
 
-/** Un plein de 50 L de SP95-E10 à 98,50 € : TICPE 0,6702 €/L, plus la TVA à 20 % sur le prix TTC. */
-export const CARBURANT = {
-  prixPlein: 98.5,
-  litres: 50,
-  ticpeParLitre: 0.6702,
-  source: 'TICPE 2026 sur le SP95-E10 (majoration régionale abrogée par la LF 2025) ; plein relevé à 98,50 €',
+/**
+ * Le paquet de 20, et l'accise dessus.
+ *
+ * ⚠ La formule n'est pas un pourcentage : l'accise est un taux proportionnel
+ * PLUS un montant fixe, avec un minimum de perception qui mord sous 11,22 €.
+ * Un « 82,5 % de taxes » recopié se trompe dès que le prix bouge, et il
+ * incluait la TVA.
+ */
+export const TABAC = {
+  prixPaquet: 13.5,
+  partProportionnelle: 0.55,
+  specifiqueParPaquet: 1.466,
+  minimumParPaquet: 7.638,
+  source:
+    'paquet de 20 à 13,50 € (Marlboro Red, arrêté du 5 août 2026 homologuant les prix, en vigueur au 01/09/2026) ; accise 2026 = 55 % du prix plus 73,30 € par mille unités, minimum de perception 381,90 € par mille (arrêté du 24 décembre 2025, articles L. 314-1 et suivants du CIBS). Un fumeur quotidien fume en moyenne 12,8 cigarettes par jour (Baromètre de Santé publique France 2024)',
 };
 
 /**
- * L'alcool : ordres de grandeur ASSUMÉS, parce que l'accise dépend du produit
- * (le vin est presque exempt de droits, les spiritueux paient 1 932,42 € par
- * hectolitre d'alcool pur). Une bouteille de vin par semaine, c'est surtout de
- * la TVA ; un verre chaque soir plus une bouteille de spiritueux par mois,
- * c'est l'accise qui pèse.
+ * Le plein de 50 litres de SP95-E10, et l'accise dessus.
+ *
+ * ⚠ 2,0869 €/L relevé, et la TVA n'entre PAS dans le compte : elle est dans le
+ * taux d'effort. L'accise, si.
  */
+export const CARBURANT = {
+  litres: 50,
+  prixLitre: 2.0869,
+  acciseParLitre: 0.6702,
+  source:
+    'SP95-E10 à 2,0869 € le litre (relevé DGEC du 4 septembre 2026, France métropolitaine hors Corse) ; accise 2026 de 75,397 €/MWh, soit 0,6702 € le litre (article L. 312-83 du CIBS ; la modulation régionale a disparu le 01/08/2025 et la majoration Île-de-France le 01/01/2026). Une voiture roule 11 600 km par an en moyenne (SDES, parc au 01/01/2026)',
+};
+
+/**
+ * L'ALCOOL, ENFIN CALCULÉ AU LIEU D'ÊTRE SUPPOSÉ.
+ *
+ * Il portait « 57 € et 400 € par an », deux ordres de grandeur posés à la main
+ * et sans arithmétique derrière. Ils sont remplacés par un calcul dont chaque
+ * terme est sourcé.
+ *
+ * ⚠ LE PROBLÈME DE L'ALCOOL, C'EST QU'UN VERRE N'EST PAS UN VERRE. À quantité
+ * d'alcool pur égale, les droits vont de 34,92 €/hlap sur le vin à 2 552,89 sur
+ * les spiritueux : un facteur SOIXANTE-TREIZE. Une estimation « un verre par
+ * jour coûte tant » qui ne dit pas QUEL verre se trompe d'un facteur cinq.
+ *
+ * On prend donc le VERRE STANDARD (10 g d'alcool pur, l'unité de l'OFDT) et on
+ * le pondère par la consommation réelle des Français : 52 % de l'alcool bu est
+ * du vin, 25 % de la bière, 21 % des spiritueux (OFDT, bilan 2024). Le buveur
+ * moyen n'existe pas, mais le mélange, lui, est mesuré.
+ */
+const DROITS_PAR_10G = {
+  // Accise seule : 4,19 €/hl de produit sur un vin à 12°, soit 34,92 €/hlap.
+  vin: 0.0044,
+  // 8,24 €/hl/degré, soit 824 €/hlap quel que soit le titre de la bière.
+  biere: 0.104,
+  // Accise 1 932,42 + cotisation sécurité sociale 620,47 = 2 552,89 €/hlap.
+  spiritueux: 0.323,
+};
+/** La part de chaque boisson dans l'alcool pur bu en France (OFDT 2024). */
+const MELANGE = { vin: 0.52, biere: 0.25, spiritueux: 0.21 };
+const droitsParVerre =
+  DROITS_PAR_10G.vin * MELANGE.vin
+  + DROITS_PAR_10G.biere * MELANGE.biere
+  + DROITS_PAR_10G.spiritueux * MELANGE.spiritueux;
+
 export const ALCOOL = {
-  /*
-   * ⚠ UN VERRE PAR SEMAINE, PAS UNE BOUTEILLE. Le choix du milieu proposait
-   * une bouteille par semaine, ce qui est déjà une consommation soutenue :
-   * personne ne se reconnaissait entre « jamais » et « une bouteille », donc
-   * le milieu ne servait à rien (Coq, 14/09/2026 : « une bouteille par semaine
-   * c'est trop »). Les deux montants descendent maintenant du MÊME ordre de
-   * grandeur par verre, 52 verres contre 365, au lieu d'être posés chacun de
-   * son côté.
-   */
-  parSemaineParAn: Math.round((400 * 52) / 365),
-  chaqueSoirParAn: 400,
-  source: 'accise spiritueux 2026 (1 932,42 € par hectolitre d’alcool pur), droits sur le vin, TVA à 20 % : ordres de grandeur assumés, 52 verres par an contre 365',
+  droitsParVerre,
+  parSemaineParAn: 52 * droitsParVerre,
+  chaqueSoirParAn: 365 * droitsParVerre,
+  source:
+    'accises 2026 sur les alcools (circulaire DGDDI du 22/12/2025) et cotisation sécurité sociale sur les boissons de plus de 18 degrés (620,47 € par hectolitre d’alcool pur) ; verre standard de 10 g d’alcool pur, pondéré par ce que boivent les Français, 52 % de vin, 25 % de bière et 21 % de spiritueux en volume d’alcool pur (OFDT, bilan 2024)',
 };
 
 /**
@@ -86,17 +139,6 @@ export const GAZ = {
 };
 
 /**
- * L'avion : ce que l'État prend sur un passager qui DÉCOLLE DE FRANCE.
- *
- * ⚠ Un aller-retour ne compte qu'UN départ taxé : le vol retour part d'un
- * autre pays, qui applique ses propres taxes, pas les nôtres.
- *
- * Le tarif de sûreté et de sécurité (de 3,30 € à 11,80 € en classe 1) n'est
- * pas compté : il est fixé aéroport par aéroport, et on ne sait pas d'où la
- * personne décolle. Le chiffre est donc un plancher, et il est annoncé comme
- * tel.
- */
-/**
  * ⚠ LE TARIF DE SÛRETÉ MANQUAIT, et il pesait 45 % du total.
  *
  * Il était écarté du calcul le 14/09/2026 au matin parce qu'il est fixé
@@ -122,9 +164,13 @@ export const AVION = {
     'au départ de Paris, en classe économique : tarif de solidarité (7,40 € vers l’Europe, 40 € vers une destination lointaine, barème de la loi de finances pour 2025, article L. 422-22 du CIBS), tarif de sûreté et de sécurité (11,80 € à Roissy et Orly, article A. 422-12), tarif de l’aviation civile (5,21 € et 9,37 € du 01/04/2026 au 31/03/2027, article A. 422-8) et péréquation aéroportuaire (1,35 € depuis le 01/07/2026, article A. 422-17) ; la redevance passager de l’aéroport n’est pas comptée, elle va à l’exploitant et non à l’État',
 };
 
-const taxesParPaquet = TABAC.prixPaquet * TABAC.partTaxes;
-const tvaParPlein = CARBURANT.prixPlein - CARBURANT.prixPlein / 1.2;
-const taxesParPlein = CARBURANT.litres * CARBURANT.ticpeParLitre + tvaParPlein;
+/** L'accise d'un paquet : proportionnelle plus forfaitaire, jamais sous le minimum. */
+const taxesParPaquet = Math.max(
+  TABAC.partProportionnelle * TABAC.prixPaquet + TABAC.specifiqueParPaquet,
+  TABAC.minimumParPaquet,
+);
+const prixPlein = CARBURANT.litres * CARBURANT.prixLitre;
+const taxesParPlein = CARBURANT.litres * CARBURANT.acciseParLitre;
 const accisesElecSans = ELECTRICITE.sansChauffageMWh * ELECTRICITE.acciseParMWh;
 const accisesElecAvec = ELECTRICITE.avecChauffageMWh * ELECTRICITE.acciseParMWh;
 const accisesGazCuisine = GAZ.cuisineMWh * GAZ.acciseParMWh;
@@ -149,12 +195,12 @@ function eur(n, decimales = 0) {
 export const EXPLICATIONS = {
   tabac: {
     titre: 'Le tabac',
-    calcul: `Un paquet de 20 à ${eur(TABAC.prixPaquet, 2)} €, dont ${Math.round(TABAC.partTaxes * 100)} % de taxes, soit ${eur(taxesParPaquet, 2)} € par paquet. Un paquet par semaine fait 52 paquets, un paquet par jour en fait 365.`,
+    calcul: `Un paquet de 20 à ${eur(TABAC.prixPaquet, 2)} € porte ${eur(taxesParPaquet, 2)} € d’accise, soit ${Math.round((taxesParPaquet / TABAC.prixPaquet) * 100)} % du prix. Un paquet par semaine fait 52 paquets, un paquet par jour en fait 365.`,
     source: TABAC.source,
   },
   alcool: {
     titre: 'L’alcool',
-    calcul: `${eur(ALCOOL.parSemaineParAn)} € par an pour un verre par semaine, ${eur(ALCOOL.chaqueSoirParAn)} € pour un verre chaque soir, soit 52 verres contre 365 au même ordre de grandeur par verre.`,
+    calcul: `${eur(ALCOOL.droitsParVerre * 100)} centimes de droits par verre standard, soit ${eur(ALCOOL.parSemaineParAn)} € par an pour un verre par semaine et ${eur(ALCOOL.chaqueSoirParAn)} € pour un verre chaque soir. ⚠ Un verre n’est pas un verre : à quantité d’alcool égale, les spiritueux paient 73 fois plus de droits que le vin.`,
     source: ALCOOL.source,
   },
   electricite: {
@@ -174,7 +220,7 @@ export const EXPLICATIONS = {
   },
   carburant: {
     titre: 'Le carburant',
-    calcul: `Un plein de ${CARBURANT.litres} litres à ${eur(CARBURANT.prixPlein, 2)} €, dont ${eur(CARBURANT.litres * CARBURANT.ticpeParLitre, 2)} € d’accise (${eur(CARBURANT.ticpeParLitre, 4)} € le litre) et ${eur(tvaParPlein, 2)} € de TVA, soit ${eur(taxesParPlein, 2)} € par plein. ⚠ La TVA porte AUSSI sur l’accise : on paie une taxe sur une taxe.`,
+    calcul: `Un plein de ${CARBURANT.litres} litres à ${eur(prixPlein, 2)} € porte ${eur(taxesParPlein, 2)} € d’accise, à ${eur(CARBURANT.acciseParLitre, 4)} € le litre. La TVA n’est pas recomptée ici, mais elle porte bien sur l’accise à la pompe : on paie une taxe sur une taxe.`,
     source: CARBURANT.source,
   },
 };
@@ -210,7 +256,7 @@ export const HABITUDES = {
     choix: [
       { id: 'non', libelle: 'Jamais', pointe: 'Sobre, et fier. Le fisc s’en remettra.', repere: '0 €', parAn: 0 },
       { id: 'parfois', libelle: 'Un verre par semaine', pointe: 'Le dimanche midi, ça ne compte pas vraiment.', repere: '52 VERRES', parAn: ALCOOL.parSemaineParAn },
-      { id: 'soir', libelle: 'Un verre chaque soir', pointe: 'C’est culturel, c’est le patrimoine.', repere: '~400 €', parAn: ALCOOL.chaqueSoirParAn },
+      { id: 'soir', libelle: 'Un verre chaque soir', pointe: 'C’est culturel, c’est le patrimoine.', repere: '365 VERRES', parAn: ALCOOL.chaqueSoirParAn },
     ],
   },
   electricite: {
