@@ -5,14 +5,9 @@ import type { NumeroPiece, Pieces } from "@/lib/images";
 import { euros, eurosSigne } from "@/lib/format";
 import { texte } from "@/lib/repliques";
 import {
-  ALCOOL,
-  AVION,
-  CARBURANT,
-  ELECTRICITE,
-  GAZ,
+  EXPLICATIONS,
   HABITUDES,
   POSTES,
-  TABAC,
   detailAccises,
   type Habitudes,
   type PosteHabitude,
@@ -122,7 +117,14 @@ export function Cafe({
     ?? simulation.carriere.annees[0];
   const parMois = annee.taxesConsommation / 12;
   const surLaCarriere = simulation.carriere.totaux.taxesConsommation;
-  const accisesMois = (detail.tabac + detail.carburant + detail.alcool) / 12;
+  /*
+   * ⚠ TOUS les postes, pas les trois premiers. Cette ligne énumérait « tabac +
+   * carburant + alcool » et servait à retrancher les taxes déclarées du total
+   * pour isoler la TVA du volet : depuis le 14/09/2026 il y a six postes, donc
+   * elle laissait l'électricité, le gaz et l'avion DANS la part annoncée comme
+   * étant de la TVA. Le volet surestimait la TVA de ce que ces trois-là pèsent.
+   */
+  const accisesMois = ORDRE.reduce((s, p) => s + detail[p], 0) / 12;
 
   /*
    * LE COMPTEUR NE COMPTE QUE CE QU'ON A DÉJÀ DEMANDÉ.
@@ -244,29 +246,37 @@ export function Cafe({
           café du commissaire, lui, est à 10 % : onze centimes sur 1,20 €.
         </p>
         <p className="text-[14px] leading-relaxed text-ligne">
-          S’y ajoutent les taxes sur ce que vous venez de dire : un paquet à{" "}
-          {TABAC.prixPaquet.toFixed(2).replace(".", ",")} € dont {Math.round(TABAC.partTaxes * 100)} % de
-          taxes, soit <span className="font-medium text-papier">{detail.taxesParPaquet.toFixed(2).replace(".", ",")} €</span>{" "}
-          par paquet ; un plein de {CARBURANT.litres} litres à{" "}
-          {CARBURANT.prixPlein.toFixed(2).replace(".", ",")} € dont{" "}
-          <span className="font-medium text-papier">{euros(detail.taxesParPlein)} €</span> de taxes ;
-          l’alcool en ordre de grandeur, {ALCOOL.parSemaineParAn} € par an pour un verre par semaine,{" "}
-          {ALCOOL.chaqueSoirParAn} € pour un verre chaque soir.
+          S’y ajoutent les taxes sur ce que vous venez de dire, poste par poste. Sur l’électricité,
+          le gaz et l’avion on ne compte QUE la taxe propre à chacun, jamais la TVA : elle est déjà
+          dans le taux d’effort ci-dessus, la recompter gonflerait le verdict d’un montant qui
+          n’existe pas.
         </p>
+
         {/*
-          L'énergie et l'avion ne comptent QUE leur taxe propre, jamais la TVA :
-          celle-ci est déjà dans le taux d'effort par décile du paragraphe
-          ci-dessus, et l'ajouter reviendrait à la compter deux fois.
+          UNE LIGNE PAR POSTE, tirée de `EXPLICATIONS` du moteur, qui la fabrique
+          avec les constantes du calcul. Le volet listait trois postes sur six et
+          réécrivait les montants à côté de ceux qui les calculent : deux
+          endroits, donc deux vérités le jour où l'un bouge (Coq, 14/09/2026 :
+          « toujours préciser quand la personne clique sur d'où sortent ces
+          chiffres »). Un poste ajouté sans explication se voit tout de suite,
+          un banc le vérifie.
         */}
-        <p className="text-[14px] leading-relaxed text-ligne">
-          Sur l’électricité, le gaz et l’avion, on ne compte QUE la taxe propre à chacun, jamais la
-          TVA : elle est déjà dans le taux d’effort ci-dessus, la recompter gonflerait le verdict
-          d’un montant qui n’existe pas. {ELECTRICITE.source}. {GAZ.source}. {AVION.source}.
-        </p>
+        <div className="flex flex-col gap-2.5">
+          {ORDRE.map((p) => (
+            <p key={p} className="text-[13.5px] leading-relaxed text-ligne">
+              <span className="font-medium text-papier">{EXPLICATIONS[p].titre}</span>
+              {" — "}
+              {EXPLICATIONS[p].calcul}{" "}
+              <span className="text-[12.5px]">({EXPLICATIONS[p].source}.)</span>
+            </p>
+          ))}
+        </div>
+
         <p className="text-[13px] leading-relaxed text-ligne">
-          Ce sont des ESTIMATIONS, et l’alcool est celle qui l’assume le plus : le droit dépend du
-          produit, un verre de vin n’est presque pas taxé, un verre de spiritueux beaucoup. {TABAC.source}.{" "}
-          {CARBURANT.source}. {ALCOOL.source}.
+          Ce sont des ESTIMATIONS pour tout ce qui dépend de vos habitudes : les barèmes sont
+          exacts, les quantités sont celles que vous venez de cocher. L’alcool est la ligne qui
+          l’assume le plus, parce que le droit dépend du produit : un verre de vin n’est presque
+          pas taxé, un verre de spiritueux beaucoup.
         </p>
         <Lien href="/methode">La méthode, ligne par ligne</Lien>
       </Volet>

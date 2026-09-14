@@ -1323,6 +1323,25 @@ test('le parcours visite les postes dans l’ordre du compteur', async () => {
   assert.equal(dansLeParcours.length, M.POSTES.length, 'un poste déclaré n’a pas d’écran');
 });
 
+test('chaque poste sait répondre à « d’où sortent ces chiffres ? »', () => {
+  /*
+   * Coq, 14/09/2026 : « toujours préciser quand la personne clique sur d'où
+   * sortent ces chiffres ». Le volet listait trois postes sur six, et les trois
+   * muets étaient ceux ajoutés le matin même : une explication qui manque ne
+   * casse rien, elle laisse juste un chiffre sans justification à l'écran.
+   */
+  for (const poste of M.POSTES) {
+    const e = M.EXPLICATIONS[poste];
+    assert.ok(e, `${poste} n'a pas d'explication dans le volet`);
+    assert.ok(e.titre && e.titre.length > 2, `${poste} : titre vide`);
+    assert.ok(e.calcul && e.calcul.length > 40, `${poste} : l'explication ne dit pas le calcul`);
+    assert.ok(e.source && e.source.length > 20, `${poste} : pas de source`);
+    // Une explication qui ne cite AUCUN nombre n'explique rien.
+    assert.ok(/\d/.test(e.calcul), `${poste} : l'explication ne porte aucun chiffre`);
+  }
+  assert.equal(Object.keys(M.EXPLICATIONS).length, M.POSTES.length, 'une explication orpheline');
+});
+
 test('chaque poste déclaré a un écran, et le compteur les somme tous', () => {
   // La liste qui fait foi, et la garde contre un poste ajouté à moitié.
   for (const poste of M.POSTES) {

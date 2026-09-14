@@ -130,8 +130,57 @@ const accisesElecAvec = ELECTRICITE.avecChauffageMWh * ELECTRICITE.acciseParMWh;
 const accisesGazCuisine = GAZ.cuisineMWh * GAZ.acciseParMWh;
 const accisesGazChauffage = GAZ.chauffageMWh * GAZ.acciseParMWh;
 
+/** Un nombre en euros, à la française, pour les explications ci-dessous. */
+function eur(n, decimales = 0) {
+  return n.toFixed(decimales).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+}
+
 /**
- * Les trois questions du café. Chaque choix porte une `pointe` : une phrase
+ * CE QU'ON RÉPOND QUAND ON CLIQUE SUR « D'OÙ SORTENT CES CHIFFRES ? ».
+ *
+ * ⚠ UNE ENTRÉE PAR POSTE, CONSTRUITE AVEC LES CONSTANTES, jamais recopiée à la
+ * main. Le volet affichait un paragraphe fourre-tout où trois postes sur six
+ * n'étaient pas expliqués du tout, et les montants y étaient réécrits à côté de
+ * ceux qui les calculent : deux endroits, donc deux vérités le jour où l'un
+ * bouge. Ici le texte SE FABRIQUE à partir des mêmes nombres que le calcul, et
+ * un poste ajouté sans explication se voit tout de suite (Coq, 14/09/2026 :
+ * « toujours préciser quand la personne clique sur d'où sortent ces chiffres »).
+ */
+export const EXPLICATIONS = {
+  tabac: {
+    titre: 'Le tabac',
+    calcul: `Un paquet de 20 à ${eur(TABAC.prixPaquet, 2)} €, dont ${Math.round(TABAC.partTaxes * 100)} % de taxes, soit ${eur(taxesParPaquet, 2)} € par paquet. Un paquet par semaine fait 52 paquets, un paquet par jour en fait 365.`,
+    source: TABAC.source,
+  },
+  alcool: {
+    titre: 'L’alcool',
+    calcul: `${eur(ALCOOL.parSemaineParAn)} € par an pour un verre par semaine, ${eur(ALCOOL.chaqueSoirParAn)} € pour un verre chaque soir, soit 52 verres contre 365 au même ordre de grandeur par verre.`,
+    source: ALCOOL.source,
+  },
+  electricite: {
+    titre: 'L’électricité',
+    calcul: `${eur(ELECTRICITE.acciseParMWh, 2)} € d’accise par MWh, sur ${eur(ELECTRICITE.sansChauffageMWh * 1000)} kWh si vous vous chauffez autrement (${eur(accisesElecSans)} € par an) et ${eur(ELECTRICITE.avecChauffageMWh * 1000)} kWh si tout est électrique (${eur(accisesElecAvec)} €).`,
+    source: ELECTRICITE.source,
+  },
+  gaz: {
+    titre: 'Le gaz',
+    calcul: `${eur(GAZ.acciseParMWh, 2)} € d’accise par MWh, sur ${eur(GAZ.cuisineMWh * 1000)} kWh pour la cuisine seule (${eur(accisesGazCuisine)} € par an) et ${eur(GAZ.chauffageMWh * 1000)} kWh pour une chaudière (${eur(accisesGazChauffage)} €).`,
+    source: GAZ.source,
+  },
+  avion: {
+    titre: 'L’avion',
+    calcul: `${eur(AVION.europeParDepart, 2)} € de taxes par départ vers l’Europe, ${eur(AVION.lointainParDepart, 2)} € vers une destination lointaine. Un aller-retour ne compte qu’UN départ : le vol de retour part d’un autre pays, qui applique ses propres taxes.`,
+    source: AVION.source,
+  },
+  carburant: {
+    titre: 'Le carburant',
+    calcul: `Un plein de ${CARBURANT.litres} litres à ${eur(CARBURANT.prixPlein, 2)} €, dont ${eur(CARBURANT.litres * CARBURANT.ticpeParLitre, 2)} € d’accise (${eur(CARBURANT.ticpeParLitre, 4)} € le litre) et ${eur(tvaParPlein, 2)} € de TVA, soit ${eur(taxesParPlein, 2)} € par plein. ⚠ La TVA porte AUSSI sur l’accise : on paie une taxe sur une taxe.`,
+    source: CARBURANT.source,
+  },
+};
+
+/**
+ * Les six questions du café. Chaque choix porte une `pointe` : une phrase
  * courte sous le libellé, qui fait sourire et qui dit au passage ce qui est
  * compté. Demande de Coq, 08/09/2026 : « un petit commentaire rigolo sous
  * chaque choix ».

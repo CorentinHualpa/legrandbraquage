@@ -33,6 +33,7 @@ import {
   HABITUDES as HABITUDES_JS,
   HABITUDES_DEFAUT as HABITUDES_DEFAUT_JS,
   POSTES as POSTES_JS,
+  EXPLICATIONS as EXPLICATIONS_JS,
   accisesAnnuelles as accisesAnnuellesJs,
   detailAccises as detailAccisesJs,
   TABAC as TABAC_JS,
@@ -380,6 +381,15 @@ export function detailAccises(
  * parcours le lisent au lieu d'énumérer les postes chacun de leur côté.
  */
 export const POSTES = POSTES_JS as PosteHabitude[];
+/**
+ * Ce que le volet « D'où sortent ces chiffres ? » répond, poste par poste.
+ * Fabriqué dans le moteur AVEC les constantes du calcul : le texte et le
+ * nombre ne peuvent pas se contredire.
+ */
+export const EXPLICATIONS = EXPLICATIONS_JS as Record<
+  PosteHabitude,
+  { titre: string; calcul: string; source: string }
+>;
 export const PALIERS_DEFAUT = PALIERS_DEFAUT_JS as Paliers;
 export const PRIX_ECOLE = PRIX_ECOLE_JS as {
   maternelle: number; elementaire: number; college: number; lyceeGeneral: number;

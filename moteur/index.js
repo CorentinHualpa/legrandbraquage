@@ -75,7 +75,8 @@ export {
 export { deroulerCarriere, totalPreleve } from './carriere.js';
 export { heureDeLiberation } from './liberation.js';
 export {
-  HABITUDES, HABITUDES_DEFAUT, POSTES, TABAC, CARBURANT, ALCOOL, ELECTRICITE, GAZ, AVION, accisesAnnuelles, detailAccises,
+  HABITUDES, HABITUDES_DEFAUT, POSTES, EXPLICATIONS, TABAC, CARBURANT, ALCOOL, ELECTRICITE, GAZ, AVION,
+  accisesAnnuelles, detailAccises,
 } from './consommation.js';
 export {
   PALIERS, PALIERS_DEFAUT, PRIX_ECOLE, PRIX_SANTE, PRIX_CHOMAGE,
