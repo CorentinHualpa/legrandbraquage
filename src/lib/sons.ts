@@ -475,7 +475,10 @@ const DUCK = 0.4;
  * s'interdit ailleurs.
  */
 const AVEC_REPLIQUE = new Set([
-  "deposition", "tabac", "carburant", "alcool", "pris", "butin",
+  // ⚠ Les six postes du café, dans l'ordre de `POSTES` (moteur/consommation.js).
+  // Un poste ajouté là-bas se pose ICI et dans `repliques.ts`, sinon le
+  // commissaire reste muet sur sa carte sans que rien ne lève.
+  "deposition", "tabac", "carburant", "alcool", "electricite", "gaz", "avion", "pris", "butin",
   "aparte", "ecole", "sante", "chomage", "rendu", "bourse",
   "verdict", "avis",
   // Les dix tranches de salaire, une par décile (cf. `DECILES` de repliques.ts).

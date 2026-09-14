@@ -176,7 +176,15 @@ export function Cafe({
         `src/lib/repliques.ts` : on peut lire plus qu'on n'entend, jamais
         l'inverse.
       */}
-      <Commissaire>« {ecran.avant ? `${ecran.avant} ` : ""}{texte(poste)} »</Commissaire>
+      {/*
+        ⚠ PAS DE BULLE VIDE. `texte()` rend une chaîne vide pour un nom
+        inconnu : les trois postes ajoutés le 14/09/2026 sont partis en prod
+        avec un commissaire qui affichait « » sur trois cartes d'affilée. Rien
+        ne lève, rien ne s'écrit dans la console, ça ne se voit qu'à l'écran.
+      */}
+      {texte(poste) || ecran.avant ? (
+        <Commissaire>« {ecran.avant ? `${ecran.avant} ` : ""}{texte(poste)} »</Commissaire>
+      ) : null}
 
       {/*
         LE DÉCOR, une fois, sur la première carte. Il dit ce qui se passe sans

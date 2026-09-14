@@ -131,6 +131,24 @@ export const REPLIQUES: Record<string, string> = {
     "[dry] Et à boire ? [scoffs] Mentez pas, on est au commissariat, pas chez la belle-famille. "
     + "[flat] Combien de verres dans la semaine ?",
 
+  /*
+   * ⚠ LES TROIS POSTES DU 14/09/2026 SONT PARTIS EN PROD SANS RÉPLIQUE, et la
+   * carte affichait une bulle VIDE : « » . `texte()` rend une chaîne vide pour
+   * un nom inconnu, donc rien ne lève, rien ne s'écrit dans la console, et le
+   * commissaire ouvre la bouche sans rien dire sur trois cartes d'affilée.
+   * `Cafe.tsx` ne rend plus la bulle quand le texte manque, mais la vraie
+   * parade est ici : un poste ajouté à `HABITUDES` s'ajoute AUSSI à cette liste.
+   */
+  electricite:
+    "[tired] Chez vous, c'est électrique ? [pause] Le chauffage, je veux dire. "
+    + "[dry] Parce que le compteur, lui, il tourne pour tout le monde.",
+  gaz:
+    "[flat] Et le gaz ? [scoffs] La chaudière, les trois plaques, ou rien du tout. "
+    + "[dry] Dites-moi juste ce qui chauffe.",
+  avion:
+    "[tired] Vous prenez l'avion ? [pause] On ne vous reproche rien. "
+    + "[sarcastic] On compte les décollages, c'est tout. [dry] Et seulement ceux de France.",
+
   /* La pièce à conviction : le mécanisme. Il explique, il ne s'emporte pas. */
   /*
    * Il juge un MODE OPÉRATOIRE, pas un prélèvement : c'est le seul angle où le

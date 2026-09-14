@@ -201,10 +201,20 @@ test("chaque réplique est écrite quelque part à l'écran", async () => {
   const muettes = Object.keys(REPLIQUES).filter(
     (nom) => !cartes.includes(`dit("${nom}")`) && !cartes.includes(`texte("${nom}")`),
   );
-  // L'aparté n'a pas de bulle : ses deux phrases sont mises en page à part,
-  // depuis la même source (`APARTE`).
+  /*
+   * ⚠ LA LISTE DES POSTES VIENT DU MOTEUR, elle ne se recopie pas ici.
+   * Elle portait « tabac, carburant, alcool » en dur : les trois postes ajoutés
+   * le 14/09/2026 ont donc fait rougir ce test alors qu'ils étaient
+   * parfaitement câblés, et on est à deux doigts de les ajouter à la main, ce
+   * qui referme le piège pour la fois d'après. `POSTES` est la seule liste qui
+   * fait foi, ici comme dans le parcours et dans le compteur.
+   *
+   * L'aparté n'a pas de bulle : ses deux phrases sont mises en page à part,
+   * depuis la même source (`APARTE`).
+   */
+  const { POSTES } = await import(pathToFileURL(join(ici, "..", "..", "moteur", "consommation.js")).href);
   const tolerees = [
-    ...(parVariable ? ["tabac", "carburant", "alcool", "ecole", "sante", "chomage"] : []),
+    ...(parVariable ? [...POSTES, "ecole", "sante", "chomage"] : []),
     ...(cartes.includes("APARTE.fort") ? ["aparte"] : []),
   ];
   assert.deepEqual(
