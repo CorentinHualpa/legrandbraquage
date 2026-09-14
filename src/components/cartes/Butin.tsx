@@ -69,24 +69,27 @@ export function Butin({
         l'achat (Coq, 08/09/2026 : « il faudrait vraiment qu'on fasse
         comprendre VOILÀ CE QU'ILS SE SONT ACHETÉ »).
 
-        ⚠ UN SEUL GROS CHIFFRE DANS LE PARCOURS, et c'est celui de l'accusation,
-        sur la pièce à conviction. Le montant était ici une seconde fois, en
-        gras et en grand, à une carte d'intervalle : on croyait lire un NOUVEAU
-        chiffre (Coq, 13/09/2026 : « je trouve qu'il y a doublon entre ces deux
-        encarts »). Il reste, parce que la phrase n'a pas de sens sans lui, mais
-        en rappel : « ces mêmes » dit que c'est le même argent, et le gros titre
-        de la carte devient ce qu'il ACHÈTE, posé sur le dessin juste en
-        dessous. On retourne une somme, on n'en annonce pas une deuxième.
+        ⚠⚠ LE MONTANT NE SE RÉÉCRIT PAS ICI. Il est en entier, en 44 px, sur la
+        carte PRÉCÉDENTE : c'est l'accusation, et c'est le seul gros chiffre du
+        parcours. Le réécrire une carte plus loin fait lire un NOUVEAU chiffre,
+        quelle que soit sa taille (Coq, 13/09/2026 : « je trouve qu'il y a
+        doublon entre ces deux encarts »).
+
+        ⚠ Le 13/09 j'avais RAPETISSÉ le montant au lieu de l'enlever, en gardant
+        « ces mêmes X € » pour dire que c'était le même argent. Demi-mesure : le
+        doublon était toujours là le 14/09, en plus petit (Coq : « on avait déjà
+        réglé ce problème de doublon, pourquoi tu l'as laissé »). « Cet argent »
+        suffit à faire le lien, la carte d'avant vient de donner la somme.
+
+        Le gros titre de cette carte-ci, c'est ce que l'argent ACHÈTE, posé sur
+        le dessin juste en dessous. On retourne une somme, on n'en annonce pas
+        une deuxième.
       */}
       <div className="-mx-5 -mt-16 flex flex-col gap-1 bg-jaune-police px-5 pt-16 pb-3 text-encre sm:-mx-6 sm:px-6">
         <span className="font-mono text-[10.5px] tracking-[0.16em] text-encre/65 uppercase">
           Scellé n° 1 · le butin
         </span>
-        <p className="text-[15.5px] leading-snug">
-          Voilà ce que ces mêmes{" "}
-          <span className="chiffres font-mono font-semibold tracking-[-0.02em] whitespace-nowrap">{eurosSigne(montant)}</span>{" "}
-          leur ont acheté.
-        </p>
+        <p className="text-[15.5px] leading-snug">Voilà ce que cet argent leur a acheté.</p>
       </div>
       {/* Les rayures qui ferment le scellé, tendues d'un bord à l'autre. */}
       <div aria-hidden className="ruban -mx-5 -mt-4 h-[10px] sm:-mx-6" />
