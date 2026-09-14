@@ -80,11 +80,20 @@ export const HABITUDES = {
   },
 };
 
-export const HABITUDES_DEFAUT = {
-  tabac: HABITUDES.tabac.defaut,
-  carburant: HABITUDES.carburant.defaut,
-  alcool: HABITUDES.alcool.defaut,
-};
+export const HABITUDES_DEFAUT = Object.fromEntries(
+  Object.entries(HABITUDES).map(([poste, d]) => [poste, d.defaut]),
+);
+
+/**
+ * L'ORDRE DES QUESTIONS, et la seule liste qui fasse foi.
+ *
+ * ⚠ Ajouter un poste, c'est ajouter une entrée à `HABITUDES` et son nom ici.
+ * Tout le reste suit : la somme, le détail par poste, le compteur qui monte,
+ * les écrans du parcours. Les trois fonctions plus bas énuméraient les postes
+ * à la main, et un quatrième poste aurait été compté dans le détail sans
+ * jamais entrer dans le total.
+ */
+export const POSTES = Object.keys(HABITUDES);
 
 function choix(poste, id) {
   const c = HABITUDES[poste].choix.find((x) => x.id === id);
@@ -94,18 +103,12 @@ function choix(poste, id) {
 
 /** Les accises d'une année, en euros, d'après ce que la personne déclare. */
 export function accisesAnnuelles(habitudes) {
-  return choix('tabac', habitudes.tabac).parAn
-    + choix('carburant', habitudes.carburant).parAn
-    + choix('alcool', habitudes.alcool).parAn;
+  return POSTES.reduce((total, poste) => total + choix(poste, habitudes[poste]).parAn, 0);
 }
 
 /** Ce que chaque poste coûte par an, pour l'écran. */
 export function detailAccises(habitudes) {
-  return {
-    tabac: choix('tabac', habitudes.tabac).parAn,
-    carburant: choix('carburant', habitudes.carburant).parAn,
-    alcool: choix('alcool', habitudes.alcool).parAn,
-    taxesParPaquet,
-    taxesParPlein,
-  };
+  const detail = { taxesParPaquet, taxesParPlein };
+  for (const poste of POSTES) detail[poste] = choix(poste, habitudes[poste]).parAn;
+  return detail;
 }

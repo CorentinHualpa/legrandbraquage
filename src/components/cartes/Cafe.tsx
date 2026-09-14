@@ -8,6 +8,7 @@ import {
   ALCOOL,
   CARBURANT,
   HABITUDES,
+  POSTES,
   TABAC,
   detailAccises,
   type Habitudes,
@@ -22,34 +23,34 @@ import {
  * (Coq, 08/09/2026 : « chaque question doit être comme sur une feuille de
  * déposition, et quand je clique ça tourne la page »).
  */
-/** L'ordre des questions, et donc l'ordre dans lequel le compteur monte. */
-const ORDRE: PosteHabitude[] = ["tabac", "carburant", "alcool"];
+/**
+ * L'ordre des questions, et donc l'ordre dans lequel le compteur monte. Il
+ * vient du moteur : ajouter un poste là-bas l'ajoute ici, dans le total et
+ * dans le compteur, sans qu'une liste oubliée ne le compte à moitié.
+ */
+const ORDRE = POSTES;
 
 const ECRAN: Record<PosteHabitude, {
   piece: NumeroPiece;
   legende: string;
-  rang: string;
   avant: string | null;
   note: string;
 }> = {
   tabac: {
     piece: 26,
     legende: "CLICHÉ 26 · C’EST OFFERT",
-    rang: "1 sur 3",
     avant: "Café ? Cadeau. Enfin, 1,20 €, dont onze centimes qui repartent chez eux. Vous les aviez déjà payés, remarquez.",
     note: "Taxes sur votre tabac",
   },
   carburant: {
     piece: 10,
     legende: "CLICHÉ 10 · LA POMPE, LA NUIT",
-    rang: "2 sur 3",
     avant: null,
     note: "Taxes sur vos pleins",
   },
   alcool: {
     piece: 8,
     legende: "CLICHÉ 08 · LA TABLE DES SCELLÉS",
-    rang: "3 sur 3",
     avant: null,
     note: "Taxes sur votre alcool",
   },
@@ -92,7 +93,8 @@ export function Cafe({
   const definition = HABITUDES[poste];
   const detail = detailAccises(habitudes);
   const parAnDuPoste = detail[poste];
-  const dernier = poste === "alcool";
+  const rang = ORDRE.indexOf(poste);
+  const dernier = rang === ORDRE.length - 1;
 
   const annee =
     simulation.carriere.annees.find((a) => a.age === simulation.entree.ageActuel)
@@ -111,14 +113,13 @@ export function Cafe({
    * ne monterait plus : il baisserait, au gré des réponses. On somme jusqu'au
    * poste courant, et lui seul.
    */
-  const rang = ORDRE.indexOf(poste);
   const releve = ORDRE.slice(0, rang + 1).reduce((s, p) => s + detail[p], 0);
 
   return (
     <Carte
       numero={numero}
       total={total}
-      nature={`Le café · ${ecran.rang}`}
+      nature={`Le café · ${rang + 1} sur ${ORDRE.length}`}
       retour={retour}
       photo={{ numero: ecran.piece, pieces, hauteur: 230, legende: ecran.legende }}
       action={{ libelle: dernier ? "Voir l’addition" : "Question suivante", onClick: suivant }}

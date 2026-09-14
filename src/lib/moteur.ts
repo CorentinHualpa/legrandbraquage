@@ -32,6 +32,7 @@ import {
   santeSurUneVie as santeSurUneVieJs,
   HABITUDES as HABITUDES_JS,
   HABITUDES_DEFAUT as HABITUDES_DEFAUT_JS,
+  POSTES as POSTES_JS,
   accisesAnnuelles as accisesAnnuellesJs,
   detailAccises as detailAccisesJs,
   TABAC as TABAC_JS,
@@ -348,9 +349,16 @@ export const ALCOOL = ALCOOL_JS as { parfoisParAn: number; chaqueSoirParAn: numb
 export function accisesAnnuelles(h: Habitudes): number {
   return accisesAnnuellesJs(h) as number;
 }
-export function detailAccises(h: Habitudes): { tabac: number; carburant: number; alcool: number; taxesParPaquet: number; taxesParPlein: number } {
-  return detailAccisesJs(h) as { tabac: number; carburant: number; alcool: number; taxesParPaquet: number; taxesParPlein: number };
+export function detailAccises(
+  h: Habitudes,
+): Record<PosteHabitude, number> & { taxesParPaquet: number; taxesParPlein: number } {
+  return detailAccisesJs(h) as Record<PosteHabitude, number> & { taxesParPaquet: number; taxesParPlein: number };
 }
+/**
+ * L'ordre des questions de consommation, tenu par le moteur. L'écran et le
+ * parcours le lisent au lieu d'énumérer les postes chacun de leur côté.
+ */
+export const POSTES = POSTES_JS as PosteHabitude[];
 export const PALIERS_DEFAUT = PALIERS_DEFAUT_JS as Paliers;
 export const PRIX_ECOLE = PRIX_ECOLE_JS as {
   maternelle: number; elementaire: number; college: number; lyceeGeneral: number;

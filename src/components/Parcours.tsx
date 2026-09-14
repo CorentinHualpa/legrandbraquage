@@ -27,6 +27,7 @@ import {
   HABITUDES_DEFAUT,
   PALIERS_DEFAUT,
   PERIMETRE_DEFAUT,
+  POSTES,
   salairePivot,
   simuler,
   type Habitudes,
@@ -48,6 +49,15 @@ const ECRANS = [
   "ecole", "sante", "chomage", "rendu", "bourse", "verdict", "avis",
 ] as const;
 type Ecran = (typeof ECRANS)[number];
+
+/**
+ * Un écran de consommation, ou non. Le test énumérait les trois postes à la
+ * main : une quatrième question se serait ajoutée au moteur et au compteur
+ * sans jamais s'afficher, et l'écran serait resté vide.
+ */
+function estPosteConso(e: Ecran): e is PosteHabitude {
+  return (POSTES as readonly string[]).includes(e);
+}
 
 /**
  * Où se passe chaque écran. Le son suit le LIEU, pas le numéro de carte : on
@@ -541,7 +551,7 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
       */}
     {ecran === "avis" ? null : <Commissariat />}
     <main className="min-h-dvh bg-nuit">
-      {ecran === "tabac" || ecran === "carburant" || ecran === "alcool" ? (
+      {estPosteConso(ecran) ? (
         <Cafe
           {...commun}
           poste={ecran}
