@@ -22,12 +22,30 @@ import {
   PALIERS,
   PALIERS_DEFAUT,
   PERIMETRE_DEFAUT,
+  POSTES,
   type Habitudes,
   type Paliers,
   type Perimetre,
+  type PosteHabitude,
   type Statut,
 } from "./moteur";
 import type { Activite, CategorieMicro, FormeTpe, Versant } from "./statuts";
+
+/**
+ * La lettre de chaque poste de consommation dans l'adresse partagée.
+ *
+ * ⚠ CES CLÉS SONT PUBLIQUES : un lien partagé il y a un mois les porte encore.
+ * On en AJOUTE, on n'en renomme jamais, sinon les dossiers déjà envoyés
+ * perdent en silence la réponse qu'ils transportaient.
+ */
+const CLE_HABITUDE: Record<PosteHabitude, string> = {
+  tabac: "ht",
+  carburant: "hc",
+  alcool: "ha",
+  electricite: "he",
+  gaz: "hg",
+  avion: "hv",
+};
 
 export type Cas = {
   netMensuel: number;
@@ -120,9 +138,9 @@ export function requeteDuCas(cas: Cas): string {
   // Le placement décide du verdict : un lien qui l'oublie rouvre un autre procès.
   if (cas.placementId !== PLACEMENT_DEFAUT_ID) q.set("pl", cas.placementId);
   if (cas.fraisId !== FRAIS_DEFAUT_ID) q.set("pf", cas.fraisId);
-  if (cas.habitudes.tabac !== HABITUDES_DEFAUT.tabac) q.set("ht", cas.habitudes.tabac);
-  if (cas.habitudes.carburant !== HABITUDES_DEFAUT.carburant) q.set("hc", cas.habitudes.carburant);
-  if (cas.habitudes.alcool !== HABITUDES_DEFAUT.alcool) q.set("ha", cas.habitudes.alcool);
+  for (const poste of POSTES) {
+    if (cas.habitudes[poste] !== HABITUDES_DEFAUT[poste]) q.set(CLE_HABITUDE[poste], cas.habitudes[poste]);
+  }
   if (cas.cadeau) q.set("cd", cas.cadeau);
   return `?${q.toString()}`;
 }
@@ -214,11 +232,12 @@ export function casDepuisRequete(recherche: string): Cas | null {
     },
     placementId: litParmi(q.get("pl"), CRANS_RENDEMENT.map((c) => c.id), PLACEMENT_DEFAUT_ID),
     fraisId: litParmi(q.get("pf"), CRANS_FRAIS.map((f) => f.id), FRAIS_DEFAUT_ID),
-    habitudes: {
-      tabac: litParmi(q.get("ht"), HABITUDES.tabac.choix.map((c) => c.id), HABITUDES_DEFAUT.tabac),
-      carburant: litParmi(q.get("hc"), HABITUDES.carburant.choix.map((c) => c.id), HABITUDES_DEFAUT.carburant),
-      alcool: litParmi(q.get("ha"), HABITUDES.alcool.choix.map((c) => c.id), HABITUDES_DEFAUT.alcool),
-    },
+    habitudes: Object.fromEntries(
+      POSTES.map((poste) => [
+        poste,
+        litParmi(q.get(CLE_HABITUDE[poste]), HABITUDES[poste].choix.map((c) => c.id), HABITUDES_DEFAUT[poste]),
+      ]),
+    ) as Habitudes,
     cadeau: litCadeau(q.get("cd")),
   };
 }

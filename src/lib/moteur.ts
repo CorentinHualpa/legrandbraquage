@@ -38,10 +38,23 @@ import {
   TABAC as TABAC_JS,
   CARBURANT as CARBURANT_JS,
   ALCOOL as ALCOOL_JS,
+  ELECTRICITE as ELECTRICITE_JS,
+  GAZ as GAZ_JS,
+  AVION as AVION_JS,
 } from "@moteur/index.js";
 
-/** Tabac, carburant, alcool : ce que la personne déclare, et qui ajoute des accises à la TVA. */
-export type Habitudes = { tabac: string; carburant: string; alcool: string };
+/**
+ * Ce que la personne déclare de sa consommation, et qui ajoute des taxes
+ * spécifiques à la TVA. L'ordre est celui de `POSTES`, dans le moteur.
+ */
+export type Habitudes = {
+  tabac: string;
+  carburant: string;
+  alcool: string;
+  electricite: string;
+  gaz: string;
+  avion: string;
+};
 export type PosteHabitude = keyof Habitudes;
 export type ChoixHabitude = {
   id: string;
@@ -346,6 +359,14 @@ export const HABITUDES_DEFAUT = HABITUDES_DEFAUT_JS as Habitudes;
 export const TABAC = TABAC_JS as { prixPaquet: number; partTaxes: number; source: string };
 export const CARBURANT = CARBURANT_JS as { prixPlein: number; litres: number; ticpeParLitre: number; source: string };
 export const ALCOOL = ALCOOL_JS as { parfoisParAn: number; chaqueSoirParAn: number; source: string };
+export const ELECTRICITE = ELECTRICITE_JS as {
+  acciseParMWh: number;
+  sansChauffageMWh: number;
+  avecChauffageMWh: number;
+  source: string;
+};
+export const GAZ = GAZ_JS as { acciseParMWh: number; cuisineMWh: number; chauffageMWh: number; source: string };
+export const AVION = AVION_JS as { europeParDepart: number; lointainParDepart: number; source: string };
 export function accisesAnnuelles(h: Habitudes): number {
   return accisesAnnuellesJs(h) as number;
 }

@@ -45,7 +45,8 @@ import { partsFiscales, regimeCalculable, regimeDe } from "@/lib/statuts";
  * chômage : la question ne lui est pas posée.
  */
 const ECRANS = [
-  "couverture", "deposition", "tabac", "carburant", "alcool", "pris", "butin", "aparte",
+  "couverture", "deposition", "tabac", "carburant", "alcool", "electricite", "gaz", "avion",
+  "pris", "butin", "aparte",
   "ecole", "sante", "chomage", "rendu", "bourse", "verdict", "avis",
 ] as const;
 type Ecran = (typeof ECRANS)[number];

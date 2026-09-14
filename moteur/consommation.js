@@ -40,9 +40,67 @@ export const ALCOOL = {
   source: 'accise spiritueux 2026 (1 932,42 € par hectolitre d’alcool pur), droits sur le vin, TVA à 20 % : ordres de grandeur assumés',
 };
 
+/**
+ * L'électricité : l'ACCISE seule, pas la TVA.
+ *
+ * ⚠ LA TVA EST DÉJÀ COMPTÉE AILLEURS. Le taux d'effort par décile couvre
+ * toute la TVA du budget, celle de la facture d'électricité comprise :
+ * l'ajouter ici la compterait deux fois et gonflerait le verdict d'un
+ * montant qui n'existe pas. Ne sont ajoutées que les taxes SPÉCIFIQUES, que
+ * le taux d'effort ne voit pas. Même règle pour le gaz et l'avion.
+ *
+ * Les deux consommations sont les CLIENTS TYPES de la CRE, ceux qui servent
+ * à comparer les offres. Ce ne sont pas des moyennes constatées, et aucune
+ * moyenne officielle « par ménage » n'est publiée : le dossier dit ce qu'il
+ * utilise plutôt que d'inventer une moyenne.
+ */
+export const ELECTRICITE = {
+  acciseParMWh: 30.62,
+  sansChauffageMWh: 2.4,
+  avecChauffageMWh: 8.5,
+  source:
+    'accise sur l’électricité, catégorie ménages, 30,62 €/MWh du 01/08/2026 au 31/01/2027 (guide DGEC 2026 sur la fiscalité des énergies) ; consommations : clients types CRE, 2 400 kWh en base 6 kVA et 8 500 kWh en heures creuses 9 kVA',
+};
+
+/**
+ * Le gaz : l'accise seule, là aussi. Le tarif est en MWh PCS, exactement
+ * l'unité de la facture, donc le client type de la CRE s'y applique
+ * directement (le piège serait de prendre une statistique en PCI, inférieure
+ * d'environ 11 %).
+ */
+export const GAZ = {
+  acciseParMWh: 16.66,
+  cuisineMWh: 0.61,
+  chauffageMWh: 14,
+  source:
+    'accise sur les gaz naturels à usage combustible, 16,66 €/MWh PCS du 01/08/2026 au 31/01/2027 (guide DGEC 2026) ; consommations : clients types CRE, 610 kWh en cuisine et 14 000 kWh en chauffage',
+};
+
+/**
+ * L'avion : ce que l'État prend sur un passager qui DÉCOLLE DE FRANCE.
+ *
+ * ⚠ Un aller-retour ne compte qu'UN départ taxé : le vol retour part d'un
+ * autre pays, qui applique ses propres taxes, pas les nôtres.
+ *
+ * Le tarif de sûreté et de sécurité (de 3,30 € à 11,80 € en classe 1) n'est
+ * pas compté : il est fixé aéroport par aéroport, et on ne sait pas d'où la
+ * personne décolle. Le chiffre est donc un plancher, et il est annoncé comme
+ * tel.
+ */
+export const AVION = {
+  europeParDepart: 7.4 + 5.21 + 1.35,
+  lointainParDepart: 40 + 9.37 + 1.35,
+  source:
+    'tarif de solidarité (7,40 € Europe, 40 € destination lointaine, classe économique, barème de l’article 30 de la loi de finances pour 2025), tarif de l’aviation civile (5,21 € et 9,37 € du 01/04/2026 au 31/03/2027) et péréquation aéroportuaire (1,35 € depuis le 01/07/2026), notices officielles DGAC ; hors tarif de sûreté, qui dépend de l’aéroport',
+};
+
 const taxesParPaquet = TABAC.prixPaquet * TABAC.partTaxes;
 const tvaParPlein = CARBURANT.prixPlein - CARBURANT.prixPlein / 1.2;
 const taxesParPlein = CARBURANT.litres * CARBURANT.ticpeParLitre + tvaParPlein;
+const accisesElecSans = ELECTRICITE.sansChauffageMWh * ELECTRICITE.acciseParMWh;
+const accisesElecAvec = ELECTRICITE.avecChauffageMWh * ELECTRICITE.acciseParMWh;
+const accisesGazCuisine = GAZ.cuisineMWh * GAZ.acciseParMWh;
+const accisesGazChauffage = GAZ.chauffageMWh * GAZ.acciseParMWh;
 
 /**
  * Les trois questions du café. Chaque choix porte une `pointe` : une phrase
@@ -78,6 +136,38 @@ export const HABITUDES = {
       { id: 'soir', libelle: 'Un verre chaque soir', pointe: 'C’est culturel, c’est le patrimoine.', repere: '~400 €', parAn: ALCOOL.chaqueSoirParAn },
     ],
   },
+  electricite: {
+    question: 'Chez vous, le chauffage, c’est l’électricité ?',
+    defaut: 'base',
+    choix: [
+      { id: 'base', libelle: 'Non, je me chauffe autrement', pointe: 'Le frigo et la box tournent quand même.', repere: '2 400 KWH', parAn: accisesElecSans },
+      { id: 'chauffage', libelle: 'Oui, tout à l’électrique', pointe: 'Le compteur, lui, ne dort jamais.', repere: '8 500 KWH', parAn: accisesElecAvec },
+    ],
+  },
+  gaz: {
+    question: 'Et le gaz ?',
+    defaut: 'non',
+    choix: [
+      { id: 'non', libelle: 'Pas de gaz', pointe: 'Tout électrique, ou tout au bois.', repere: '0 €', parAn: 0 },
+      { id: 'cuisine', libelle: 'La cuisine seulement', pointe: 'Trois plaques et une omelette.', repere: '610 KWH', parAn: accisesGazCuisine },
+      { id: 'chauffage', libelle: 'Le chauffage au gaz', pointe: 'La chaudière, et la facture qui va avec.', repere: '14 000 KWH', parAn: accisesGazChauffage },
+    ],
+  },
+  avion: {
+    question: 'Vous prenez l’avion ?',
+    defaut: 'non',
+    choix: [
+      { id: 'non', libelle: 'Jamais', pointe: 'Les pieds sur terre, le portefeuille aussi.', repere: '0 €', parAn: 0 },
+      { id: 'europe', libelle: 'Un aller-retour en Europe dans l’année', pointe: 'Le retour part d’ailleurs : la France ne taxe que le départ.', repere: '1 DÉPART', parAn: AVION.europeParDepart },
+      {
+        id: 'souvent',
+        libelle: 'Plusieurs vols, dont un long-courrier',
+        pointe: 'Vous décollez, ils encaissent.',
+        repere: '3 DÉPARTS',
+        parAn: 2 * AVION.europeParDepart + AVION.lointainParDepart,
+      },
+    ],
+  },
 };
 
 export const HABITUDES_DEFAUT = Object.fromEntries(
@@ -95,8 +185,18 @@ export const HABITUDES_DEFAUT = Object.fromEntries(
  */
 export const POSTES = Object.keys(HABITUDES);
 
+/**
+ * ⚠ NE PAS RÉPONDRE et RÉPONDRE N'IMPORTE QUOI sont deux choses.
+ *
+ * Un poste ABSENT retombe sur son défaut : c'est le cas d'un appelant qui ne
+ * connaît que les postes d'avant (un ancien lien partagé, un test écrit quand
+ * il n'y en avait que trois), et le faire lever casserait un dossier
+ * parfaitement valide. Une VALEUR inconnue lève, elle, parce qu'elle veut dire
+ * qu'on compte zéro sans le dire.
+ */
 function choix(poste, id) {
-  const c = HABITUDES[poste].choix.find((x) => x.id === id);
+  const valeur = id === undefined || id === null ? HABITUDES[poste].defaut : id;
+  const c = HABITUDES[poste].choix.find((x) => x.id === valeur);
   if (!c) throw new Error(`Habitude inconnue pour ${poste} : « ${id} »`);
   return c;
 }

@@ -6,7 +6,10 @@ import { euros, eurosSigne } from "@/lib/format";
 import { texte } from "@/lib/repliques";
 import {
   ALCOOL,
+  AVION,
   CARBURANT,
+  ELECTRICITE,
+  GAZ,
   HABITUDES,
   POSTES,
   TABAC,
@@ -53,6 +56,24 @@ const ECRAN: Record<PosteHabitude, {
     legende: "CLICHÉ 08 · LA TABLE DES SCELLÉS",
     avant: null,
     note: "Taxes sur votre alcool",
+  },
+  electricite: {
+    piece: 18,
+    legende: "CLICHÉ 18 · LES LUMIÈRES RESTENT ALLUMÉES",
+    avant: null,
+    note: "Taxes sur votre électricité",
+  },
+  gaz: {
+    piece: 17,
+    legende: "CLICHÉ 17 · LE BUREAU, CHAUFFÉ AUX FRAIS DE QUI ?",
+    avant: null,
+    note: "Taxes sur votre gaz",
+  },
+  avion: {
+    piece: 6,
+    legende: "CLICHÉ 06 · IL A QUITTÉ LE TERRITOIRE",
+    avant: null,
+    note: "Taxes sur vos billets d’avion",
   },
 };
 
@@ -166,8 +187,8 @@ export function Cafe({
       {rang === 0 ? (
         <p className="text-[14.5px] leading-relaxed text-papier-2">
           Sur tout ce que vous achetez, une part part en taxes avant vous. Elle ne figure sur aucune
-          fiche de paie, et personne ne vous demande de signer. Trois questions, et on chiffre la
-          vôtre.
+          fiche de paie, et personne ne vous demande de signer. {ORDRE.length} questions, et on
+          chiffre la vôtre. Vous pouvez couper court quand vous voulez.
         </p>
       ) : null}
 
@@ -223,6 +244,16 @@ export function Cafe({
           <span className="font-medium text-papier">{euros(detail.taxesParPlein)} €</span> de taxes ;
           l’alcool en ordre de grandeur, {ALCOOL.parfoisParAn} € par an pour une bouteille par semaine,{" "}
           {ALCOOL.chaqueSoirParAn} € pour un verre chaque soir.
+        </p>
+        {/*
+          L'énergie et l'avion ne comptent QUE leur taxe propre, jamais la TVA :
+          celle-ci est déjà dans le taux d'effort par décile du paragraphe
+          ci-dessus, et l'ajouter reviendrait à la compter deux fois.
+        */}
+        <p className="text-[14px] leading-relaxed text-ligne">
+          Sur l’électricité, le gaz et l’avion, on ne compte QUE la taxe propre à chacun, jamais la
+          TVA : elle est déjà dans le taux d’effort ci-dessus, la recompter gonflerait le verdict
+          d’un montant qui n’existe pas. {ELECTRICITE.source}. {GAZ.source}. {AVION.source}.
         </p>
         <p className="text-[13px] leading-relaxed text-ligne">
           Ce sont des ESTIMATIONS, et l’alcool est celle qui l’assume le plus : le droit dépend du

@@ -1214,25 +1214,83 @@ test('le pivot existe aussi sur le coût d’opportunité, et monte avec le rend
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Les accises déclarées : tabac, carburant, alcool, en plus de la TVA.
-test('sans habitudes, rien ne s’ajoute à la TVA', () => {
+// Les taxes de consommation déclarées, en plus de la TVA.
+/*
+ * ⚠ L'ÉLECTRICITÉ N'A PAS DE RÉPONSE « ZÉRO », et c'est volontaire : on ne peut
+ * pas ne pas être raccordé. Son option basse (le client type CRE sans chauffage)
+ * est donc le PLANCHER de tout dossier où la personne a répondu à quoi que ce
+ * soit. Les tests le NOMMENT au lieu de faire comme s'il n'existait pas.
+ */
+const PLANCHER_CONSO = M.ELECTRICITE.sansChauffageMWh * M.ELECTRICITE.acciseParMWh;
+const CONSO_MINIMALE = {
+  tabac: 'non', carburant: 'non', alcool: 'non', electricite: 'base', gaz: 'non', avion: 'non',
+};
+
+test('tout au plus bas, il ne reste que le plancher de l’électricité', () => {
   const s = simuler({ netMensuel: 2190 });
-  const t = simuler({ netMensuel: 2190, habitudes: { tabac: 'non', carburant: 'non', alcool: 'non' } });
-  assert.equal(s.carriere.totaux.taxesConsommation, t.carriere.totaux.taxesConsommation);
+  const t = simuler({ netMensuel: 2190, habitudes: CONSO_MINIMALE });
+  const ecart = t.carriere.totaux.taxesConsommation - s.carriere.totaux.taxesConsommation;
+  assert.ok(Math.abs(ecart - PLANCHER_CONSO * t.carriere.annees.length) < 1e-6);
+  assert.ok(Math.abs(M.accisesAnnuelles(CONSO_MINIMALE) - PLANCHER_CONSO) < 1e-9);
+});
+
+test('un poste absent retombe sur son défaut, une réponse inconnue LÈVE', () => {
+  // Un ancien lien partagé ne connaît que les trois premiers postes.
+  assert.equal(
+    M.accisesAnnuelles({ tabac: 'non', carburant: 'non', alcool: 'non' }),
+    M.accisesAnnuelles(CONSO_MINIMALE),
+  );
+  assert.throws(() => M.accisesAnnuelles({ ...CONSO_MINIMALE, carburant: 'vélo' }), /Habitude inconnue/);
+  assert.throws(() => M.accisesAnnuelles({ ...CONSO_MINIMALE, avion: 'fusée' }), /Habitude inconnue/);
 });
 
 test('un paquet par jour ajoute 365 fois les taxes du paquet, chaque année', () => {
-  const sans = simuler({ netMensuel: 2190, habitudes: { tabac: 'non', carburant: 'non', alcool: 'non' } });
-  const avec = simuler({ netMensuel: 2190, habitudes: { tabac: 'jour', carburant: 'non', alcool: 'non' } });
+  const sans = simuler({ netMensuel: 2190, habitudes: CONSO_MINIMALE });
+  const avec = simuler({ netMensuel: 2190, habitudes: { ...CONSO_MINIMALE, tabac: 'jour' } });
   const parAn = 365 * 13 * 0.825;
   assert.ok(Math.abs((avec.carriere.totaux.taxesConsommation - sans.carriere.totaux.taxesConsommation) - parAn * avec.carriere.annees.length) < 1e-6);
-  assert.ok(Math.abs(M.accisesAnnuelles({ tabac: 'jour', carburant: 'non', alcool: 'non' }) - parAn) < 1e-9);
+  assert.ok(Math.abs(M.accisesAnnuelles({ ...CONSO_MINIMALE, tabac: 'jour' }) - PLANCHER_CONSO - parAn) < 1e-9);
 });
 
 test('un plein par mois : TICPE sur 50 litres plus la TVA du plein', () => {
   const parPlein = 50 * 0.6702 + (98.5 - 98.5 / 1.2);
-  assert.ok(Math.abs(M.accisesAnnuelles({ tabac: 'non', carburant: 'mois', alcool: 'non' }) - 12 * parPlein) < 1e-9);
-  assert.throws(() => M.accisesAnnuelles({ tabac: 'non', carburant: 'vélo', alcool: 'non' }), /Habitude inconnue/);
+  const total = M.accisesAnnuelles({ ...CONSO_MINIMALE, carburant: 'mois' });
+  assert.ok(Math.abs(total - PLANCHER_CONSO - 12 * parPlein) < 1e-9);
+});
+
+test('énergie et avion : la taxe propre, jamais la TVA, et un aller-retour ne compte qu’un départ', () => {
+  // Le chauffage électrique ajoute l'accise sur l'écart de consommation, pas plus.
+  const chauffe = M.accisesAnnuelles({ ...CONSO_MINIMALE, electricite: 'chauffage' });
+  const ecartElec = (M.ELECTRICITE.avecChauffageMWh - M.ELECTRICITE.sansChauffageMWh) * M.ELECTRICITE.acciseParMWh;
+  assert.ok(Math.abs(chauffe - PLANCHER_CONSO - ecartElec) < 1e-9);
+
+  // Le gaz de chauffage : 14 000 kWh PCS à l'accise, et rien d'autre.
+  const gaz = M.accisesAnnuelles({ ...CONSO_MINIMALE, gaz: 'chauffage' });
+  assert.ok(Math.abs(gaz - PLANCHER_CONSO - M.GAZ.chauffageMWh * M.GAZ.acciseParMWh) < 1e-9);
+
+  // ⚠ Un aller-retour en Europe = UN seul départ taxé par la France.
+  const vol = M.accisesAnnuelles({ ...CONSO_MINIMALE, avion: 'europe' });
+  assert.ok(Math.abs(vol - PLANCHER_CONSO - M.AVION.europeParDepart) < 1e-9);
+  assert.ok(Math.abs(M.AVION.europeParDepart - (7.4 + 5.21 + 1.35)) < 1e-9);
+  assert.ok(Math.abs(M.AVION.lointainParDepart - (40 + 9.37 + 1.35)) < 1e-9);
+});
+
+test('chaque poste déclaré a un écran, et le compteur les somme tous', () => {
+  // La liste qui fait foi, et la garde contre un poste ajouté à moitié.
+  for (const poste of M.POSTES) {
+    assert.ok(M.HABITUDES[poste], `${poste} n'a pas de question`);
+    assert.ok(M.HABITUDES[poste].choix.length >= 2, `${poste} n'offre pas de choix`);
+    assert.ok(
+      M.HABITUDES[poste].choix.some((c) => c.id === M.HABITUDES[poste].defaut),
+      `le défaut de ${poste} ne fait pas partie de ses choix`,
+    );
+    assert.ok(M.HABITUDES_DEFAUT[poste] === M.HABITUDES[poste].defaut, `défaut incohérent pour ${poste}`);
+  }
+  assert.equal(M.POSTES.length, Object.keys(M.HABITUDES).length);
+  // Le détail par poste et le total disent la même chose.
+  const d = M.detailAccises(M.HABITUDES_DEFAUT);
+  const somme = M.POSTES.reduce((s, p) => s + d[p], 0);
+  assert.ok(Math.abs(somme - M.accisesAnnuelles(M.HABITUDES_DEFAUT)) < 1e-9);
 });
 
 test('paliers : bac+5 dans le privé compte comme le bac, bac+5 public compte cinq ans de fac', () => {
