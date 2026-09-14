@@ -155,7 +155,17 @@ export const HABITUDES = {
   },
   gaz: {
     question: 'Et le gaz ?',
-    defaut: 'non',
+    /*
+     * ⚠ DÉFAUT NON NUL, comme le carburant et l'alcool. Un défaut à zéro fait
+     * stagner le compteur pendant deux cartes, et un compteur qui ne monte plus
+     * dit le contraire de ce qu'il est là pour dire (Coq, 14/09/2026).
+     *
+     * C'est la CUISINE et pas le chauffage, et l'écart compte : le chauffage au
+     * gaz concerne une minorité de logements, le poser par défaut chiffrerait
+     * 233 € à des gens qui n'ont pas de chaudière. Trois plaques, 610 kWh, dix
+     * euros : modeste, mais vrai pour beaucoup de monde et modifiable en un clic.
+     */
+    defaut: 'cuisine',
     choix: [
       { id: 'non', libelle: 'Pas de gaz', pointe: 'Tout électrique, ou tout au bois.', repere: '0 €', parAn: 0 },
       { id: 'cuisine', libelle: 'La cuisine seulement', pointe: 'Trois plaques et une omelette.', repere: '610 KWH', parAn: accisesGazCuisine },
@@ -164,7 +174,12 @@ export const HABITUDES = {
   },
   avion: {
     question: 'Vous prenez l’avion ?',
-    defaut: 'non',
+    /*
+     * ⚠ Même raison : un aller-retour en Europe dans l'année, c'est UN départ
+     * taxé et quatorze euros. C'est le voyage le plus banal qui soit, et celui
+     * qui ne prend jamais l'avion le décoche en un clic.
+     */
+    defaut: 'europe',
     choix: [
       { id: 'non', libelle: 'Jamais', pointe: 'Les pieds sur terre, le portefeuille aussi.', repere: '0 €', parAn: 0 },
       { id: 'europe', libelle: 'Un aller-retour en Europe dans l’année', pointe: 'Le retour part d’ailleurs : la France ne taxe que le départ.', repere: '1 DÉPART', parAn: AVION.europeParDepart },

@@ -1236,9 +1236,16 @@ test('tout au plus bas, il ne reste que le plancher de l’électricité', () =>
 
 test('un poste absent retombe sur son défaut, une réponse inconnue LÈVE', () => {
   // Un ancien lien partagé ne connaît que les trois premiers postes.
+  /*
+   * ⚠ La référence est le DÉFAUT de chaque poste manquant, pas zéro : depuis le
+   * 14/09/2026 le gaz et l'avion ont un défaut NON NUL (sinon le compteur
+   * stagnait sur deux cartes). Comparer à `CONSO_MINIMALE` ferait échouer ce
+   * test à chaque fois qu'on change un défaut, alors que ce qu'il garde, c'est
+   * le REPLI, pas la valeur.
+   */
   assert.equal(
     M.accisesAnnuelles({ tabac: 'non', carburant: 'non', alcool: 'non' }),
-    M.accisesAnnuelles(CONSO_MINIMALE),
+    M.accisesAnnuelles({ ...M.HABITUDES_DEFAUT, tabac: 'non', carburant: 'non', alcool: 'non' }),
   );
   assert.throws(() => M.accisesAnnuelles({ ...CONSO_MINIMALE, carburant: 'vélo' }), /Habitude inconnue/);
   assert.throws(() => M.accisesAnnuelles({ ...CONSO_MINIMALE, avion: 'fusée' }), /Habitude inconnue/);
