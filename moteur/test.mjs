@@ -1278,8 +1278,16 @@ test('énergie et avion : la taxe propre, jamais la TVA, et un aller-retour ne c
   // ⚠ Un aller-retour en Europe = UN seul départ taxé par la France.
   const vol = M.accisesAnnuelles({ ...CONSO_MINIMALE, avion: 'europe' });
   assert.ok(Math.abs(vol - PLANCHER_CONSO - M.AVION.europeParDepart) < 1e-9);
-  assert.ok(Math.abs(M.AVION.europeParDepart - (7.4 + 5.21 + 1.35)) < 1e-9);
-  assert.ok(Math.abs(M.AVION.lointainParDepart - (40 + 9.37 + 1.35)) < 1e-9);
+  /*
+   * ⚠ LES QUATRE TARIFS Y SONT, LE TARIF DE SÛRETÉ COMPRIS. Il manquait le
+   * 14/09/2026 au matin, parce qu'il dépend de l'aéroport : le poste rendait
+   * 13,96 € pour un aller-retour en Europe, soit 45 % de moins qu'un vrai
+   * billet, et ça se voyait à l'œil nu. On prend Paris et on l'écrit.
+   */
+  assert.ok(Math.abs(M.AVION.europeParDepart - (7.4 + 5.21 + 11.8 + 1.35)) < 1e-9, M.AVION.europeParDepart);
+  assert.ok(Math.abs(M.AVION.lointainParDepart - (40 + 9.37 + 11.8 + 1.35)) < 1e-9, M.AVION.lointainParDepart);
+  // Le garde-fou qui compte : un total sous 20 € n'est plus un billet d'avion.
+  assert.ok(M.AVION.europeParDepart > 20, 'un départ vers l’Europe sous 20 € : une taxe a sauté');
 });
 
 test('le parcours visite les postes dans l’ordre du compteur', async () => {

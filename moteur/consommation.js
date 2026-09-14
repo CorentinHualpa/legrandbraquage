@@ -96,11 +96,30 @@ export const GAZ = {
  * personne décolle. Le chiffre est donc un plancher, et il est annoncé comme
  * tel.
  */
+/**
+ * ⚠ LE TARIF DE SÛRETÉ MANQUAIT, et il pesait 45 % du total.
+ *
+ * Il était écarté du calcul le 14/09/2026 au matin parce qu'il est fixé
+ * aéroport par aéroport et qu'on ne sait pas d'où la personne décolle : 13,96 €
+ * pour un aller-retour en Europe, un chiffre qui a l'air faux (Coq : « 14 € de
+ * taxe c'est tout ??? »). Écarter une taxe réelle pour ne pas choisir une
+ * valeur est pire qu'assumer une hypothèse : on publie un total qui ne
+ * correspond à aucun billet existant.
+ *
+ * On prend donc PARIS, Roissy ou Orly, 11,80 €, et on l'écrit. C'est le départ
+ * le plus probable, et le montant est dans le code, à l'article A. 422-12.
+ *
+ * ⚠ ON NE COMPTE QUE LES TAXES, pas les redevances. La redevance passager du
+ * groupe ADP (11,16 € en Schengen) est perçue par l'EXPLOITANT de l'aéroport,
+ * pas par l'État : elle gonflerait la ligne « taxes et redevances » du billet à
+ * une trentaine d'euros, mais ce n'est pas ce que ce dossier reproche.
+ */
+const T2S_PARIS = 11.8;
 export const AVION = {
-  europeParDepart: 7.4 + 5.21 + 1.35,
-  lointainParDepart: 40 + 9.37 + 1.35,
+  europeParDepart: 7.4 + 5.21 + T2S_PARIS + 1.35,
+  lointainParDepart: 40 + 9.37 + T2S_PARIS + 1.35,
   source:
-    'tarif de solidarité (7,40 € Europe, 40 € destination lointaine, classe économique, barème de l’article 30 de la loi de finances pour 2025), tarif de l’aviation civile (5,21 € et 9,37 € du 01/04/2026 au 31/03/2027) et péréquation aéroportuaire (1,35 € depuis le 01/07/2026), notices officielles DGAC ; hors tarif de sûreté, qui dépend de l’aéroport',
+    'au départ de Paris, en classe économique : tarif de solidarité (7,40 € vers l’Europe, 40 € vers une destination lointaine, barème de la loi de finances pour 2025, article L. 422-22 du CIBS), tarif de sûreté et de sécurité (11,80 € à Roissy et Orly, article A. 422-12), tarif de l’aviation civile (5,21 € et 9,37 € du 01/04/2026 au 31/03/2027, article A. 422-8) et péréquation aéroportuaire (1,35 € depuis le 01/07/2026, article A. 422-17) ; la redevance passager de l’aéroport n’est pas comptée, elle va à l’exploitant et non à l’État',
 };
 
 const taxesParPaquet = TABAC.prixPaquet * TABAC.partTaxes;
@@ -176,7 +195,7 @@ export const HABITUDES = {
     question: 'Vous prenez l’avion ?',
     /*
      * ⚠ Même raison : un aller-retour en Europe dans l'année, c'est UN départ
-     * taxé et quatorze euros. C'est le voyage le plus banal qui soit, et celui
+     * taxé et vingt-six euros. C'est le voyage le plus banal qui soit, et celui
      * qui ne prend jamais l'avion le décoche en un clic.
      */
     defaut: 'europe',
