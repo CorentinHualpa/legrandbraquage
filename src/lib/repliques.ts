@@ -159,8 +159,19 @@ export const REPLIQUES: Record<string, string> = {
   pris:
     "[flat] Voilà la pièce à conviction. [dry] Du travail propre, hein. "
     + "Pas une porte forcée, pas un cri. [scoffs] Et personne qui porte plainte.",
+  /*
+   * ⚠ IL N'OUVRE PLUS SUR « VOILÀ ». La carte d'avant ouvre sur « Voilà la
+   * pièce à conviction », celle-ci ouvrait sur « Voilà le butin » : deux fois
+   * le même geste à une carte d'intervalle, et les deux écrans se lisaient
+   * comme le même écran (Coq, 14/09/2026 : « ces deux pages se répètent »).
+   * Le défaut n'existe dans AUCUNE des deux répliques prise à part, il naît de
+   * l'enchaînement, comme celui que garde `test-vie.mjs` sur les réactions.
+   *
+   * Il ne PRÉSENTE plus une pièce, il commente un prix. C'est un autre métier
+   * dans la même bouche, et c'est ce qui sépare les deux cartes.
+   */
   butin:
-    "[flat] Voilà le butin. [scoffs] C'est pas moi qui fixe les prix, hein. Moi je compte. "
+    "[scoffs] C'est pas moi qui fixe les prix, hein. Moi je compte. "
     + "[dry] Et franchement, j'ai rarement vu un scellé aussi bien rempli.",
 
   /* La bourse : l'avocat du Braqueur demande la parole. Il s'agace un peu. */

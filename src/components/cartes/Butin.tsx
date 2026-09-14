@@ -64,37 +64,30 @@ export function Butin({
       teteSurClair
     >
       {/*
-        L'annonce AVANT le dessin. Le dessin seul se lisait comme une
-        illustration de fond de page : on ne comprenait pas qu'il montrait
-        l'achat (Coq, 08/09/2026 : « il faudrait vraiment qu'on fasse
-        comprendre VOILÀ CE QU'ILS SE SONT ACHETÉ »).
+        ⚠⚠ CETTE CARTE NE PRÉSENTE PAS UNE PIÈCE, elle en montre le PRIX.
 
-        ⚠⚠ LE MONTANT NE SE RÉÉCRIT PAS ICI. Il est en entier, en 44 px, sur la
-        carte PRÉCÉDENTE : c'est l'accusation, et c'est le seul gros chiffre du
-        parcours. Le réécrire une carte plus loin fait lire un NOUVEAU chiffre,
-        quelle que soit sa taille (Coq, 13/09/2026 : « je trouve qu'il y a
-        doublon entre ces deux encarts »).
+        Elle ouvrait sur un bandeau jaune « SCELLÉ N° 1 · LE BUTIN » suivi du
+        ruban rayé, exactement le chrome de la carte précédente, et le
+        commissaire y disait « Voilà le butin » une carte après « Voilà la pièce
+        à conviction ». Deux scellés d'affilée, deux fois le même geste : les
+        deux écrans se lisaient comme le même écran (Coq, 14/09/2026 : « ces
+        deux pages se répètent »). Ce n'est pas l'information qui doublonnait,
+        c'est la mise en scène.
 
-        ⚠ Le 13/09 j'avais RAPETISSÉ le montant au lieu de l'enlever, en gardant
-        « ces mêmes X € » pour dire que c'était le même argent. Demi-mesure : le
-        doublon était toujours là le 14/09, en plus petit (Coq : « on avait déjà
-        réglé ce problème de doublon, pourquoi tu l'as laissé »). « Cet argent »
-        suffit à faire le lien, la carte d'avant vient de donner la somme.
+        Donc : plus de bandeau, plus de ruban, le dessin s'ouvre en plein cadre,
+        et il ne dit plus « Voilà ». La carte d'avant accuse (combien, et d'où
+        ça sort) ; celle-ci convertit, en objet et en années de vie.
 
-        Le gros titre de cette carte-ci, c'est ce que l'argent ACHÈTE, posé sur
-        le dessin juste en dessous. On retourne une somme, on n'en annonce pas
-        une deuxième.
+        ⚠ LE MONTANT NE SE RÉÉCRIT PAS ICI. Il est en entier, en 44 px, sur la
+        carte précédente : c'est le seul gros chiffre en euros du parcours, et
+        le réécrire une carte plus loin fait lire un NOUVEAU chiffre, quelle que
+        soit sa taille (Coq, 13/09/2026). Les années, elles, ne sont pas des
+        euros : elles ne peuvent pas se confondre avec la somme.
+
+        ⚠ Le 13/09 j'avais RAPETISSÉ le montant au lieu de l'enlever. Demi-mesure :
+        le doublon était toujours là le lendemain, en plus petit.
       */}
-      <div className="-mx-5 -mt-16 flex flex-col gap-1 bg-jaune-police px-5 pt-16 pb-3 text-encre sm:-mx-6 sm:px-6">
-        <span className="font-mono text-[10.5px] tracking-[0.16em] text-encre/65 uppercase">
-          Scellé n° 1 · le butin
-        </span>
-        <p className="text-[15.5px] leading-snug">Voilà ce que cet argent leur a acheté.</p>
-      </div>
-      {/* Les rayures qui ferment le scellé, tendues d'un bord à l'autre. */}
-      <div aria-hidden className="ruban -mx-5 -mt-4 h-[10px] sm:-mx-6" />
-
-      <div className="relative -mx-5 h-[300px] overflow-hidden bg-papier sm:-mx-6">
+      <div className="relative -mx-5 -mt-16 h-[340px] overflow-hidden bg-papier sm:-mx-6">
         {objet.image ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={`/images/butin/${objet.image}.webp`} alt={objet.nom} className="h-full w-full object-cover" decoding="async" />
@@ -126,15 +119,28 @@ export function Butin({
           <p className="text-[15px] leading-relaxed text-papier-2 italic">{objet.pointe}</p>
         ) : null}
         {/*
-          Les années de député ont sauté : un montant converti en carrière de
-          quelqu'un d'autre n'apprend rien à personne (Coq, 08/09/2026 : « ce
-          genre de trucs, on s'en fout »). Les années de SA vie restent : c'est
-          la seule conversion qui parle de la personne devant l'écran.
+          LE CHIFFRE DE CETTE CARTE, et c'est ce qui la distingue de la
+          précédente : elle convertit, elle ne compte pas. Les années de député
+          ont sauté (un montant converti en carrière de quelqu'un d'autre
+          n'apprend rien à personne, Coq 08/09/2026) ; les années de SA vie
+          restent, c'est la seule conversion qui parle de la personne devant
+          l'écran, et depuis le 14/09 c'est elle qu'on lit en grand.
+
+          ⚠ 34 px et pas 44 : le 44 px est réservé à l'accusation, une carte
+          plus tôt. Des ANNÉES ne peuvent pas se confondre avec des euros, mais
+          deux chiffres de même taille à une carte d'intervalle se liraient
+          comme deux annonces de même rang.
         */}
         {montant >= SEUIL_ANNEES ? (
-          <p className="text-[14.5px] leading-relaxed text-ligne">
-            <span className="chiffres font-mono font-medium text-papier">{annees.toFixed(1).replace(".", ",")}</span> années de votre vie sans travailler, à votre niveau de vie.
-          </p>
+          <div className="flex flex-col gap-0.5 border-t border-papier/15 pt-3">
+            <Kicker couleur="jaune">Ce que ça vous coûte, en temps</Kicker>
+            <p className="text-[34px] leading-none font-bold tracking-[-0.02em] text-papier">
+              <span className="chiffres font-mono">{annees.toFixed(1).replace(".", ",")}</span> années
+            </p>
+            <p className="text-[14.5px] leading-relaxed text-ligne">
+              de votre vie sans travailler, à votre niveau de vie.
+            </p>
+          </div>
         ) : null}
         {/*
           La question du cadeau. Elle ne calcule rien : elle sert à ce que la
