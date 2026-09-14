@@ -207,7 +207,20 @@ export const HABITUDES_DEFAUT = Object.fromEntries(
  * à la main, et un quatrième poste aurait été compté dans le détail sans
  * jamais entrer dans le total.
  */
-export const POSTES = Object.keys(HABITUDES);
+/*
+ * ⚠ L'ORDRE EST UN CHOIX DE MISE EN SCÈNE, pas l'ordre d'écriture.
+ *
+ * Le CARBURANT passe en DERNIER (14/09/2026). Il pèse 599 € à lui seul, contre
+ * 57, 73, 10 et 14 pour les autres : posé en deuxième, il écrasait tout ce qui
+ * suivait et les quatre dernières cartes ressemblaient à des miettes. En
+ * dernier, le compteur monte doucement puis encaisse le coup, et la carte qui
+ * ouvre l'addition est celle qui frappe.
+ *
+ * ⚠ Le TABAC reste en premier : sa réplique ouvre sur « Bon. », la charnière
+ * qui enchaîne après la réaction au montant signé, et c'est la seule carte qui
+ * porte le décor du café.
+ */
+export const POSTES = ['tabac', 'alcool', 'electricite', 'gaz', 'avion', 'carburant'];
 
 /**
  * ⚠ NE PAS RÉPONDRE et RÉPONDRE N'IMPORTE QUOI sont deux choses.

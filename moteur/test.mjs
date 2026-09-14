@@ -1282,6 +1282,39 @@ test('énergie et avion : la taxe propre, jamais la TVA, et un aller-retour ne c
   assert.ok(Math.abs(M.AVION.lointainParDepart - (40 + 9.37 + 1.35)) < 1e-9);
 });
 
+test('le parcours visite les postes dans l’ordre du compteur', async () => {
+  /*
+   * ⚠ DEUX LISTES, UN SEUL ORDRE. `POSTES` donne l'ordre du COMPTEUR (et le
+   * « N sur 6 » affiché) ; `ECRANS` de `Parcours.tsx` donne l'ordre de
+   * NAVIGATION. Si elles divergent, la deuxième carte visitée annonce « 3 sur
+   * 6 », le compteur saute une marche ou en rejoue une, et RIEN NE LÈVE.
+   *
+   * Le risque est réel : le carburant est passé en dernier le 14/09/2026 pour
+   * la mise en scène (il pèse 599 € contre 10 à 73 pour les autres), et il
+   * fallait le déplacer dans les deux fichiers.
+   *
+   * On lit le vrai `Parcours.tsx` plutôt que de recopier sa liste : un test qui
+   * recopie la donnée qu'il vérifie reste vert le jour où elle change.
+   */
+  const { readFileSync } = await import('node:fs');
+  const { fileURLToPath } = await import('node:url');
+  const { join, dirname } = await import('node:path');
+  const ici = dirname(fileURLToPath(import.meta.url));
+  const src = readFileSync(join(ici, '..', 'src', 'components', 'Parcours.tsx'), 'utf8');
+  const bloc = src.slice(src.indexOf('const ECRANS = ['), src.indexOf('] as const;'));
+  const ecrans = [...bloc.matchAll(/"([a-z]+)"/g)].map((m) => m[1]);
+  const dansLeParcours = ecrans.filter((e) => M.POSTES.includes(e));
+
+  assert.deepEqual(
+    dansLeParcours,
+    [...M.POSTES],
+    'ECRANS de Parcours.tsx et POSTES du moteur ne visitent pas les postes dans le même ordre',
+  );
+  // Et ils y sont TOUS : un poste déclaré mais absent du parcours compte dans
+  // le total sans jamais s'afficher.
+  assert.equal(dansLeParcours.length, M.POSTES.length, 'un poste déclaré n’a pas d’écran');
+});
+
 test('chaque poste déclaré a un écran, et le compteur les somme tous', () => {
   // La liste qui fait foi, et la garde contre un poste ajouté à moitié.
   for (const poste of M.POSTES) {

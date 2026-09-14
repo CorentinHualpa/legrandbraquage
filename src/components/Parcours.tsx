@@ -45,7 +45,11 @@ import { partsFiscales, regimeCalculable, regimeDe } from "@/lib/statuts";
  * chômage : la question ne lui est pas posée.
  */
 const ECRANS = [
-  "couverture", "deposition", "tabac", "carburant", "alcool", "electricite", "gaz", "avion",
+  // ⚠ Les six postes du café suivent l'ordre de `POSTES` (moteur), et un banc
+  // le vérifie : la liste ci-dessous donne l'ordre de NAVIGATION, `POSTES`
+  // donne l'ordre du COMPTEUR. Deux ordres qui divergent font afficher
+  // « 3 sur 6 » sur la deuxième carte visitée, sans que rien ne lève.
+  "couverture", "deposition", "tabac", "alcool", "electricite", "gaz", "avion", "carburant",
   "pris", "butin", "aparte",
   "ecole", "sante", "chomage", "rendu", "bourse", "verdict", "avis",
 ] as const;
