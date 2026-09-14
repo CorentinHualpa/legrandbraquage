@@ -35,9 +35,18 @@ export const CARBURANT = {
  * c'est l'accise qui pèse.
  */
 export const ALCOOL = {
-  parfoisParAn: 60,
+  /*
+   * ⚠ UN VERRE PAR SEMAINE, PAS UNE BOUTEILLE. Le choix du milieu proposait
+   * une bouteille par semaine, ce qui est déjà une consommation soutenue :
+   * personne ne se reconnaissait entre « jamais » et « une bouteille », donc
+   * le milieu ne servait à rien (Coq, 14/09/2026 : « une bouteille par semaine
+   * c'est trop »). Les deux montants descendent maintenant du MÊME ordre de
+   * grandeur par verre, 52 verres contre 365, au lieu d'être posés chacun de
+   * son côté.
+   */
+  parSemaineParAn: Math.round((400 * 52) / 365),
   chaqueSoirParAn: 400,
-  source: 'accise spiritueux 2026 (1 932,42 € par hectolitre d’alcool pur), droits sur le vin, TVA à 20 % : ordres de grandeur assumés',
+  source: 'accise spiritueux 2026 (1 932,42 € par hectolitre d’alcool pur), droits sur le vin, TVA à 20 % : ordres de grandeur assumés, 52 verres par an contre 365',
 };
 
 /**
@@ -132,7 +141,7 @@ export const HABITUDES = {
     defaut: 'parfois',
     choix: [
       { id: 'non', libelle: 'Jamais', pointe: 'Sobre, et fier. Le fisc s’en remettra.', repere: '0 €', parAn: 0 },
-      { id: 'parfois', libelle: 'Une bouteille par semaine', pointe: 'Le dimanche midi, ça ne compte pas vraiment.', repere: '~60 €', parAn: ALCOOL.parfoisParAn },
+      { id: 'parfois', libelle: 'Un verre par semaine', pointe: 'Le dimanche midi, ça ne compte pas vraiment.', repere: '52 VERRES', parAn: ALCOOL.parSemaineParAn },
       { id: 'soir', libelle: 'Un verre chaque soir', pointe: 'C’est culturel, c’est le patrimoine.', repere: '~400 €', parAn: ALCOOL.chaqueSoirParAn },
     ],
   },

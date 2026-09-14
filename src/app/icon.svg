@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Le Grand Braquage">
+  <!--
+    LE CHAPEAU DU COMMISSAIRE, dessiné pour 16 px.
+
+    ⚠ Une icône se dessine pour sa PLUS PETITE taille de rendu. Tout est en
+    APLAT : un seul motif plein, aucun trait fin, aucun texte, et le fond va
+    d'un bord à l'autre pour que la pastille garde son encre une fois réduite.
+    Le jaune est celui du ruban de police (#e8c126), l'encre celle du dossier.
+  -->
+  <rect width="64" height="64" rx="13" fill="#e8c126"/>
+  <!-- La coiffe, pincée sur le dessus comme un feutre mou. -->
+  <path fill="#0f151c" d="M32 12c-7.2 0-11.6 3.6-12.3 9.1l-1.5 12.2h27.6l-1.5-12.2C43.6 15.6 39.2 12 32 12Zm0 4.6c1.9 0 3.2.6 4.1 1.7-1.3.7-2.7 1-4.1 1-1.4 0-2.8-.3-4.1-1 .9-1.1 2.2-1.7 4.1-1.7Z"/>
+  <!-- Le bord, large et franc : c'est lui qu'on reconnaît quand tout le reste a disparu. -->
+  <ellipse cx="32" cy="36.4" rx="27" ry="7.4" fill="#0f151c"/>
+  <!-- Le ruban, creusé dans la coiffe plutôt que posé dessus : un trait clair de 3 px tient à 16 px, un trait de 1 px non. -->
+  <path fill="#e8c126" d="M19.4 29.2h25.2l.5 4H18.9z"/>
+</svg>

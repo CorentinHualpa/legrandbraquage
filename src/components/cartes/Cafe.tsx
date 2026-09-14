@@ -242,7 +242,7 @@ export function Cafe({
           par paquet ; un plein de {CARBURANT.litres} litres à{" "}
           {CARBURANT.prixPlein.toFixed(2).replace(".", ",")} € dont{" "}
           <span className="font-medium text-papier">{euros(detail.taxesParPlein)} €</span> de taxes ;
-          l’alcool en ordre de grandeur, {ALCOOL.parfoisParAn} € par an pour une bouteille par semaine,{" "}
+          l’alcool en ordre de grandeur, {ALCOOL.parSemaineParAn} € par an pour un verre par semaine,{" "}
           {ALCOOL.chaqueSoirParAn} € pour un verre chaque soir.
         </p>
         {/*

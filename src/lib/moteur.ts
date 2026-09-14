@@ -358,7 +358,7 @@ export const HABITUDES = HABITUDES_JS as Record<PosteHabitude, { question: strin
 export const HABITUDES_DEFAUT = HABITUDES_DEFAUT_JS as Habitudes;
 export const TABAC = TABAC_JS as { prixPaquet: number; partTaxes: number; source: string };
 export const CARBURANT = CARBURANT_JS as { prixPlein: number; litres: number; ticpeParLitre: number; source: string };
-export const ALCOOL = ALCOOL_JS as { parfoisParAn: number; chaqueSoirParAn: number; source: string };
+export const ALCOOL = ALCOOL_JS as { parSemaineParAn: number; chaqueSoirParAn: number; source: string };
 export const ELECTRICITE = ELECTRICITE_JS as {
   acciseParMWh: number;
   sansChauffageMWh: number;
