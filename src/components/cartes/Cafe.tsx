@@ -246,10 +246,10 @@ export function Cafe({
           café du commissaire, lui, est à 10 % : onze centimes sur 1,20 €.
         </p>
         <p className="text-[14px] leading-relaxed text-ligne">
-          S’y ajoutent les taxes sur ce que vous venez de dire, poste par poste. Sur l’électricité,
-          le gaz et l’avion on ne compte QUE la taxe propre à chacun, jamais la TVA : elle est déjà
-          dans le taux d’effort ci-dessus, la recompter gonflerait le verdict d’un montant qui
-          n’existe pas.
+          S’y ajoutent les taxes sur ce que vous venez de dire, poste par poste. Sur AUCUN d’eux on
+          ne recompte la TVA : elle est déjà dans le taux d’effort ci-dessus, et la compter deux
+          fois gonflerait le verdict d’un montant qui n’existe pas. Ce qu’on ajoute, ce sont les
+          accises, que ce taux d’effort ne voit pas.
         </p>
 
         {/*
