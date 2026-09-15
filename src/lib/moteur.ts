@@ -10,7 +10,9 @@
 
 import {
   simuler as simulerJs,
-  salairePivot as salairePivotJs,
+  salaireEquilibre as salaireEquilibreJs,
+  bornesNonLieu as bornesNonLieuJs,
+  BANDE_NON_LIEU as BANDE_NON_LIEU_JS,
   PALIERS_ALIBI as PALIERS_ALIBI_JS,
   ALIBI_INDICE_NU as ALIBI_INDICE_NU_JS,
   capitalApresRetraits as capitalApresRetraitsJs,
@@ -296,11 +298,19 @@ export type Simulation = {
     fraisVersement: number;
   } | null;
   verdict: {
-    braquage: boolean;
-    ecart: number;
+    /** Rendu MOINS pris, en euros constants. Positif : la personne reçoit plus qu'on ne lui prend. */
+    solde: number;
+    /** Trois issues, parce que deux mentaient : au médian, le tampon tenait à 8,9 % du pris. */
+    issue: Issue;
+    /** La largeur de la bande de non-lieu, en euros. */
+    bandeNonLieu: number;
     libelle: string;
+    /** Ce que le placement AURAIT changé. S'affiche à côté du verdict, ne le décide pas. */
+    scenario: { capital: number; ecart: number } | null;
   };
 };
+
+export type Issue = "coupable" | "non-lieu" | "relaxe";
 
 export type PalierAlibi = {
   id: string;
@@ -339,7 +349,8 @@ export function simuler(entree: Entree): Simulation {
 }
 
 /**
- * Le salaire où la balance bascule, pour un régime et un périmètre donnés.
+ * Le salaire où les deux plateaux s'égalisent, pour un régime et un périmètre
+ * donnés : en dessous on reçoit plus qu'on ne verse, au-dessus l'inverse.
  *
  * Rend `null` quand il n'y a AUCUNE bascule sur la plage, ce qui est un
  * résultat et non une panne : pour un fonctionnaire d'État au périmètre
@@ -347,10 +358,24 @@ export function simuler(entree: Entree): Simulation {
  * traitement, parce que la contribution de l'État à son propre régime pèse
  * 82,28 % du traitement indiciaire. Toute surface qui affiche ce cas doit
  * afficher l'avertissement du COR avec.
+ *
+ * ⚠ Ne PAS confondre avec l'ancien `salairePivot`, qui mesurait le placement et
+ * que l'écran annonçait pourtant comme « reçoit plus qu'on ne lui prend ».
  */
-export function salairePivot(opts: Partial<Entree> = {}): number | null {
-  return salairePivotJs(opts) as number | null;
+export function salaireEquilibre(opts: Partial<Entree> = {}): number | null {
+  return salaireEquilibreJs(opts) as number | null;
 }
+
+/** Les deux bords de la zone où le dossier ne tranche pas. */
+export function bornesNonLieu(opts: Partial<Entree> = {}): {
+  relaxeJusqua: number | null;
+  coupableAPartirDe: number | null;
+} {
+  return bornesNonLieuJs(opts) as { relaxeJusqua: number | null; coupableAPartirDe: number | null };
+}
+
+/** La part du pris sous laquelle le dossier ne tranche pas (voir `moteur/index.js`). */
+export const BANDE_NON_LIEU = BANDE_NON_LIEU_JS as number;
 
 export const PALIERS_ALIBI = PALIERS_ALIBI_JS as PalierAlibi[];
 

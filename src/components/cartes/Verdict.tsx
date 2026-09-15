@@ -11,11 +11,15 @@ import { CRANS_RENDEMENT, type Perimetre, type Simulation } from "@/lib/moteur";
 /**
  * Écran 12 : le verdict. Le tampon sur le papier, dans le prétoire.
  *
- * Il se juge sur le COÛT D'OPPORTUNITÉ : ce que le prélèvement serait devenu,
- * placé là où la personne l'a dit, contre ce qui a été rendu. Le seuil est
- * le chiffre inédit de la page ; il peut ne pas exister (avec un placement
- * en actions, la balance penche du même côté à tout niveau), et c'est un
- * résultat. Le commissaire le lâche en sortant.
+ * Il se juge sur le SOLDE, rendu moins pris, depuis le 15/09/2026, et il a
+ * TROIS issues : au médian, l'écart vaut 8,9 % du pris, moins que l'effet
+ * d'une seule convention du dossier, donc on ne tranche pas et on le dit.
+ *
+ * ⚠ Ce que cet écran a affiché jusque-là : COUPABLE à quelqu'un dont la page
+ * venait d'afficher, deux cartes plus tôt, qu'il reçoit 1 040 463 € pour
+ * 989 940 € versés. Le tampon tenait au coût d'opportunité, calculé sur la
+ * TOTALITÉ du prélevé, santé, famille, impôt et TVA compris. Ce scénario reste
+ * à l'écran, sous le verdict, nommé pour ce qu'il est.
  */
 /**
  * Ce que le commissaire ressort de la réponse donnée sur l'écran du butin.
@@ -31,7 +35,7 @@ const RAPPEL: Record<"partage" | "picotte", string> = {
 export function Verdict({
   pieces,
   simulation,
-  pivot,
+  equilibre,
   perimetre,
   placementId,
   cadeau,
@@ -42,7 +46,8 @@ export function Verdict({
 }: {
   pieces: Pieces;
   simulation: Simulation;
-  pivot: number | null;
+  /** Le salaire où les deux plateaux s'égalisent. `null` s'il n'y a pas de bascule. */
+  equilibre: number | null;
   perimetre: Perimetre;
   placementId: string;
   cadeau: Cadeau;
@@ -51,11 +56,24 @@ export function Verdict({
   suivant: () => void;
   retour: () => void;
 }) {
-  const { plateauDroit, verdict, opportunite } = simulation;
+  const { plateauGauche, plateauDroit, verdict } = simulation;
   const cran = CRANS_RENDEMENT.find((c) => c.id === placementId) ?? CRANS_RENDEMENT[0];
-  const capital = opportunite?.capital ?? simulation.plateauGauche.total;
+  const capital = verdict.scenario?.capital ?? plateauGauche.total;
   const fonctionnaire = simulation.entree.regime === "fonctionnaire";
   const complet = Object.values(perimetre).every(Boolean);
+  const coupable = verdict.issue === "coupable";
+  const MOT = { coupable: "COUPABLE", "non-lieu": "NON-LIEU", relaxe: "RELAXE" } as const;
+  /* ⚠ Classes ÉCRITES EN ENTIER : Tailwind lit le source, un `text-${x}` ne sort pas. */
+  const TAMPON = {
+    coupable: "border-rouge text-rouge",
+    "non-lieu": "border-encre-2 text-encre-2",
+    relaxe: "border-vert text-vert",
+  } as const;
+  const CHIFFRE = {
+    coupable: "text-rouge",
+    "non-lieu": "text-encre",
+    relaxe: "text-vert",
+  } as const;
 
   return (
     <Carte
@@ -80,12 +98,16 @@ export function Verdict({
         tampon. Une seule suffit, et c'est celle du tampon qui compte.
       */}
       <Papier rotation={0.8} className="-mt-10 flex flex-col items-center gap-2.5 px-4 pt-4 pb-3.5 text-center">
-        <div className={`tampon rounded-[5px] border-[3px] px-5 py-2 ${verdict.braquage ? "border-rouge text-rouge" : "border-bleu text-bleu"}`}>
+        <div className={`tampon rounded-[5px] border-[3px] px-5 py-2 ${TAMPON[verdict.issue]}`}>
           <p className="font-mono text-[8.5px] tracking-[0.16em]">TRIBUNAL DES PRÉLÈVEMENTS</p>
-          <p className="text-[38px] leading-[1.05] font-extrabold">{verdict.braquage ? "COUPABLE" : "RELAXE"}</p>
+          <p className="text-[38px] leading-[1.05] font-extrabold">{MOT[verdict.issue]}</p>
         </div>
         <p className="font-mono text-[10px] tracking-[0.12em] text-encre-3 uppercase">
-          {verdict.braquage ? "Les prélèvements, sur votre cas" : "Les prélèvements, sur votre cas · non retenu"}
+          {coupable
+            ? "Les prélèvements, sur votre cas"
+            : verdict.issue === "relaxe"
+              ? "Les prélèvements, sur votre cas · non retenu"
+              : "Les prélèvements, sur votre cas · l’écart est dans l’épaisseur du trait"}
         </p>
 
         {/*
@@ -98,26 +120,54 @@ export function Verdict({
         <div className="flex w-full flex-col gap-1 pt-0.5 text-left">
           <div className="flex items-baseline justify-between gap-3">
             <span className="text-[13.5px] leading-tight text-encre-2">
-              Ce que les {eurosSigne(simulation.plateauGauche.total)} pris vous auraient rapporté,
-              placés en {cran.nom} à {taux(cran.reel)}
+              Ce qu’ils vous auront pris, sur toute la carrière
             </span>
-            <span className="chiffres shrink-0 font-mono text-[14px] font-semibold text-encre">{euros(capital)} €</span>
+            <span className="chiffres shrink-0 font-mono text-[14px] font-semibold text-encre">
+              {euros(plateauGauche.total)} €
+            </span>
           </div>
           <div className="flex items-baseline justify-between gap-3 border-b border-encre pb-1.5">
             <span className="text-[13.5px] leading-tight text-encre-2">
-              Moins ce qu’ils vous ont rendu, en retraite, école, soins et chômage
+              Moins ce qu’ils vous auront rendu, en retraite, école, soins et chômage
             </span>
-            <span className="chiffres shrink-0 font-mono text-[14px] font-semibold text-encre">
+            <span className="chiffres shrink-0 font-mono text-[14px] font-semibold text-vert">
               − {euros(plateauDroit.total)} €
             </span>
           </div>
         </div>
-        <span className={`chiffres font-mono text-[40px] leading-none font-semibold tracking-[-0.03em] ${verdict.braquage ? "text-rouge" : "text-bleu"}`}>
-          {eurosSigne(verdict.ecart)}
+        <span className={`chiffres font-mono text-[40px] leading-none font-semibold tracking-[-0.03em] ${CHIFFRE[verdict.issue]}`}>
+          {eurosSigne(verdict.solde)}
         </span>
         <p className="text-[16px] leading-snug text-encre-2">
-          {verdict.braquage ? "de manque à gagner, pour vous." : "de mieux pour vous, grâce à eux."}
+          {coupable
+            ? "à votre charge, une fois tout déduit."
+            : verdict.issue === "relaxe"
+              ? "en votre faveur, une fois tout déduit."
+              : `d’écart, soit moins de 10 % de ce qui est pris. Sous cette barre, le dossier ne tranche pas.`}
         </p>
+
+        {/*
+          LE PLACEMENT PASSE DERRIÈRE, et il reste. C'est la question que tout le
+          monde se pose, et c'est une HYPOTHÈSE : quarante-trois ans de suite,
+          sans y toucher, sur la totalité du prélevé, santé et impôt compris.
+          Elle a fait le verdict pendant une semaine ; elle informe, elle ne
+          juge plus.
+        */}
+        <div className="mt-1 w-full border-t border-cadre-bord pt-2 text-left">
+          <p className="font-mono text-[9px] tracking-[0.12em] text-encre-3 uppercase">
+            Le scénario de la défense
+          </p>
+          <p className="text-[13.5px] leading-snug text-encre-2">
+            Si tout cela avait été placé en {cran.nom} à {taux(cran.reel)} par an, vous auriez{" "}
+            <span className="chiffres font-mono font-semibold text-encre">{euros(capital)} €</span> à 64 ans,
+            soit{" "}
+            <span className="chiffres font-mono font-semibold text-encre">
+              {eurosSigne(Math.abs(verdict.scenario?.ecart ?? 0))}
+            </span>{" "}
+            {(verdict.scenario?.ecart ?? 0) > 0 ? "de plus" : "de moins"} que ce qui vous est rendu.
+            Personne ne place quarante-trois ans sans y toucher : c’est une hypothèse, pas le verdict.
+          </p>
+        </div>
       </Papier>
 
       <Commissaire>{dit("verdict")}</Commissaire>
@@ -132,24 +182,60 @@ export function Verdict({
         AUTRE personne, celle qui gagne moins. L'information passe avant la
         formule de sortie, qui reste parce que c'est le personnage.
       */}
+      {/*
+        ⚠ CETTE PHRASE ÉTAIT FAUSSE. Elle annonçait « moins de 2 038 € net par
+        mois, lui, reçoit plus qu'on ne lui prend » en affichant le seuil du
+        PLACEMENT, alors que les deux plateaux, eux, s'égalisent à 2 297 €.
+        Entre les deux, elle disait à des gens qui reçoivent plus qu'ils ne
+        versent qu'ils sont du mauvais côté de la barre.
+      */}
       <Commissaire qui="Le commissaire, en sortant">
-        {pivot ? (
-          <>« Quelqu’un qui gagne moins de {euros(pivot)} € net par mois, lui, reçoit plus qu’on ne lui prend. Vous, vous savez déjà. Ne me citez pas. »</>
-        ) : verdict.braquage ? (
-          <>« Avec ce placement, personne n’est gagnant, à aucun salaire. Ne me citez pas. »</>
+        {equilibre ? (
+          <>« Quelqu’un qui gagne moins de {euros(equilibre)} € net par mois, lui, reçoit plus qu’on ne lui prend. Vous, vous savez déjà. Ne me citez pas. »</>
+        ) : coupable ? (
+          <>« Sur ce régime, la balance ne penche jamais du côté de l’agent, à aucun traitement. Ne me citez pas. »</>
         ) : (
-          <>« Avec ce placement, tout le monde est gagnant, à tous les salaires. Vous pouvez me citer. »</>
+          <>« Sur ce régime, la balance penche de votre côté à tous les niveaux. Vous pouvez me citer. »</>
         )}
       </Commissaire>
 
       <div className="grow" />
 
+      {/*
+        ⚠ CE QUI N'EST PAS COMPTÉ EST OUVERT, PAS REPLIÉ. L'écran écrivait
+        « ici, tout est compté » alors que le plateau droit ne contient que
+        quatre lignes : c'est la phrase qu'un lecteur hostile cite en premier,
+        et il a raison. Un dossier à charge qui nomme lui-même ses angles morts
+        est le seul qui tienne en contradictoire.
+      */}
+      <div className="border border-ligne/30 bg-papier/[0.04] px-4 py-3.5">
+        <p className="font-mono text-[10px] tracking-[0.12em] text-ligne uppercase">
+          Ce que ce calcul ne compte pas
+        </p>
+        <p className="mt-1.5 text-[14px] leading-relaxed text-papier-2">
+          En face de ce qui est pris, on ne met que quatre lignes : votre retraite, votre école, vos
+          soins et votre chômage. Il manque donc la police, la justice, les routes, l’armée, la
+          recherche, l’école de vos enfants, les allocations familiales, les aides au logement, la
+          prime d’activité, les indemnités journalières, l’invalidité et la dépendance. Toutes sont
+          payées par des lignes qui, elles, sont comptées dans ce qui vous est pris.
+        </p>
+        <p className="mt-2 text-[14px] leading-relaxed text-papier-2">
+          L’INSEE, qui compte ces services-là, trouve que{" "}
+          <span className="font-semibold text-papier">56 % des personnes reçoivent plus qu’elles ne
+          contribuent</span>{" "}
+          (Insee Analyses n° 118, avril 2026). Sa mesure porte sur une ANNÉE et sur toute la
+          population, enfants et retraités compris ; la nôtre suit une carrière de quarante-trois
+          ans. Les deux sont vraies, elles ne mesurent pas la même chose.
+        </p>
+      </div>
+
       <Volet titre="Pourquoi ce verdict ?">
         <p className="text-[14px] leading-relaxed text-ligne">
-          Chaque année de votre carrière, ce qui vous a été pris (au périmètre coché à la pièce à conviction)
-          est placé à {taux(cran.reel)} par an, en réel, frais compris, jusqu’à 64 ans. Le capital
-          obtenu est comparé à ce qu’ils vous auront rendu : votre retraite jusqu’à 85 ans, l’école, les soins
-          et le chômage tels que vous les avez déclarés. Changez d’enveloppe, le verdict change.
+          On additionne ce qui vous est pris chaque année (au périmètre coché à la pièce à conviction),
+          et on en retire ce qu’ils vous rendent : votre retraite jusqu’à 85 ans, l’école, les soins et
+          le chômage tels que vous les avez déclarés. Le solde décide. Tant qu’il reste sous 10 % de ce
+          qui est pris, le dossier prononce un non-lieu : à ce niveau, changer une seule convention de
+          calcul retournerait le résultat.
         </p>
         {fonctionnaire ? (
           <p className="text-[14px] leading-relaxed text-ligne">
@@ -161,10 +247,12 @@ export function Verdict({
           </p>
         ) : null}
         <p className="text-[13px] leading-relaxed text-ligne">
-          Le seuil dépend de ce que vous avez coché, de vos réponses au commissaire et de l’enveloppe :
-          {complet ? " ici, tout est compté." : " ici, une ligne au moins est décochée."} Le salaire net
-          médian du privé est de 2 190 € (INSEE 2024, net avant impôt). Ce n’est pas un verdict sur vous,
-          c’est un verdict sur le calcul.
+          Le seuil dépend de ce que vous avez coché et de vos réponses au commissaire :
+          {complet
+            ? " ici, les quatre lignes du prélèvement sont comptées."
+            : " ici, une ligne au moins du prélèvement est décochée."}{" "}
+          Le salaire net médian du privé est de 2 190 € (INSEE 2024, net avant impôt). Ce n’est pas un
+          verdict sur vous, c’est un verdict sur le calcul.
         </p>
       </Volet>
     </Carte>

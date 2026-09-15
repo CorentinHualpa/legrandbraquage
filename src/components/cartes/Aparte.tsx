@@ -39,7 +39,7 @@ export function Aparte({
         d'elle, donc on lisait la réponse avant la question.
       */}
       <Commissaire>{dit("aparte-commissaire")}</Commissaire>
-      <Kicker couleur="bleu">L’avocate des braqueurs se lève.</Kicker>
+      <Kicker couleur="bleu">L’avocate de la défense se lève.</Kicker>
       {/* Les deux phrases viennent de la source commune : c'est aussi ce qu'il DIT. */}
       <p className="text-[36px] leading-[1.08] font-bold tracking-[-0.02em]">« {APARTE.fort} »</p>
       <p className="text-[22px] leading-[1.3] text-papier-2 italic">« {APARTE.suite} »</p>

@@ -8,7 +8,8 @@ import {
   CRANS_RENDEMENT,
   PALIERS_DEFAUT,
   PERIMETRE_COMPLET,
-  salairePivot,
+  salaireEquilibre,
+  bornesNonLieu,
 } from "@/lib/moteur";
 import { aSourcer } from "@/lib/objets";
 
@@ -48,16 +49,22 @@ export default function Methode() {
   const pieces = piecesDeposees();
   /*
    * Le seuil publié : périmètre complet, réponses par défaut au commissaire
-   * (bac, santé comme tout le monde, un trou d’air), argent placé en fonds
-   * en euros sans frais. C’est le cas que l’image de partage affiche.
+   * (bac, santé comme tout le monde, un trou d’air). C’est le cas que l’image
+   * de partage affiche.
+   *
+   * ⚠ Il mesure le SOLDE, plus le placement, depuis le 15/09/2026. L’ancien
+   * chiffre (2 038 €) était celui du coût d’opportunité, et la page comme
+   * l’écran du verdict l’annonçaient pourtant comme le salaire sous lequel
+   * « on reçoit plus qu’on ne vous prend ». Les deux plateaux, eux,
+   * s’égalisent à 2 297 €.
    */
   const fondsEuros = CRANS_RENDEMENT.find((c) => c.id === "fonds-euros") ?? CRANS_RENDEMENT[0];
-  const pivot = salairePivot({
+  const equilibre = salaireEquilibre({
     perimetre: PERIMETRE_COMPLET,
     paliers: PALIERS_DEFAUT,
-    placement: { rendementReel: fondsEuros.reel },
   });
-  const pivotPensionSeule = salairePivot({ perimetre: PERIMETRE_COMPLET });
+  const bornes = bornesNonLieu({ perimetre: PERIMETRE_COMPLET, paliers: PALIERS_DEFAUT });
+  const equilibrePensionSeule = salaireEquilibre({ perimetre: PERIMETRE_COMPLET });
   const restant = aSourcer();
 
   return (
@@ -126,18 +133,25 @@ export default function Methode() {
               valeur="2 190 €"
               source="INSEE 2024, net EQTP"
             />
-            {pivot ? (
+            {equilibre ? (
               <Ligne
-                quoi="Salaire où le verdict bascule : périmètre complet, réponses par défaut, argent placé en fonds en euros"
-                valeur={`${euros(pivot)} €`}
+                quoi="Salaire où les deux plateaux s’égalisent : périmètre complet, réponses par défaut"
+                valeur={`${euros(equilibre)} €`}
                 source="calculé par dichotomie, moteur/index.js"
               />
             ) : null}
-            {pivotPensionSeule ? (
+            {bornes.relaxeJusqua && bornes.coupableAPartirDe ? (
               <Ligne
-                quoi="Le même seuil, pension seule en face et argent non placé"
-                valeur={`${euros(pivotPensionSeule)} €`}
-                source="l’ancien verdict, gardé pour comparaison"
+                quoi="La zone de non-lieu : entre ces deux salaires, l’écart reste sous 10 % du pris et le dossier ne tranche pas"
+                valeur={`${euros(bornes.relaxeJusqua)} € à ${euros(bornes.coupableAPartirDe)} €`}
+                source="bornesNonLieu(), moteur/index.js"
+              />
+            ) : null}
+            {equilibrePensionSeule ? (
+              <Ligne
+                quoi="Le même seuil, pension seule en face, sans l’école ni les soins ni le chômage"
+                valeur={`${euros(equilibrePensionSeule)} €`}
+                source="périmètre complet, aucun palier déclaré"
               />
             ) : null}
           </ul>

@@ -46,11 +46,22 @@ export function Couverture({
 
       <div className="relative z-10 mt-auto flex flex-col gap-4 px-5 pb-5 sm:px-6">
         <span className="font-mono text-[10px] tracking-[0.16em] text-jaune-police">DÉPÔT DE PLAINTE · 2026</span>
+        {/*
+          ⚠ LE POINT D'INTERROGATION EST LE CŒUR DU DOSSIER. L'affiche a affirmé
+          « VOUS AVEZ ÉTÉ BRAQUÉS. » jusqu'au 15/09/2026, c'est-à-dire qu'elle
+          rendait le verdict avant la première question, sur un parcours dont la
+          conclusion dépend du salaire : au SMIC, l'État rend 356 566 € de plus
+          qu'il ne prend. Une enquête dont l'issue est écrite sur la couverture
+          n'est pas une enquête, et c'est la première chose qu'un lecteur
+          hostile a le droit de nous opposer. La mise en scène ne bouge pas :
+          c'est la ponctuation qui fait la différence.
+        */}
         <h1 className="text-[56px] leading-[0.95] font-extrabold tracking-[-0.02em]">
-          VOUS AVEZ ÉTÉ BRAQUÉS.
+          AVEZ-VOUS ÉTÉ BRAQUÉS ?
         </h1>
         <p className="text-[17px] leading-[1.4] text-papier-2 italic">
-          Chaque mois, quelqu’un passe chez vous avant vous. Il a une clé. Il a le droit.
+          Chaque mois, quelqu’un passe chez vous avant vous. Il a une clé. Il a le droit. Reste à
+          savoir ce qu’il laisse en repartant.
         </p>
         {/*
           Deux façons d'entrer, et c'est ici que le son se décide. Un bouton
@@ -80,8 +91,16 @@ export function Couverture({
           </button>
         </div>
         <p className="text-center text-[12.5px] text-ligne">
-          Rien n’est enregistré. Tout se calcule dans votre téléphone.{" "}
-          <a href="/methode" className="underline underline-offset-2">La méthode.</a>
+          {/*
+            ⚠ « Rien n'est enregistré » ÉTAIT FAUX dès qu'on ouvrait le
+            commissaire : la page lui envoie le net, le statut, les montants et
+            le verdict, et la conversation vit chez l'hébergeur de l'assistant.
+            La phrase de confiance la plus visible du site était la seule à ne
+            pas être vérifiée.
+          */}
+          Le simulateur calcule dans votre téléphone, rien n’en sort.{" "}
+          <a href="/methode" className="underline underline-offset-2">La méthode.</a>{" "}
+          <a href="/confidentialite" className="underline underline-offset-2">Vos données.</a>
         </p>
       </div>
     </section>

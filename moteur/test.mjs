@@ -21,7 +21,7 @@ import { indiceAge, deroulerCarriere, regimeDe } from './carriere.js';
 import {
   PALIERS_ALIBI, capitalApresRetraits, capitalPourRente, capitaliser,
 } from './capitalisation.js';
-import { simuler, salairePivot } from './index.js';
+import { simuler, salaireEquilibre, bornesNonLieu, BANDE_NON_LIEU } from './index.js';
 import * as M from './index.js';
 import { RGDU_SMIC_REFERENCE_ANNUEL, SALAIRES_REFERENCE, COURBES_AGE } from './baremes-2026.js';
 
@@ -244,8 +244,8 @@ test('simuler : la balance se retourne selon le périmètre', () => {
     perimetre: { salariales: true, patronales: true, impotRevenu: true, consommation: true },
   });
   assert.ok(large.plateauGauche.total > etroit.plateauGauche.total * 3);
-  assert.equal(etroit.verdict.braquage, false, 'salariales seules : pas de braquage');
-  assert.equal(large.verdict.braquage, true, 'périmètre complet : braquage');
+  assert.equal(etroit.verdict.issue, 'relaxe', 'salariales seules : la balance penche pour la personne');
+  assert.equal(large.verdict.issue, 'coupable', 'périmètre complet : braquage');
 });
 
 test('simuler : un bas salaire est bénéficiaire net', () => {
@@ -253,7 +253,14 @@ test('simuler : un bas salaire est bénéficiaire net', () => {
     netMensuel: 1400,
     perimetre: { salariales: true, patronales: true, impotRevenu: true, consommation: true },
   });
-  assert.equal(r.verdict.braquage, false, `écart ${Math.round(r.verdict.ecart)} €`);
+  /*
+   * ⚠ Pension seule en face, l'écart d'un bas salaire est POSITIF mais petit :
+   * 34 687 € au SMIC, soit moins de 10 % du pris, donc non-lieu et pas relaxe.
+   * Ce qu'on garde ici, c'est le SIGNE : à ce niveau de salaire, la balance ne
+   * penche pas contre la personne.
+   */
+  assert.ok(r.verdict.solde > 0, `solde ${Math.round(r.verdict.solde)} €`);
+  assert.notEqual(r.verdict.issue, 'coupable');
 });
 
 test('simuler : un haut salaire est perdant net', () => {
@@ -262,13 +269,60 @@ test('simuler : un haut salaire est perdant net', () => {
     cadre: true,
     perimetre: { salariales: true, patronales: true, impotRevenu: true, consommation: true },
   });
-  assert.equal(r.verdict.braquage, true);
+  assert.equal(r.verdict.issue, 'coupable');
 });
 
-test('LE CHIFFRE INÉDIT : le salaire-pivot existe et est plausible', () => {
-  const pivot = salairePivot({ ageActuel: 36 });
-  assert.ok(pivot !== null, 'la balance bascule bien quelque part');
-  assert.ok(pivot > 1200 && pivot < 6000, `pivot à ${pivot} € net/mois`);
+test('LE CHIFFRE INÉDIT : le salaire d’équilibre existe et est plausible', () => {
+  const equilibre = salaireEquilibre({ ageActuel: 36 });
+  assert.ok(equilibre !== null, 'la balance bascule bien quelque part');
+  assert.ok(equilibre > 1200 && equilibre < 6000, `équilibre à ${equilibre} € net/mois`);
+});
+
+/*
+ * LE VERDICT SE LIT SUR LE SOLDE, ET IL A TROIS ISSUES (15/09/2026).
+ *
+ * Ces quatre assertions échouent toutes sur le code d'avant : il tamponnait
+ * COUPABLE au salaire médian, où le rendu DÉPASSE le pris, parce qu'il jugeait
+ * sur le capital qu'aurait fait la totalité du prélevé placée à 0,7 %.
+ */
+test('VERDICT : le médian reçoit plus qu’il ne verse, et ce n’est pas un braquage', () => {
+  const perimetre = { salariales: true, patronales: true, impotRevenu: true, consommation: true };
+  const paliers = { ecole: 'bac', sante: 'normal', chomage: 'trou' };
+  const r = simuler({ netMensuel: 2190, perimetre, paliers, placement: { rendementReel: 0.007 } });
+
+  assert.ok(r.plateauDroit.total > r.plateauGauche.total, 'le rendu dépasse le pris au médian');
+  assert.ok(r.verdict.solde > 0, `solde ${Math.round(r.verdict.solde)} €`);
+  assert.notEqual(r.verdict.issue, 'coupable', 'on n’accuse pas quelqu’un qu’on rembourse');
+  // Et le placement reste calculé, à côté, sans décider.
+  assert.ok(r.verdict.scenario.ecart > 0, 'le scénario du placement reste défavorable, et il est là');
+});
+
+test('VERDICT : trois issues, et la bande de non-lieu vaut bien 10 % du pris', () => {
+  const perimetre = { salariales: true, patronales: true, impotRevenu: true, consommation: true };
+  const paliers = { ecole: 'bac', sante: 'normal', chomage: 'trou' };
+  const cas = (netMensuel) => simuler({ netMensuel, perimetre, paliers });
+
+  assert.equal(cas(1478).verdict.issue, 'relaxe', 'au SMIC, le rendu écrase le pris');
+  assert.equal(cas(2190).verdict.issue, 'non-lieu', 'au médian, l’écart est dans l’épaisseur du trait');
+  assert.equal(cas(5000).verdict.issue, 'coupable', 'à 5 000 €, le pris écrase le rendu');
+
+  const r = cas(2190);
+  assert.ok(Math.abs(r.verdict.bandeNonLieu - BANDE_NON_LIEU * r.plateauGauche.total) < 1e-6);
+  assert.ok(Math.abs(r.verdict.solde) < r.verdict.bandeNonLieu, 'le médian tombe dans la bande');
+});
+
+test('VERDICT : les bornes du non-lieu encadrent le salaire d’équilibre', () => {
+  const opts = {
+    perimetre: { salariales: true, patronales: true, impotRevenu: true, consommation: true },
+    paliers: { ecole: 'bac', sante: 'normal', chomage: 'trou' },
+  };
+  const { relaxeJusqua, coupableAPartirDe } = bornesNonLieu(opts);
+  const equilibre = salaireEquilibre(opts);
+  assert.ok(relaxeJusqua < equilibre, `${relaxeJusqua} < ${equilibre}`);
+  assert.ok(equilibre < coupableAPartirDe, `${equilibre} < ${coupableAPartirDe}`);
+  // Le seuil du solde n'est PAS celui du placement : c'est toute l'erreur corrigée.
+  const avecPlacement = simuler({ ...opts, netMensuel: equilibre, placement: { rendementReel: 0.007 } });
+  assert.ok(avecPlacement.verdict.scenario.ecart > 0, 'à l’équilibre du solde, le placement dit encore braquage');
 });
 
 test('simuler : refuse une entrée absurde', () => {
@@ -595,11 +649,12 @@ test('LE SECOND CHIFFRE DU PROJET : le pivot du fonctionnaire n’est pas celui 
   // pivot : la contribution employeur publique (37,65 % à la CNRACL, 82,28 %
   // pour l'État) l'emporte à tout niveau. La territoriale en avait un
   // (1 383 €) quand santé, école et chômage pesaient encore 390 000 €.
-  const fpt = M.salairePivot({ statut: 'fonctionnaire', versant: 'fpt', perimetre: p });
+  const fpt = M.salaireEquilibre({ statut: 'fonctionnaire', versant: 'fpt', perimetre: p });
   assert.equal(fpt, null, 'la territoriale ne bascule plus nulle part');
-  assert.ok(
+  assert.equal(
     M.simuler({ netMensuel: 1000, statut: 'fonctionnaire', versant: 'fpt', perimetre: p })
-      .verdict.braquage,
+      .verdict.issue,
+    'coupable',
     'braquée dès le plancher',
   );
 
@@ -615,7 +670,7 @@ test('LE SECOND CHIFFRE DU PROJET : le pivot du fonctionnaire n’est pas celui 
   // le traitement de la part employeur publique : il faut alors relire la page
   // méthode avant de laisser passer le chiffre.
   assert.equal(
-    M.salairePivot({ statut: 'fonctionnaire', versant: 'fpe', perimetre: p }),
+    M.salaireEquilibre({ statut: 'fonctionnaire', versant: 'fpe', perimetre: p }),
     null,
   );
 });
@@ -954,9 +1009,9 @@ test('le point de bascule et la médiane INSEE se comparent enfin', () => {
   // est comptée en face, le pivot tombe SOUS le médian : la majorité des
   // salariés du privé versent plus qu'ils ne reçoivent. Il valait 2 337 €
   // quand santé, école et chômage pesaient encore 390 000 €.
-  const pivot = salairePivot();
-  assert.ok(pivot < 2190, `pivot ${pivot} €, attendu sous le médian INSEE`);
-  assert.ok(pivot > 1200, `pivot ${pivot} €, anormalement bas`);
+  const equilibre = salaireEquilibre();
+  assert.ok(equilibre < 2190, `équilibre ${equilibre} €, attendu sous le médian INSEE`);
+  assert.ok(equilibre > 1200, `équilibre ${equilibre} €, anormalement bas`);
 });
 
 test('le micro-entrepreneur a son régime, et ne retombe JAMAIS sur le réel', () => {
@@ -1147,11 +1202,11 @@ test('avec paliers, le second plateau les compte et le verdict bouge', () => {
     avec.plateauDroit.total,
     sans.plateauDroit.total + 190_860 + 213_377,
   );
-  const signe = (s) => (s.verdict.braquage ? 1 : -1) * s.verdict.ecart;
-  assert.equal(signe(avec), signe(sans) - 190_860 - 213_377);
+  // Le solde est signé : deux paliers de plus le déplacent d'exactement leur montant.
+  assert.equal(avec.verdict.solde, sans.verdict.solde + 190_860 + 213_377);
   // Au salaire médian, deux paliers ordinaires suffisent à retourner le verdict.
-  assert.equal(sans.verdict.braquage, true);
-  assert.equal(avec.verdict.braquage, false);
+  assert.equal(sans.verdict.issue, 'coupable');
+  assert.equal(avec.verdict.issue, 'relaxe');
   assert.equal(avec.plateauGauche.total, sans.plateauGauche.total);
 });
 
@@ -1164,40 +1219,46 @@ test('un fonctionnaire garde sa ligne chômage absente, même avec paliers', () 
   assert.equal(s.plateauDroit.lignes.education.montant, 153_480);
 });
 
-test('le pivot monte quand la personne déclare avoir plus reçu', () => {
+test('le seuil monte quand la personne déclare avoir plus reçu', () => {
   const perimetre = { salariales: true, patronales: true, impotRevenu: true, consommation: true };
-  const nu = salairePivot({ perimetre });
-  const peu = salairePivot({ perimetre, paliers: { ecole: 'rien', sante: 'fer', chomage: 'jamais' } });
-  const beaucoup = salairePivot({ perimetre, paliers: { ecole: 'etudes', sante: 'fragile', chomage: 'deuxAns' } });
+  const nu = salaireEquilibre({ perimetre });
+  const peu = salaireEquilibre({ perimetre, paliers: { ecole: 'rien', sante: 'fer', chomage: 'jamais' } });
+  const beaucoup = salaireEquilibre({ perimetre, paliers: { ecole: 'etudes', sante: 'fragile', chomage: 'deuxAns' } });
   assert.ok(nu !== null && peu !== null && beaucoup !== null);
   assert.ok(peu > nu, `${peu} > ${nu}`);
   assert.ok(beaucoup > peu, `${beaucoup} > ${peu}`);
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Le coût d'opportunité : avec un placement, le verdict compare ce que le
-// prélèvement serait devenu, placé, à ce qui a été rendu.
-test('sans placement, le verdict compare pris et rendu, et opportunite est null', () => {
+// Le coût d'opportunité : il est CALCULÉ et AFFICHÉ, il ne décide plus.
+test('sans placement, le solde est la différence des deux plateaux et il n’y a pas de scénario', () => {
   const s = simuler({ netMensuel: 2190 });
   assert.equal(s.opportunite, null);
-  assert.equal(s.verdict.ecart, Math.abs(s.plateauGauche.total - s.plateauDroit.total));
+  assert.equal(s.verdict.scenario, null);
+  assert.equal(s.verdict.solde, s.plateauDroit.total - s.plateauGauche.total);
 });
 
-test('avec placement, le capital placé remplace le prélèvement dans la balance', () => {
+test('avec placement, le scénario est chiffré et le verdict N’EN DÉPEND PAS', () => {
   const pe = { salariales: true, patronales: true, impotRevenu: true, consommation: true };
   const paliers = { ecole: 'bac', sante: 'normal', chomage: 'trou' };
   const nu = simuler({ netMensuel: 2190, perimetre: pe, paliers });
   const zero = simuler({ netMensuel: 2190, perimetre: pe, paliers, placement: { rendementReel: 0 } });
   // À 0 % réel et sans frais, le capital vaut exactement la somme prélevée.
   assert.ok(Math.abs(zero.opportunite.capital - nu.plateauGauche.total) < 1e-6);
-  assert.equal(zero.verdict.braquage, nu.verdict.braquage);
   const sp = simuler({ netMensuel: 2190, perimetre: pe, paliers, placement: { rendementReel: 0.0677 } });
   assert.ok(sp.opportunite.capital > 3 * nu.plateauGauche.total, `${sp.opportunite.capital}`);
-  assert.equal(sp.verdict.braquage, true);
-  assert.equal(sp.verdict.ecart, sp.opportunite.capital - sp.plateauDroit.total);
-  // Un rendement réel négatif (le Livret A) peut retourner le verdict.
+  assert.equal(sp.verdict.scenario.ecart, sp.opportunite.capital - sp.plateauDroit.total);
+  /*
+   * ⚠ LE CŒUR DE LA CORRECTION DU 15/09/2026 : trois enveloppes qui changent
+   * tout au scénario, et un verdict qui ne bouge pas d'un iota. Cette
+   * assertion échoue sur le code d'avant, où l'enveloppe FAISAIT le verdict.
+   */
   const livret = simuler({ netMensuel: 2190, perimetre: pe, paliers, placement: { rendementReel: -0.0024 } });
   assert.ok(livret.opportunite.capital < nu.plateauGauche.total);
+  assert.equal(nu.verdict.issue, zero.verdict.issue);
+  assert.equal(nu.verdict.issue, sp.verdict.issue);
+  assert.equal(nu.verdict.issue, livret.verdict.issue);
+  assert.equal(nu.verdict.solde, sp.verdict.solde);
 });
 
 test('les frais mordent sur le capital placé, et sansFrais les ignore', () => {
@@ -1205,12 +1266,17 @@ test('les frais mordent sur le capital placé, et sansFrais les ignore', () => {
   assert.ok(s.opportunite.capital < s.opportunite.sansFrais);
 });
 
-test('le pivot existe aussi sur le coût d’opportunité, et monte avec le rendement', () => {
+test('le SEUIL DU SOLDE ne dépend pas de l’enveloppe choisie', () => {
   const perimetre = { salariales: true, patronales: true, impotRevenu: true, consommation: true };
   const paliers = { ecole: 'bac', sante: 'normal', chomage: 'trou' };
-  const lent = salairePivot({ perimetre, paliers, placement: { rendementReel: 0.0075 } });
-  const rapide = salairePivot({ perimetre, paliers, placement: { rendementReel: 0.0677 } });
-  assert.ok(lent === null || rapide === null || rapide < lent, `${rapide} < ${lent}`);
+  const lent = salaireEquilibre({ perimetre, paliers, placement: { rendementReel: 0.0075 } });
+  const rapide = salaireEquilibre({ perimetre, paliers, placement: { rendementReel: 0.0677 } });
+  /*
+   * ⚠ Avant le 15/09/2026, ces deux seuils étaient différents de plusieurs
+   * centaines d'euros et c'était NORMAL : le verdict se lisait sur le
+   * placement. Ils doivent maintenant être égaux, et l'égalité est le test.
+   */
+  assert.equal(lent, rapide, `${lent} contre ${rapide}`);
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1833,7 +1899,7 @@ test('les frais ne sont plus cachés derrière un clic', () => {
   // Ils entrent dans le calcul du capital, donc dans le verdict, et ils vivaient
   // dans un volet replié dont le titre n’annonçait pas un réglage.
   const bourse = SRC('src/components/cartes/Bourse.tsx');
-  assert.match(bourse, /l’avocate des braqueurs demande la parole" ouvertParDefaut/);
+  assert.match(bourse, /l’avocate de la défense demande la parole" ouvertParDefaut/);
 });
 
 test('le bouton de l’écran final ne promet plus d’effacer', () => {
@@ -1885,7 +1951,15 @@ test('méthode : le coût d’opportunité est nommé, et son objection avec', (
   assert.match(page, /prime d’assurance/, 'et elle est exposée dans ses termes');
   assert.match(page, /Institut des politiques\s*\n?\s*publiques/, 'avec son institution');
 
-  // Le seuil SANS placement doit rester affiché : c'est la sortie offerte à
-  // qui refuse le raisonnement, et la réponse cesse d'être honnête sans lui.
-  assert.match(page, /pension seule en face et argent non placé/, 'l’ancien seuil reste publié');
+  /*
+   * ⚠ DEPUIS LE 15/09/2026, LE PLACEMENT NE DÉCIDE PLUS : le verdict se lit sur
+   * le solde, et le coût d'opportunité n'est qu'un scénario affiché à côté. La
+   * page doit donc publier le seuil du SOLDE (les deux plateaux qui
+   * s'égalisent) et la zone où le dossier ne tranche pas. C'est la réponse
+   * complète à l'objection Bozio : on ne la discute plus, on ne juge plus
+   * dessus.
+   */
+  assert.match(page, /les deux plateaux s’égalisent/, 'le seuil du solde est publié');
+  assert.match(page, /zone de non-lieu/, 'et la zone où l’on ne tranche pas');
+  assert.match(page, /pension seule en face/, 'le seuil pension seule reste publié');
 });

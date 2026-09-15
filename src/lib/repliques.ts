@@ -35,7 +35,7 @@
  * c'est précisément la carte la plus mise en avant qui se désaligne.
  */
 export const APARTE = {
-  fort: "Objection ! Je suis l'avocate des braqueurs.",
+  fort: "Objection ! Je suis l'avocate de la défense.",
   suite: "Contente de vous voir aussi. Vous lui montrez ce qu'on lui a pris, très bien. Vous comptez lui montrer ce qu'on lui a rendu, ou c'est pas dans le dossier ?",
 };
 
@@ -63,7 +63,7 @@ export const AVOCATE: Record<string, string> = {
    * personnage secondaire ; là elle coupe, puis elle se paie sa tête.
    */
   aparte:
-    "[dry] Objection ! Je suis l'avocate des braqueurs. "
+    "[dry] Objection ! Je suis l'avocate de la défense. "
     + "[chuckles] Contente de vous voir aussi. "
     + "[sarcastic] Vous lui montrez ce qu'on lui a pris, très bien. "
     + "Vous comptez lui montrer ce qu'on lui a rendu, ou c'est pas dans le dossier ?",
@@ -245,9 +245,15 @@ export const REACTIONS: Record<string, string> = {
   "salaire-08":
     "[dry] Vous êtes dans le tiers du haut. [sarcastic] Félicitations. "
     + "[scoffs] C'est là qu'ils se servent le plus.",
-  /* 09 · Formulation de Coq, gardée telle quelle. */
+  /*
+   * 09 · ⚠ La formulation de Coq, « les braqueurs ont dû se régaler », est
+   * partie le 15/09/2026 : elle tombait à la SAISIE DU SALAIRE, donc avant le
+   * moindre calcul, et elle annonçait le verdict d'une enquête qui n'avait pas
+   * commencé. C'est exactement ce que la couverture a cessé de faire en passant
+   * à la question. Le chiffre reste commenté, la conclusion ne l'est plus.
+   */
   "salaire-09":
-    "[scoffs] Ah. Pas mal. [sarcastic] Les braqueurs ont dû se régaler. [laughs]",
+    "[scoffs] Ah. Pas mal. [dry] On va compter, alors. [sarcastic] Dans les deux sens.",
   /* 10 · au-dessus du dernier décile. */
   "salaire-10":
     "[whispers] Oh. [scoffs] Alors là. [tired] J'ai vu des braquages à main armée rapporter moins. "

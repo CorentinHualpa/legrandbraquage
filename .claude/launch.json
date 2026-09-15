@@ -2,10 +2,10 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "braquage-parcours",
+      "name": "braquage-solde",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev", "--", "--port", "4791"],
-      "port": 4791
+      "runtimeArgs": ["run", "dev", "--", "--port", "4793"],
+      "port": 4793
     }
   ]
 }

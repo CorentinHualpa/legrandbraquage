@@ -177,12 +177,12 @@ export function Bourse({
         * plaidoirie de l’avocate amène les frais, c’est elle qui les réclame),
         * on retire seulement le clic qui les cachait.
         */}
-      <Volet titre="Sauf que… l’avocate des braqueurs demande la parole" ouvertParDefaut>
+      <Volet titre="Sauf que… l’avocate de la défense demande la parole" ouvertParDefaut>
         {pieces[28] ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={`/images/${pieces[28]}`} alt="L’avocate des braqueurs, dans le couloir" className="-mx-5 aspect-[16/9] w-[calc(100%+2.5rem)] max-w-none object-cover object-[50%_30%] saturate-[0.8] sm:-mx-6 sm:w-[calc(100%+3rem)]" decoding="async" />
+          <img src={`/images/${pieces[28]}`} alt="L’avocate de la défense, dans le couloir" className="-mx-5 aspect-[16/9] w-[calc(100%+2.5rem)] max-w-none object-cover object-[50%_30%] saturate-[0.8] sm:-mx-6 sm:w-[calc(100%+3rem)]" decoding="async" />
         ) : null}
-        <Commissaire qui="L’avocate des braqueurs" couleur="bleu">
+        <Commissaire qui="L’avocate de la défense" couleur="bleu">
           « Objection. Mon client vous a pris cet argent, soit. Mais qui place quarante-trois ans sans
           jamais y toucher ? Qui n’a pas de frais ? Qui n’a pas paniqué en 2008 ? Le million de
           l’accusation tient à trois hypothèses. Regardez ce qu’il en reste quand on les retire. »
@@ -195,7 +195,7 @@ export function Bourse({
           ))}
         </ul>
         <div className="flex flex-col gap-2">
-          <Commissaire qui="L’avocate des braqueurs" couleur="bleu">
+          <Commissaire qui="L’avocate de la défense" couleur="bleu">
             « Et les frais, monsieur le commissaire. Personne ne parle jamais des frais. »
           </Commissaire>
           <Kicker>Les frais, qui comptent dans le verdict</Kicker>

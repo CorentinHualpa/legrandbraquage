@@ -11,23 +11,71 @@
 import { ETIQUETTES_PLACEMENT } from "./placements";
 import { euros, eurosSigne } from "./format";
 import type { Cas } from "./lien";
-import { CRANS_FRAIS, CRANS_RENDEMENT, simuler } from "./moteur";
+import { CRANS_FRAIS, CRANS_RENDEMENT, simuler, type Issue } from "./moteur";
 import { SEUIL_ANNEES, anneesSansTravailler, objetPour } from "./objets";
 import { partsFiscales } from "./statuts";
 
 export type Une = {
+  /** Ce qui est parti sur la carrière. */
   preleve: string;
+  /** Ce qui revient, sur toute la vie. Il PASSE DEVANT le pris jusqu'à 2 297 €. */
+  recu: string;
+  /** Rendu moins pris, signé. C'est lui qui décide, depuis le 15/09/2026. */
+  solde: string;
+  issue: Issue;
+  /** Le scénario du placement : son étiquette, son capital, son écart. Jamais le verdict. */
   placement: string;
   capital: string;
-  recu: string;
-  ecart: string;
-  braquage: boolean;
+  ecartPlace: string;
+  /** Le solde, traduit en objet ou en années. Le titre dit dans quel sens il penche. */
+  objetTitre: string;
   objet: string;
 };
 
 /** 0,0677 → « 6,8 % », −0,0024 → « −0,2 % ». Le taux RÉEL, inflation retirée. */
 export function tauxReel(reel: number): string {
   return `${(reel * 100).toFixed(1).replace(".", ",").replace("-", "−")} %`;
+}
+
+/**
+ * Le solde, traduit en objet ou en années, avec le titre qui dit son sens.
+ *
+ * ⚠ Partagé par la une de l'écran et par l'image de partage, parce que les deux
+ * l'affichaient chacune de leur côté et sur le montant BRUT : 39,4 années au
+ * médian, 56 ans à 5 000 €, c'est-à-dire plus que la carrière simulée.
+ */
+export function objetDuSolde(solde: number, netApresImpotActuel: number, issue: Issue) {
+  const ecartNet = Math.abs(solde);
+  const annees = anneesSansTravailler(ecartNet, netApresImpotActuel);
+  return {
+    titre:
+      issue === "coupable"
+        ? "CE QU’ILS ONT PRIS EN TROP, AUTREMENT DIT"
+        : issue === "relaxe"
+          ? "CE QU’ILS VOUS ONT RENDU EN PLUS, AUTREMENT DIT"
+          : "L’ÉCART ENTRE LES DEUX, AUTREMENT DIT",
+    texte:
+      ecartNet >= SEUIL_ANNEES
+        ? `${annees.toFixed(1).replace(".", ",")} années de votre niveau de vie`
+        : objetPour(ecartNet).nom,
+  };
+}
+
+/**
+ * Le texte de remplacement de l'image, CALCULÉ, jamais tapé à la main.
+ *
+ * Il a décrit pendant des semaines un dossier que le moteur ne produisait plus.
+ * Écrit ici une seule fois, il sert la page d'accueil et chaque lien partagé.
+ */
+export function texteAlternatif(une: Une): string {
+  const issue =
+    une.issue === "coupable" ? "Coupable" : une.issue === "relaxe" ? "Relaxe" : "Non-lieu";
+  return (
+    `La Gazette des Prélèvements : pris ${une.preleve}, rendu ${une.recu} sur une carrière, `
+    + `soit ${une.solde} au bout du compte. ${issue}. `
+    + `Scénario de la défense : tout placé en ${une.placement}, ça aurait fait ${une.capital}, `
+    + `soit ${une.ecartPlace} contre ce qui est rendu.`
+  );
 }
 
 /** Le dossier d'un cas, en lignes de une. Lève si le régime n'est pas instruit. */
@@ -74,17 +122,24 @@ export function uneDuCas(cas: Cas): Une {
     comptes === postes.length ? "" : ` · ${comptes} POSTE${comptes > 1 ? "S" : ""} SUR ${postes.length}`;
 
   const preleve = s.plateauGauche.total;
-  const annees = anneesSansTravailler(preleve, s.netApresImpotActuel);
+  const solde = s.verdict.solde;
+  /*
+   * ⚠ L'OBJET SE CALCULE SUR LE SOLDE, PLUS SUR LE BRUT. La une titrait
+   * « BRAQUÉ DE 989 940 € » et traduisait ce brut en « 39,4 années de votre vie
+   * sans travailler », ce qui donnait 56 ans à 5 000 € de net, soit plus que la
+   * carrière entière qu'on venait de simuler. Le chiffre qui se partage doit
+   * être celui qui reste une fois déduit ce qui revient.
+   */
+  const objet = objetDuSolde(solde, s.netApresImpotActuel, s.verdict.issue);
   return {
     preleve: `${euros(preleve)} €`,
-    placement: `${ETIQUETTES_PLACEMENT[cran.id] ?? cran.nom} à ${tauxReel(cran.reel)}${mention}`,
-    capital: `${euros(s.opportunite?.capital ?? preleve)} €`,
     recu: `${euros(s.plateauDroit.total)} €`,
-    ecart: eurosSigne(s.verdict.ecart),
-    braquage: s.verdict.braquage,
-    objet:
-      preleve >= SEUIL_ANNEES
-        ? `${annees.toFixed(1).replace(".", ",")} années de vie sans travailler`
-        : objetPour(preleve).nom,
+    solde: eurosSigne(solde),
+    issue: s.verdict.issue,
+    placement: `${ETIQUETTES_PLACEMENT[cran.id] ?? cran.nom} à ${tauxReel(cran.reel)}${mention}`,
+    capital: `${euros(s.verdict.scenario?.capital ?? preleve)} €`,
+    ecartPlace: eurosSigne(s.verdict.scenario?.ecart ?? preleve - s.plateauDroit.total),
+    objetTitre: objet.titre,
+    objet: objet.texte,
   };
 }

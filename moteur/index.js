@@ -28,6 +28,24 @@ import { lignesChoisies } from './paliers.js';
 import { accisesAnnuelles } from './consommation.js';
 
 /**
+ * La bande où l'on ne tranche pas, en part de ce qui a été pris.
+ *
+ * Elle n'est pas une précaution de style : au salaire médian, l'écart entre les
+ * deux plateaux vaut 8,9 % du pris, alors que CHACUNE des conventions du
+ * dossier en déplace autant à elle seule (la façon de valoriser la pension vaut
+ * 15 points, la courbe de carrière et le taux d'effort TVA plusieurs points).
+ * Tamponner COUPABLE ou RELAXE là-dedans, c'est publier du bruit avec l'aplomb
+ * d'un tribunal. En dessous, l'issue est NON-LIEU, et la page dit pourquoi.
+ */
+export const BANDE_NON_LIEU = 0.10;
+
+export const LIBELLE_ISSUE = {
+  coupable: 'Braquage constaté.',
+  'non-lieu': 'Non-lieu : ce qui est pris et ce qui est rendu s’équilibrent.',
+  relaxe: 'Braquage non constaté. Relaxe.',
+};
+
+/**
  * Le régime social derrière une qualité de victime.
  *
  * « Patron de TPE » n'est PAS un régime : un gérant majoritaire de SARL cotise
@@ -199,9 +217,9 @@ function contreparties(pensionMensuelle, regime = 'salarie', paliers = null) {
  *   tabac, carburant, alcool : les accises s'ajoutent à la TVA chaque année.
  *   Absent, rien n'est ajouté.
  * @param {{rendementReel: number, fraisAnnuels?: number, fraisVersement?: number}} [entree.placement]
- *   où la personne dit qu'elle aurait mis l'argent. Présent, le VERDICT se juge sur
- *   le coût d'opportunité : ce que le prélèvement serait devenu, placé à ce taux,
- *   contre ce qui a été rendu. Absent, le verdict compare pris et rendu tels quels.
+ *   où la personne dit qu'elle aurait mis l'argent. C'est un SCÉNARIO affiché à
+ *   côté du verdict (`verdict.scenario`), jamais ce qui décide : depuis le
+ *   15/09/2026, l'issue se lit sur le solde. Voir `BANDE_NON_LIEU`.
  */
 export function simuler(entree) {
   const {
@@ -379,7 +397,33 @@ export function simuler(entree) {
     };
   }
 
-  const ecart = (opportunite ? opportunite.capital : preleve) - totalRecu;
+  /*
+   * LE VERDICT SE LIT SUR LE SOLDE, et le placement n'est plus qu'un scénario.
+   * Décision de Coq du 15/09/2026, après l'audit du même jour.
+   *
+   * Ce qui n'allait pas : au salaire médian, ce qui est RENDU (1 040 463 €)
+   * dépasse ce qui est PRIS (989 940 €), et l'écran tamponnait quand même
+   * COUPABLE, parce qu'il comparait le rendu au capital qu'aurait fait la
+   * TOTALITÉ du prélevé placée à 0,7 % par an, santé, famille, impôt et TVA
+   * compris. C'est l'argument que franceinfo a démonté chez Sarah Knafo le
+   * 08/09/2026 en citant Antoine Bozio, et un dossier qui accuse quelqu'un
+   * qu'il rembourse ne tient pas dix minutes en contradictoire.
+   *
+   * TROIS issues, parce que deux mentent. Au médian, l'écart vaut 8,9 % du
+   * pris, c'est-à-dire moins que l'effet d'UNE SEULE convention défendable
+   * (la valorisation de la pension, la courbe de carrière, le taux d'effort
+   * TVA) : le tampon dépendait du bruit. Sous la bande, on ne tranche pas.
+   */
+  const solde = totalRecu - preleve;
+  const bandeNonLieu = BANDE_NON_LIEU * preleve;
+  const issue = solde > bandeNonLieu
+    ? 'relaxe'
+    : solde < -bandeNonLieu ? 'coupable' : 'non-lieu';
+
+  /* Ce que le placement AURAIT changé. Positif : il manquerait à la personne. */
+  const scenario = opportunite
+    ? { capital: opportunite.capital, ecart: opportunite.capital - totalRecu }
+    : null;
 
   return {
     entree: {
@@ -420,37 +464,73 @@ export function simuler(entree) {
     /** Le capital qu'aurait fait le prélèvement, placé. Absent sans placement. */
     opportunite,
     verdict: {
-      braquage: ecart > 0,
-      ecart: Math.abs(ecart),
-      libelle: ecart > 0 ? 'Braquage constaté.' : 'Braquage non constaté. Relaxe.',
+      /** Rendu MOINS pris, en euros constants. Positif : la personne reçoit plus qu'on ne lui prend. */
+      solde,
+      /** `'relaxe' | 'non-lieu' | 'coupable'`. Jamais un booléen : deux issues mentaient. */
+      issue,
+      /** Largeur de la bande de non-lieu, en euros (part du pris, cf. `BANDE_NON_LIEU`). */
+      bandeNonLieu,
+      libelle: LIBELLE_ISSUE[issue],
+      /**
+       * Ce que le placement aurait changé : son capital à 64 ans, et l'écart
+       * avec ce qui a été rendu (positif = manque à gagner). S'affiche À CÔTÉ
+       * du verdict, ne le décide pas. `null` sans placement.
+       */
+      scenario,
     },
   };
 }
 
 /**
- * Cherche le salaire où la balance bascule, par dichotomie.
- * C'est le chiffre inédit de la page : personne ne le publie.
+ * Cherche par dichotomie le salaire où un test change de réponse.
+ *
+ * ⚠ Le test porte sur la SIMULATION, jamais sur un booléen figé : depuis que le
+ * verdict a trois issues, « où ça bascule » n'a plus de sens tout seul. Il faut
+ * dire ce qui bascule.
  */
-export function salairePivot(opts = {}) {
+function chercherSalaire(opts, test) {
   const perimetre = opts.perimetre
     ?? { salariales: true, patronales: true, impotRevenu: true, consommation: true };
 
   let bas = SALAIRES_REFERENCE.d1 * 0.7;
   let haut = SALAIRES_REFERENCE.d9 * 2;
 
-  const braquageA = simuler({ ...opts, netMensuel: bas, perimetre }).verdict.braquage;
-  const braquageB = simuler({ ...opts, netMensuel: haut, perimetre }).verdict.braquage;
-  if (braquageA === braquageB) return null; // pas de bascule sur la plage
+  const a = test(simuler({ ...opts, netMensuel: bas, perimetre }));
+  const b = test(simuler({ ...opts, netMensuel: haut, perimetre }));
+  if (a === b) return null; // pas de bascule sur la plage
 
   for (let i = 0; i < 40; i += 1) {
     const milieu = (bas + haut) / 2;
-    if (simuler({ ...opts, netMensuel: milieu, perimetre }).verdict.braquage === braquageA) {
+    if (test(simuler({ ...opts, netMensuel: milieu, perimetre })) === a) {
       bas = milieu;
     } else {
       haut = milieu;
     }
   }
   return Math.round((bas + haut) / 2);
+}
+
+/**
+ * Le salaire où les deux plateaux s'égalisent : en dessous, on reçoit plus
+ * qu'on ne verse, au-dessus l'inverse. C'est le chiffre inédit de la page, et
+ * c'est le SEUL qu'on a le droit d'annoncer comme « reçoit plus qu'on ne lui
+ * prend » : l'ancien pivot mesurait le placement, pas le solde, et l'écran l'a
+ * présenté six jours durant comme s'il mesurait le solde.
+ */
+export function salaireEquilibre(opts = {}) {
+  return chercherSalaire(opts, (s) => s.verdict.solde > 0);
+}
+
+/**
+ * Les deux bords de la zone de non-lieu. `relaxeJusqua` : au-dessous, le rendu
+ * dépasse le pris de plus de `BANDE_NON_LIEU`. `coupableAPartirDe` : au-dessus,
+ * c'est l'inverse. Entre les deux, le dossier ne tranche pas.
+ */
+export function bornesNonLieu(opts = {}) {
+  return {
+    relaxeJusqua: chercherSalaire(opts, (s) => s.verdict.issue === 'relaxe'),
+    coupableAPartirDe: chercherSalaire(opts, (s) => s.verdict.issue === 'coupable'),
+  };
 }
 
 /**

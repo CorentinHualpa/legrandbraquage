@@ -28,7 +28,7 @@ import {
   PALIERS_DEFAUT,
   PERIMETRE_DEFAUT,
   POSTES,
-  salairePivot,
+  salaireEquilibre,
   simuler,
   type Habitudes,
   type Paliers,
@@ -276,11 +276,11 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
   }, [calculable, etat, parts, perimetre, paliers, placement, habitudes]);
 
   /** Le seuil, pour CE régime, CE périmètre et CES réponses. Quarante simulations, donc seulement au verdict. */
-  const pivot = useMemo(() => {
+  const equilibre = useMemo(() => {
     if (!simulation || ecran !== "verdict") return null;
     const { netMensuel: _net, ...reste } = etat;
     void _net;
-    return salairePivot({ ...reste, parts, perimetre, paliers, placement, habitudes });
+    return salaireEquilibre({ ...reste, parts, perimetre, paliers, placement, habitudes });
   }, [simulation, ecran, etat, parts, perimetre, paliers, placement, habitudes]);
 
   /**
@@ -290,11 +290,18 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
    * conséquence, et `null` efface une valeur devenue fausse. Le commissaire lit
    * ce bloc à chaque tour, donc il arrête de demander le salaire : il l'a.
    *
-   * ⚠ Ce qui n'est PAS ici est volontaire. Le verdict et le manque à gagner
-   * sont la chute du parcours : les envoyer en continu depuis la déposition
-   * permettrait au commissaire de les lâcher avant que le visiteur ne les
-   * découvre. Ils partent avec l'événement `verdict_rendu`, au moment exact où
-   * l'écran les montre, et pas une seconde avant.
+   * ⚠ Ce qui n'est PAS ici est volontaire. Le verdict et le solde sont la chute
+   * du parcours : les envoyer en continu depuis la déposition permettrait au
+   * commissaire de les lâcher avant que le visiteur ne les découvre. Ils
+   * partent avec l'événement `verdict_rendu`, au moment exact où l'écran les
+   * montre, et pas une seconde avant.
+   *
+   * ⚠⚠ ET IL FAUT LUI ENVOYER LES DEUX PLATEAUX. Il n'a longtemps reçu que
+   * `montant_pris` et un écart mal nommé : il annonçait « 87 690 € d'écart
+   * entre ce que vous avez versé et ce que vous récupérez » à quelqu'un qui
+   * récupère PLUS qu'il ne verse, et quand on lui demandait le rendu, il
+   * l'inventait. Un modèle à qui on donne un terme et une différence complète
+   * la soustraction tout seul.
    */
   useEffect(() => {
     contexte({
@@ -304,6 +311,7 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
       placement: placementId,
       cadeau: cadeau ?? null,
       montant_pris: simulation ? Math.round(simulation.plateauGauche.total) : null,
+      montant_rendu: simulation ? Math.round(simulation.plateauDroit.total) : null,
     });
   }, [ecran, etat.netMensuel, etat.statut, placementId, cadeau, simulation]);
 
@@ -321,8 +329,10 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
     if (ecran !== "verdict" || !simulation || verdictAnnonce.current) return;
     verdictAnnonce.current = true;
     evenement("verdict_rendu", {
-      verdict: simulation.verdict.braquage ? "braquage" : "relaxe",
-      manque_a_gagner: Math.round(simulation.verdict.ecart),
+      verdict: simulation.verdict.issue,
+      /* Rendu moins pris, signé. Le nom dit ce que c'est, et il est déclaré pareil côté agent. */
+      solde: Math.round(simulation.verdict.solde),
+      ecart_si_place: Math.round(simulation.verdict.scenario?.ecart ?? 0),
     });
   }, [ecran, simulation]);
 
@@ -604,7 +614,7 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
       ) : ecran === "rendu" ? (
         <Rendu {...commun} simulation={simulation} paliers={paliers} allerAuPalier={(poste) => aller(poste)} />
       ) : ecran === "verdict" ? (
-        <Verdict {...commun} simulation={simulation} pivot={pivot} perimetre={perimetre} placementId={placementId} cadeau={cadeau} />
+        <Verdict {...commun} simulation={simulation} equilibre={equilibre} perimetre={perimetre} placementId={placementId} cadeau={cadeau} />
       ) : (
         <Avis {...commun} simulation={simulation} cas={cas} recommencer={() => aller("deposition")} />
       )}

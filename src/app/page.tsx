@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Parcours } from "@/components/Parcours";
 import { piecesDeposees } from "@/lib/images";
 import { casDepuisRequete } from "@/lib/lien";
-import { uneDuCas } from "@/lib/une";
+import { texteAlternatif, uneDuCas } from "@/lib/une";
 
 /**
  * Le parcours, en dix-sept cartes. Une seule chose est calculée ICI, côté
@@ -44,11 +44,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Requete
       url: `/api/avis?${q.toString()}`,
       width: 1200,
       height: 630,
-      alt:
-        `La Gazette des Prélèvements : braqué de ${une.preleve} sur une carrière. `
-        + `Placés en ${une.placement}, ils auraient fait ${une.capital}, contre ${une.recu} rendus. `
-        + `${une.braquage ? "Manque à gagner" : "En votre faveur"} : ${une.ecart}. `
-        + `${une.braquage ? "Coupable" : "Relaxe"}.`,
+      alt: texteAlternatif(une),
     };
     return { openGraph: { images: [image] }, twitter: { card: "summary_large_image", images: [image.url] } };
   } catch {

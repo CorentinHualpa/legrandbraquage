@@ -141,9 +141,13 @@ export function Audition({
 
       <p className="text-[13.5px] leading-relaxed text-encre-2">
         Il a votre procès-verbal sous les yeux : votre net mensuel, votre
-        statut, ce qui vous a été pris, et votre verdict, qui est de{" "}
+        statut, ce qui vous a été pris, ce qui vous est rendu, et l’issue,{" "}
         <span className="font-semibold text-encre">
-          {verdict.braquage ? "braquage" : "relaxe"}
+          {verdict.issue === "coupable"
+            ? "un braquage"
+            : verdict.issue === "relaxe"
+              ? "une relaxe"
+              : "un non-lieu"}
         </span>
         . Ne les lui redonnez pas, demandez-lui pourquoi.
       </p>
@@ -175,11 +179,25 @@ export function Audition({
         className={`${ouverte ? "min-h-[520px]" : "hidden"} scroll-mt-4 border-2 border-encre bg-papier-2`}
       />
 
+      {/*
+        ⚠ CE RENVOI DISAIT L'INVERSE DE CE QUI SE PASSE. « Il n'a aucun moyen
+        d'enregistrer quoi que ce soit sur vous » : la conversation part sur les
+        serveurs de Dale Voz, y est conservée, et un identifiant tient dans le
+        navigateur. Promettre le contraire à l'endroit exact où l'on invite à
+        parler est la faute la plus coûteuse du dossier, parce qu'elle porte sur
+        la confiance et pas sur un barème.
+      */}
       <Renvoi>
-        Personnage de fiction. Il ne parle au nom de personne, ne commente
-        aucune actualité et ne dit à personne pour qui voter. Chaque chiffre
-        qu’il cite renvoie à sa source, et il n’a aucun moyen d’enregistrer quoi
-        que ce soit sur vous.
+        Assistant conversationnel : vous parlez à une intelligence artificielle,
+        pas à une personne. Personnage de fiction, il ne parle au nom de
+        personne, ne commente aucune actualité et ne dit à personne pour qui
+        voter. Chaque chiffre qu’il cite renvoie à sa source. La conversation et
+        ce que la page lui transmet (votre net, votre statut, vos montants) sont
+        enregistrés chez l’hébergeur de l’assistant :{" "}
+        <a href="/confidentialite" className="underline underline-offset-2">
+          ce qui est conservé, et combien de temps
+        </a>
+        .
       </Renvoi>
     </Feuille>
   );

@@ -12,7 +12,7 @@ import { dit } from "@/lib/repliques";
 import { euros, eurosSigne } from "@/lib/format";
 import { requeteDuCas, type Cas } from "@/lib/lien";
 import { CRANS_FRAIS, CRANS_RENDEMENT, simuler, type Simulation } from "@/lib/moteur";
-import { SEUIL_ANNEES, anneesSansTravailler, objetPour } from "@/lib/objets";
+import { objetDuSolde } from "@/lib/une";
 import { partsFiscales } from "@/lib/statuts";
 
 /**
@@ -54,11 +54,7 @@ export function Avis({
   const { plateauGauche, plateauDroit, verdict, opportunite } = simulation;
   const cran = CRANS_RENDEMENT.find((c) => c.id === cas.placementId) ?? CRANS_RENDEMENT[0];
 
-  const annees = anneesSansTravailler(plateauGauche.total, simulation.netApresImpotActuel);
-  const objet =
-    plateauGauche.total >= SEUIL_ANNEES
-      ? `${annees.toFixed(1).replace(".", ",")} années de votre vie, à votre niveau de vie`
-      : objetPour(plateauGauche.total).nom;
+  const objet = objetDuSolde(verdict.solde, simulation.netApresImpotActuel, verdict.issue);
 
   /*
    * Le mur : les trois cas types, avec LES MÊMES réponses et LA MÊME
@@ -75,9 +71,23 @@ export function Avis({
         couple: cas.couple,
         perimetre: cas.perimetre,
         paliers: cas.paliers,
+        /*
+         * ⚠ LES HABITUDES AUSSI. Le titre promet « mêmes réponses », et les six
+         * réponses sur la consommation manquaient : la brève du salaire médian
+         * affichait 967 729 € quand la personne, au même salaire médian, lisait
+         * 989 940 € trois centimètres plus haut, sur le même écran. L'écart
+         * valait exactement ses accises, 517 € par an sur 43 ans.
+         */
+        habitudes: cas.habitudes,
         placement: { rendementReel: cran.reel, fraisAnnuels: frais.annuels, fraisVersement: frais.versement },
       });
-      return { ...m, pris: s.plateauGauche.total, braquage: s.verdict.braquage, ecart: s.verdict.ecart };
+      return {
+        ...m,
+        pris: s.plateauGauche.total,
+        rendu: s.plateauDroit.total,
+        solde: s.verdict.solde,
+        issue: s.verdict.issue,
+      };
     });
   }, [cas, cran]);
 
@@ -93,9 +103,21 @@ export function Avis({
    */
   const image = `/api/avis${requete}`;
 
-  const texte = verdict.braquage
-    ? `Placé en ${cran.nom}, mon argent aurait fait plus que ce qu’ils m’auront rendu. Chiffré sur les barèmes officiels.`
-    : `Placé en ${cran.nom}, mon argent aurait fait moins que ce qu’ils m’auront rendu. Vérifie le tien.`;
+  /*
+   * ⚠ La phrase partagée annonçait le SCÉNARIO du placement (« placé en S&P 500,
+   * mon argent aurait fait plus… ») en le présentant comme « chiffré sur les
+   * barèmes officiels » : les barèmes sont officiels, le placement est une
+   * hypothèse, et les deux se retrouvaient dans la même phrase. Elle annonce
+   * maintenant les deux plateaux, qui eux sont calculés. Et elle TUTOYAIT dans
+   * sa branche relaxe, sur le message qui circule le plus loin.
+   */
+  const texte = `Sur ma carrière : pris ${euros(plateauGauche.total)} €, rendu ${euros(plateauDroit.total)} €.${
+    verdict.issue === "coupable"
+      ? " Le calcul est public, vérifiez le vôtre."
+      : verdict.issue === "relaxe"
+        ? " Oui, dans ce sens-là. Vérifiez le vôtre."
+        : " Match nul. Vérifiez le vôtre."
+  }`;
 
   /*
    * DEUX RÉSEAUX EN CLAIR, À CÔTÉ DU PARTAGE DU SYSTÈME.
@@ -194,11 +216,13 @@ export function Avis({
         <CarteAvis
           preleve={plateauGauche.total}
           placement={`${ETIQUETTES[cran.id] ?? cran.nom} à ${taux(cran.reel)}`}
-          capital={opportunite?.capital ?? plateauGauche.total}
+          capital={verdict.scenario?.capital ?? plateauGauche.total}
           recu={plateauDroit.total}
-          ecart={verdict.ecart}
-          braquage={verdict.braquage}
-          objet={objet}
+          solde={verdict.solde}
+          ecartPlace={verdict.scenario?.ecart ?? plateauGauche.total - plateauDroit.total}
+          issue={verdict.issue}
+          objetTitre={objet.titre}
+          objet={objet.texte}
           portrait={pieces[13]}
         />
       </div>
@@ -221,15 +245,19 @@ export function Avis({
                 qu'il veut dire ici.
               */}
               <span className="border-b border-cadre-bord pb-0.5 font-mono text-[7.5px] tracking-[0.12em] text-encre-3 uppercase">{m.nom}</span>
-              <span className="font-mono text-[7px] tracking-[0.1em] text-encre-3 uppercase">Braqué de</span>
+              <span className="font-mono text-[7px] tracking-[0.1em] text-encre-3 uppercase">Pris</span>
               <span className="chiffres font-mono text-[12px] leading-none font-semibold text-rouge-texte">{euros(m.pris)} €</span>
-              <span className={`font-mono text-[7.5px] leading-tight tracking-[0.1em] ${m.braquage ? "text-rouge-texte" : "text-bleu"}`}>
-                {m.braquage ? "COUPABLE" : "RELAXE"}
+              <span className="font-mono text-[7px] tracking-[0.1em] text-encre-3 uppercase">Rendu</span>
+              <span className="chiffres font-mono text-[12px] leading-none font-semibold text-vert">{euros(m.rendu)} €</span>
+              <span
+                className={`font-mono text-[7.5px] leading-tight tracking-[0.1em] ${m.issue === "coupable" ? "text-rouge-texte" : m.issue === "relaxe" ? "text-vert" : "text-encre-2"}`}
+              >
+                {m.issue === "coupable" ? "COUPABLE" : m.issue === "relaxe" ? "RELAXE" : "NON-LIEU"}
               </span>
               <span className="text-[9.5px] leading-tight text-encre-2">
-                {m.braquage
-                  ? <>{eurosSigne(m.ecart)} de manque à gagner</>
-                  : <>reçoit {eurosSigne(m.ecart)} de plus qu’on ne lui prend</>}
+                {m.solde < 0
+                  ? <>il reste {eurosSigne(Math.abs(m.solde))} à sa charge</>
+                  : <>reçoit {eurosSigne(m.solde)} de plus qu’on ne lui prend</>}
               </span>
             </div>
           ))}

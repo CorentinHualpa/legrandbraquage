@@ -1,4 +1,5 @@
 import { euros, eurosSigne } from "@/lib/format";
+import type { Issue } from "@/lib/moteur";
 import { SITE_HOTE } from "@/lib/site";
 
 /**
@@ -10,10 +11,13 @@ import { SITE_HOTE } from "@/lib/site";
  * format se capture bien : c'est la seule chose qui circule sur Instagram,
  * où un lien n'affiche aucun aperçu.
  *
- * Elle porte le crime (le montant emporté), puis le procès tel qu'il a été
- * jugé : ce que l'argent aurait fait, placé là où la personne l'a dit, contre
- * ce qui a été rendu. Depuis le 08/09/2026, c'est ce coût d'opportunité qui
- * fait le verdict, donc c'est lui que la une annonce.
+ * Elle porte les DEUX plateaux, puis le solde, puis le scénario du placement.
+ *
+ * ⚠ Elle a titré « BRAQUÉ DE 989 940 € » jusqu'au 15/09/2026, en affichant
+ * trois lignes plus bas 1 040 463 € rendus, c'est-à-dire PLUS que le montant
+ * dont elle disait la personne braquée, et en tamponnant COUPABLE. C'était la
+ * pièce la plus partagée du site et la plus facile à retourner contre lui : une
+ * une qui annonce un vol doit annoncer le solde, pas la recette.
  *
  * Composant purement présentationnel : il ne calcule rien, pour pouvoir être
  * rendu aussi bien dans la page que dans l'aperçu de partage.
@@ -28,8 +32,10 @@ export function CarteAvis({
   placement,
   capital,
   recu,
-  ecart,
-  braquage,
+  solde,
+  ecartPlace,
+  issue,
+  objetTitre,
   objet,
   portrait,
 }: {
@@ -38,11 +44,19 @@ export function CarteAvis({
   placement: string;
   capital: number;
   recu: number;
-  ecart: number;
-  braquage: boolean;
+  /** Rendu moins pris. C'est LUI le titre, depuis le 15/09/2026. */
+  solde: number;
+  /** Ce que le placement aurait changé. Un scénario, imprimé comme tel. */
+  ecartPlace: number;
+  issue: Issue;
+  objetTitre: string;
   objet: string;
   portrait: string | null;
 }) {
+  const teinte =
+    issue === "coupable" ? "text-rouge-texte" : issue === "relaxe" ? "text-vert" : "text-encre";
+  const bord =
+    issue === "coupable" ? "border-rouge-texte" : issue === "relaxe" ? "border-vert" : "border-encre";
   return (
     <div className="mx-auto w-full max-w-[540px] bg-[#3f3a32] p-2.5 text-encre">
       <div className="flex h-full flex-col bg-[#ece5d5] px-4 py-3.5 shadow-2xl">
@@ -62,19 +76,38 @@ export function CarteAvis({
           Quarante-trois ans d’enquête · Tribunal des prélèvements
         </p>
 
-        {/* La manchette. */}
+        {/* La manchette : les deux plateaux, puis le solde. Jamais l'un sans l'autre. */}
         <div className="border-b-[1px] border-encre py-2.5">
-          <p className="font-mono text-[8.5px] tracking-[0.14em] text-rouge-texte uppercase">
-            Braquage à domicile, tous les mois, pendant une carrière
+          <p className={`font-mono text-[8.5px] tracking-[0.14em] uppercase ${teinte}`}>
+            {issue === "coupable"
+              ? "Braquage à domicile, tous les mois, pendant une carrière"
+              : issue === "relaxe"
+                ? "Enquête close : la maison rend plus qu’elle ne prend"
+                : "Enquête close : les deux plateaux s’équilibrent"}
           </p>
-          <p className="mt-1 text-[38px] leading-[0.92] font-bold tracking-[-0.03em] sm:text-[52px]">
-            BRAQUÉ DE
-          </p>
-          <p className="chiffres font-mono text-[34px] leading-[0.98] font-semibold tracking-[-0.04em] whitespace-nowrap sm:text-[46px]">
-            {euros(preleve)} €
-          </p>
+          <div className="mt-1 flex items-baseline justify-between gap-2">
+            <span className="text-[19px] leading-none font-bold tracking-[-0.02em] sm:text-[24px]">PRIS</span>
+            <span className="chiffres font-mono text-[25px] leading-[0.98] font-semibold tracking-[-0.04em] whitespace-nowrap sm:text-[33px]">
+              {euros(preleve)} €
+            </span>
+          </div>
+          <div className="mt-0.5 flex items-baseline justify-between gap-2 text-vert">
+            <span className="text-[19px] leading-none font-bold tracking-[-0.02em] sm:text-[24px]">RENDU</span>
+            <span className="chiffres font-mono text-[25px] leading-[0.98] font-semibold tracking-[-0.04em] whitespace-nowrap sm:text-[33px]">
+              {euros(recu)} €
+            </span>
+          </div>
+          <div className={`mt-1 flex items-baseline justify-between gap-2 border-t border-encre pt-1 ${teinte}`}>
+            <span className="text-[13px] leading-none font-bold tracking-[0.02em] uppercase sm:text-[15px]">
+              {solde < 0 ? "À votre charge" : "En votre faveur"}
+            </span>
+            <span className="chiffres font-mono text-[28px] leading-none font-semibold tracking-[-0.04em] whitespace-nowrap sm:text-[36px]">
+              {eurosSigne(solde)}
+            </span>
+          </div>
           <p className="mt-1 text-[11.5px] leading-snug text-encre-2 italic">
-            En monnaie d’aujourd’hui. La victime n’a jamais porté plainte : elle ne savait pas.
+            En monnaie d’aujourd’hui, sur toute une vie. Ce qui est rendu ne compte ni les routes, ni
+            l’école des enfants, ni les allocations : voir la méthode.
           </p>
         </div>
 
@@ -97,35 +130,41 @@ export function CarteAvis({
           </div>
 
           <div className="flex grow flex-col gap-1">
-            <p className="font-mono text-[8px] tracking-[0.14em] text-rouge-texte uppercase">L’enquête</p>
-            <p className="border-b border-cadre-bord pb-0.5 text-[10.5px] leading-tight text-encre-2 italic">
-              Placé en {placement}
+            <p className="font-mono text-[8px] tracking-[0.14em] text-rouge-texte uppercase">
+              Le scénario de la défense
             </p>
             {/*
-              ⚠ « Oublié sur place » était un jeu de mots qui se retournait :
-              on lit « oublié » comme « perdu », alors que c'est la ligne qui
-              joue POUR la victime. Les deux libellés disent maintenant ce
-              qu'ils comptent, et le calcul se lit de haut en bas.
+              ⚠ Ce bloc a fait le VERDICT jusqu'au 15/09/2026. Il reste, parce
+              que c'est une question que tout le monde se pose, mais il est
+              imprimé pour ce qu'il est : une hypothèse, celle où l'on place
+              quarante-trois ans de suite la totalité du prélevé, santé et
+              impôt compris, sans jamais y toucher.
             */}
+            <p className="border-b border-cadre-bord pb-0.5 text-[10.5px] leading-tight text-encre-2 italic">
+              Si tout avait été placé en {placement}
+            </p>
             <div className="flex justify-between gap-2">
               <span className="text-[12px] leading-tight">Ça aurait fait</span>
               <span className="chiffres shrink-0 font-mono text-[12px] font-semibold">{euros(capital)} €</span>
             </div>
-            {/* En vert : c'est la seule ligne de la une qui joue pour la victime. */}
+            {/* En vert : c'est la ligne qui joue pour la victime. */}
             <div className="flex justify-between gap-2 text-vert">
               <span className="text-[12px] leading-tight">Rendu en services</span>
               <span className="chiffres shrink-0 font-mono text-[12px] font-semibold">− {euros(recu)} €</span>
             </div>
             <div className="mt-0.5 flex items-baseline justify-between gap-2 border-t border-encre pt-1">
               <span className="text-[12.5px] leading-tight font-bold">
-                {braquage ? "Manque à gagner" : "En votre faveur"}
+                {ecartPlace > 0 ? "Manque à gagner" : "En votre faveur"}
               </span>
               <span
-                className={`chiffres shrink-0 font-mono text-[19px] leading-none font-semibold tracking-[-0.02em] ${braquage ? "text-rouge-texte" : "text-bleu"}`}
+                className={`chiffres shrink-0 font-mono text-[19px] leading-none font-semibold tracking-[-0.02em] ${ecartPlace > 0 ? "text-rouge-texte" : "text-vert"}`}
               >
-                {eurosSigne(ecart)}
+                {eurosSigne(ecartPlace)}
               </span>
             </div>
+            <p className="text-[9.5px] leading-tight text-encre-3 italic">
+              Hypothèse, pas le verdict.
+            </p>
           </div>
         </div>
 
@@ -137,7 +176,7 @@ export function CarteAvis({
         */}
         <div className="border-b-[3px] border-double border-encre py-2">
           <p className="font-mono text-[8px] tracking-[0.14em] text-rouge-texte uppercase">
-            Ce qu’ils ont pris, autrement dit
+            {objetTitre}
           </p>
           <p className="text-[16px] leading-tight font-bold sm:text-[19px]">{objet}</p>
         </div>
@@ -145,13 +184,13 @@ export function CarteAvis({
         {/* L'ours : le tampon, puis l'adresse, discrète. */}
         <div className="flex items-center justify-between gap-3 pt-2.5">
           <span
-            className={`shrink-0 -rotate-[7deg] border-[3px] px-2.5 py-0.5 font-mono text-[16px] font-bold tracking-[0.14em] sm:text-[20px] ${braquage ? "border-rouge-texte text-rouge-texte" : "border-bleu text-bleu"}`}
+            className={`shrink-0 -rotate-[7deg] border-[3px] px-2.5 py-0.5 font-mono text-[16px] font-bold tracking-[0.14em] sm:text-[20px] ${bord} ${teinte}`}
           >
-            {braquage ? "COUPABLE" : "RELAXE"}
+            {issue === "coupable" ? "COUPABLE" : issue === "relaxe" ? "RELAXE" : "NON-LIEU"}
           </span>
           <div className="flex flex-col items-end text-right">
             <span className="text-[11px] leading-tight text-encre-2 italic">
-              Combien vous ont-ils braqué ?
+              Et chez vous, pris ou rendu ?
             </span>
             <span className="font-mono text-[10.5px] tracking-[0.04em] text-encre-3">{SITE_HOTE}</span>
           </div>

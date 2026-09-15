@@ -86,7 +86,14 @@ function FiletDouble() {
 }
 
 function Journal({ une, visage }: { une: Une; visage: string | null }) {
-  const accent = une.braquage ? ROUGE : BLEU;
+  /*
+   * ⚠ L'image de partage titrait « BRAQUÉ DE » le montant PRIS, et affichait
+   * trois lignes plus bas un rendu SUPÉRIEUR à ce montant, avec un tampon
+   * COUPABLE. C'est la pièce qui circule sur WhatsApp et LinkedIn, donc la plus
+   * facile à retourner contre le dossier : elle porte maintenant les deux
+   * plateaux et le solde.
+   */
+  const accent = une.issue === "coupable" ? ROUGE : une.issue === "relaxe" ? VERT : ENCRE_2;
   return (
     <div style={{ display: "flex", width: "100%", height: "100%", background: CARTON, padding: 16 }}>
       <div
@@ -155,52 +162,66 @@ function Journal({ une, visage }: { une: Une; visage: string | null }) {
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
-            <span style={{ fontFamily: "Plex", fontSize: 13, letterSpacing: 2, color: ROUGE }}>
-              BRAQUAGE À DOMICILE, TOUS LES MOIS, PENDANT UNE CARRIÈRE
+            <span style={{ fontFamily: "Plex", fontSize: 13, letterSpacing: 2, color: accent }}>
+              {une.issue === "coupable"
+                ? "BRAQUAGE À DOMICILE, TOUS LES MOIS, PENDANT UNE CARRIÈRE"
+                : une.issue === "relaxe"
+                  ? "ENQUÊTE CLOSE · LA MAISON REND PLUS QU’ELLE NE PREND"
+                  : "ENQUÊTE CLOSE · LES DEUX PLATEAUX S’ÉQUILIBRENT"}
             </span>
-            <span style={{ fontSize: 74, fontWeight: 700, lineHeight: 1, letterSpacing: -2, paddingTop: 4 }}>
-              BRAQUÉ DE
-            </span>
-            <span style={{ fontFamily: "Plex", fontSize: 64, fontWeight: 600, lineHeight: 1.05, letterSpacing: -3 }}>
-              {une.preleve}
-            </span>
-
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", paddingTop: 4 }}>
+              <span style={{ fontSize: 40, fontWeight: 700, lineHeight: 1, letterSpacing: -1 }}>PRIS</span>
+              <span style={{ fontFamily: "Plex", fontSize: 46, fontWeight: 600, lineHeight: 1.05, letterSpacing: -2 }}>
+                {une.preleve}
+              </span>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "baseline",
+                paddingTop: 2,
+                color: VERT,
+              }}
+            >
+              <span style={{ fontSize: 40, fontWeight: 700, lineHeight: 1, letterSpacing: -1 }}>RENDU</span>
+              <span style={{ fontFamily: "Plex", fontSize: 46, fontWeight: 600, lineHeight: 1.05, letterSpacing: -2 }}>
+                {une.recu}
+              </span>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                borderTop: `1px solid ${ENCRE}`,
+                marginTop: 8,
+                paddingTop: 6,
+                color: accent,
+              }}
+            >
+              <span style={{ fontSize: 21, fontWeight: 700 }}>
+                {une.solde.startsWith("−") ? "À VOTRE CHARGE" : "EN VOTRE FAVEUR"}
+              </span>
+              <span style={{ fontFamily: "Plex", fontSize: 40, fontWeight: 600, letterSpacing: -1 }}>
+                {une.solde}
+              </span>
+            </div>
             <div
               style={{
                 display: "flex",
                 flexDirection: "column",
                 borderTop: `1px solid ${ENCRE}`,
-                marginTop: 10,
-                paddingTop: 7,
+                marginTop: 8,
+                paddingTop: 5,
               }}
             >
               <span style={{ fontFamily: "Plex", fontSize: 12, letterSpacing: 2, color: ENCRE_3 }}>
-                L’ENQUÊTE · PLACÉ EN {une.placement.toUpperCase()}
+                LE SCÉNARIO DE LA DÉFENSE · TOUT PLACÉ EN {une.placement.toUpperCase()}
               </span>
-              <div style={{ display: "flex", justifyContent: "space-between", paddingTop: 5 }}>
-                <span style={{ fontSize: 19 }}>Ça faisait</span>
-                <span style={{ fontFamily: "Plex", fontSize: 19, fontWeight: 600 }}>{une.capital}</span>
-              </div>
-              {/* En vert : la seule ligne de la une qui joue pour la victime. */}
-              <div style={{ display: "flex", justifyContent: "space-between", paddingTop: 2, color: VERT }}>
-                <span style={{ fontSize: 19 }}>Oublié sur place</span>
-                <span style={{ fontFamily: "Plex", fontSize: 19, fontWeight: 600 }}>{une.recu}</span>
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  borderTop: `1px solid ${ENCRE}`,
-                  marginTop: 6,
-                  paddingTop: 5,
-                }}
-              >
-                <span style={{ fontSize: 21, fontWeight: 700 }}>
-                  {une.braquage ? "Manque à gagner" : "En votre faveur"}
-                </span>
-                <span style={{ fontFamily: "Plex", fontSize: 34, fontWeight: 600, letterSpacing: -1, color: accent }}>
-                  {une.ecart}
+              <div style={{ display: "flex", justifyContent: "space-between", paddingTop: 4 }}>
+                <span style={{ fontSize: 18, color: ENCRE_2 }}>
+                  Ça aurait fait {une.capital} · écart avec le rendu {une.ecartPlace}
                 </span>
               </div>
             </div>
@@ -221,13 +242,13 @@ function Journal({ une, visage }: { une: Une; visage: string | null }) {
         >
           <div style={{ display: "flex", flexDirection: "column" }}>
             <span style={{ fontFamily: "Plex", fontSize: 12, letterSpacing: 2, color: ROUGE }}>
-              EN PIÈCES DÉTACHÉES
+              {une.objetTitre}
             </span>
             <span style={{ fontSize: 26, fontWeight: 700, lineHeight: 1.15 }}>{une.objet}</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
-              <span style={{ fontSize: 16, color: ENCRE_2 }}>Combien vous ont-ils braqué ?</span>
+              <span style={{ fontSize: 16, color: ENCRE_2 }}>Et chez vous, pris ou rendu ?</span>
               <span style={{ fontFamily: "Plex", fontSize: 16, color: ENCRE_3 }}>{SITE_HOTE}</span>
             </div>
             <div
@@ -240,7 +261,7 @@ function Journal({ une, visage }: { une: Une; visage: string | null }) {
               }}
             >
               <span style={{ fontFamily: "Plex", fontSize: 30, fontWeight: 600, letterSpacing: 3 }}>
-                {une.braquage ? "COUPABLE" : "RELAXE"}
+                {une.issue === "coupable" ? "COUPABLE" : une.issue === "relaxe" ? "RELAXE" : "NON-LIEU"}
               </span>
             </div>
           </div>

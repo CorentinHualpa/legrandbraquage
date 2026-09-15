@@ -4,7 +4,7 @@ import "./globals.css";
 import { euros } from "@/lib/format";
 import { casDepuisRequete, REQUETE_UNE_PAR_DEFAUT } from "@/lib/lien";
 import { SITE_URL } from "@/lib/site";
-import { uneDuCas } from "@/lib/une";
+import { texteAlternatif, uneDuCas } from "@/lib/une";
 
 const serif = Newsreader({
   subsets: ["latin"],
@@ -59,10 +59,8 @@ const PARTAGE = {
   width: 1200,
   height: 630,
   alt:
-    `La Gazette des Prélèvements : braqué de ${UNE_PAR_DEFAUT.preleve} sur une carrière au salaire médian, `
-    + `${euros(CAS_PAR_DEFAUT.netMensuel)} € net avant impôt par mois. Placés en ${UNE_PAR_DEFAUT.placement}, `
-    + `ils auraient fait ${UNE_PAR_DEFAUT.capital}, contre ${UNE_PAR_DEFAUT.recu} rendus. `
-    + `Manque à gagner : ${UNE_PAR_DEFAUT.ecart}. ${UNE_PAR_DEFAUT.braquage ? "Coupable" : "Relaxe"}.`,
+    `${texteAlternatif(UNE_PAR_DEFAUT)} Cas type : salarié au salaire médian, `
+    + `${euros(CAS_PAR_DEFAUT.netMensuel)} € net avant impôt par mois.`,
 } as const;
 
 export const metadata: Metadata = {
