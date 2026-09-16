@@ -231,30 +231,40 @@ export default function Methode() {
             au lieu de 1 614 €.
           </p>
           <p className="text-[14.5px] leading-relaxed">
-            <span className="font-semibold">L’objection la plus sérieuse, et elle vise le cœur du
-            verdict.</span>{" "}
-            Depuis le 8 septembre 2026, le verdict ne compare plus ce qui a été pris à ce qui a
-            été rendu : il compare ce que l’argent pris <span className="italic">serait devenu</span>,
-            placé, à ce qui a été rendu. C’est un raisonnement en coût d’opportunité, et il est
-            contestable. L’économiste{" "}
+            <span className="font-semibold">L’objection la plus sérieuse, et elle a gagné.</span>{" "}
+            Du 8 au 15 septembre 2026, le verdict ne comparait pas ce qui a été pris à ce qui a été
+            rendu : il comparait ce que l’argent pris{" "}
+            <span className="italic">serait devenu</span>, placé, à ce qui a été rendu. C’est un
+            raisonnement en coût d’opportunité, et l’économiste{" "}
             <span className="font-semibold">Antoine Bozio</span>, de l’Institut des politiques
-            publiques, l’a formulé en une image : traiter une cotisation en préjudice parce qu’on
+            publiques, l’a démonté en une image : traiter une cotisation en préjudice parce qu’on
             aurait pu la placer, c’est traiter une prime d’assurance automobile en préjudice. Une
             cotisation vieillesse achète une rente ; une cotisation maladie achète le droit d’être
             soigné sans payer. Ce ne sont pas des sommes qu’on aurait pu garder.
           </p>
           <p className="text-[14.5px] leading-relaxed">
-            <span className="font-semibold">Ce que cette page y répond.</span>{" "}
-            L’objection est juste contre un calcul qui ne déduirait rien. Ici, le capital placé est
-            comparé à <span className="italic">tout</span> ce qui revient : la pension jusqu’à
-            85 ans, et l’école, les soins et le chômage aux montants que vous avez choisis
-            vous-même. Une prime d’assurance n’est un préjudice que si l’on oublie l’indemnité ;
-            l’indemnité est ici comptée, ligne à ligne, et c’est elle qui fait basculer le verdict
-            en relaxe dans une bonne partie des cas. Reste que le placement est une hypothèse et
-            non un fait : c’est pourquoi l’enveloppe se change en un clic, que le Livret A donne un
-            verdict opposé aux actions, et que l’ancien seuil, celui qui ne place rien, reste
-            affiché plus haut sur cette page. Si vous jugez le raisonnement illégitime, ce seuil-là
-            est le vôtre.
+            <span className="font-semibold">Ce qu’on en a fait.</span>{" "}
+            Le verdict se lit désormais sur les deux plateaux, pris contre rendu, et rien d’autre.
+            Le placement reste affiché, sous le verdict, nommé comme le scénario qu’il est : il
+            suppose qu’on place quarante-trois ans de suite la totalité du prélèvement, santé,
+            famille, impôt et TVA compris, sans jamais y toucher. Changez d’enveloppe, ce scénario
+            change ; l’issue, elle, ne bouge pas. Au salaire médian, ce qui est rendu dépasse ce
+            qui est pris, et le dossier prononce un non-lieu : il l’écrivait « coupable » tant que
+            le placement décidait.
+          </p>
+          <p className="text-[14.5px] leading-relaxed">
+            <span className="font-semibold">Ce que le plateau de droite ne contient pas.</span>{" "}
+            Quatre lignes : la pension, l’école suivie, les soins remboursés, le chômage indemnisé.
+            Il manque donc la police, la justice, les routes, l’armée, la recherche, l’école des
+            enfants, les allocations familiales, les aides au logement, la prime d’activité, les
+            indemnités journalières, l’invalidité et la dépendance, alors que les cotisations et
+            les impôts qui les financent sont, eux, comptés à gauche. Le dossier est à charge sur
+            ce point et il l’assume : il compare ce qui part à ce qui revient{" "}
+            <span className="italic">à la personne</span>. Quand on compte aussi les services
+            publics, l’INSEE trouve que <span className="font-semibold">56 % des personnes
+            reçoivent plus qu’elles ne contribuent</span> (Insee Analyses n° 118, avril 2026,
+            données 2023) : mesure annuelle sur toute la population, enfants et retraités compris,
+            là où cette page suit une carrière de quarante-trois ans. Les deux sont vraies.
           </p>
           <p className="text-[14.5px] leading-relaxed">
             <span className="font-semibold">Le salaire ne reste pas figé, et c’est ce qui sépare ce
@@ -311,14 +321,14 @@ export default function Methode() {
             LE DÉNOMINATEUR, ET POURQUOI ON DONNE LES DEUX
           </h2>
           <p className="text-[14.5px] leading-relaxed">
-            L’heure de libération rapporte les prélèvements au{" "}
-            <span className="font-semibold">coût employeur</span>, c’est-à-dire à
-            ce que le travail coûte. C’est le dénominateur le plus défavorable
-            aux prélèvements, et c’est celui qu’emploient les publications qui
-            militent pour leur baisse. On le retient quand même, à une condition :
-            que la page le dise, et qu’elle affiche à côté le même montant
-            rapporté à ce qui arrive réellement sur le compte. Les deux chiffres
-            sont vrais et ne racontent pas la même histoire.
+            Un même prélèvement change de taille selon ce à quoi on le rapporte.
+            Au <span className="font-semibold">coût employeur</span>, c’est-à-dire
+            à ce que le travail coûte, il paraît énorme : c’est le dénominateur
+            qu’emploient les publications qui militent pour la baisse des
+            prélèvements. Au net qui arrive sur le compte, il paraît plus petit.
+            Les deux sont vrais. Le dossier montre les montants en euros, sur
+            toute la carrière, et non en pourcentage d’une base choisie : c’est
+            la seule façon de ne pas trancher le débat par le cadrage.
           </p>
           <p className="text-[14.5px] leading-relaxed">
             Même règle sur la TVA : elle est régressive rapportée au revenu
@@ -511,8 +521,12 @@ export default function Methode() {
               <span className="font-semibold">
                 Ce que la santé, l’école et le chômage vous ont rendu.
               </span>{" "}
-              Ces trois postes ne portent aucun montant par défaut, et ce n’est
-              pas un oubli. Pour la <span className="font-semibold">santé</span>{" "}
+              Le moteur ne leur donne aucun montant tant que personne n’a
+              répondu, et ce n’est pas un oubli. Le parcours, lui, présélectionne
+              une réponse moyenne (jusqu’au bac, une santé comme tout le monde,
+              six mois de chômage) pour qu’un dossier ouvert sans rien cocher
+              reste lisible : ces réponses se changent d’un clic, et le verdict
+              change avec. Pour la <span className="font-semibold">santé</span>{" "}
               et le <span className="font-semibold">chômage</span>, aucun
               organisme ne publie ce qu’une vie reçoit : ni la DREES, ni la
               Cnam, ni l’Unédic, ni le COR, ni l’OCDE. Pour l’
