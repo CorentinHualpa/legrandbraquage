@@ -18,6 +18,7 @@ import { Avis } from "./cartes/Avis";
 import type { Pieces } from "@/lib/images";
 import type { Cadeau } from "@/lib/lien";
 import { contexte, evenement } from "@/lib/dalevoz";
+import { mesurer, type Etape } from "@/lib/mesure";
 import { reactionSalaire } from "@/lib/repliques";
 import { etatDuSon, jouer, parler, poserDecor, reagir, reglerSons, taire, type Acte, type Son } from "@/lib/sons";
 import { FRAIS_DEFAUT_ID, PLACEMENT_DEFAUT_ID, casDepuisRequete, requeteDuCas } from "@/lib/lien";
@@ -75,6 +76,23 @@ function estPosteConso(e: Ecran): e is PosteHabitude {
  *
  * Ce qui n'est pas listé retombe sur le commissariat.
  */
+/**
+ * Les étapes qu'on compte. Volontairement courtes : un point par acte, plus
+ * celui qui dit si le dossier a été lu jusqu'au bout. Mesurer les six écrans du
+ * café ne dirait rien de plus et ferait du bruit dans le journal.
+ */
+const ETAPES_MESUREES = new Set<Ecran>([
+  "couverture",
+  "deposition",
+  "pris",
+  "butin",
+  "aparte",
+  "rendu",
+  "bourse",
+  "verdict",
+  "avis",
+]);
+
 const ACTE: Partial<Record<Ecran, Acte>> = {
   pris: "scelles",
   butin: "scelles",
@@ -135,9 +153,16 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
    * (un fonctionnaire n'a pas la carte chômage), donc un index retenu
    * désignerait une autre carte après un changement de statut.
    */
-  const [vus, setVus] = useState<Set<Ecran>>(() => new Set<Ecran>(["couverture"]));
+  /*
+   * ⚠ Une RÉFÉRENCE, remplie pendant le rendu, et pas un état rempli dans un
+   * effet : l'écran qu'on est en train de rendre a été vu par définition, donc
+   * l'inscrire déclenchait un second rendu pour rien à chaque carte (seule
+   * erreur de lint du dépôt, `react-hooks/set-state-in-effect`). L'ajout est
+   * idempotent, donc le double rendu du mode strict ne change rien.
+   */
+  const vusRef = useRef<Set<Ecran>>(new Set<Ecran>(["couverture"]));
   useEffect(() => {
-    setVus((v) => (v.has(ecran) ? v : new Set(v).add(ecran)));
+    vusRef.current.add(ecran);
   }, [ecran]);
 
   const changer = (patch: Partial<EtatSaisie>) => setEtat((e) => ({ ...e, ...patch }));
@@ -303,6 +328,20 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
    * l'inventait. Un modèle à qui on donne un terme et une différence complète
    * la soustraction tout seul.
    */
+  /*
+   * LA MESURE. Une ligne par étape franchie, sans cookie ni identifiant, et
+   * seulement pour les étapes qui disent quelque chose : combien arrivent,
+   * combien déposent un montant, combien vont jusqu'au verdict, combien
+   * partagent. Voir `src/lib/mesure.ts` et `src/app/api/evt/route.ts`.
+   */
+  useEffect(() => {
+    if (!ETAPES_MESUREES.has(ecran)) return;
+    mesurer(ecran as Etape, {
+      statut: etat.statut,
+      issue: ecran === "verdict" || ecran === "avis" ? simulation?.verdict.issue : undefined,
+    });
+  }, [ecran, etat.statut, simulation]);
+
   useEffect(() => {
     contexte({
       ecran,
@@ -468,7 +507,7 @@ export function Parcours({ pieces }: { pieces: Pieces }) {
         return;
       }
       const apres = ecrans[indexEcran + 1];
-      if (!apres || !vus.has(apres)) return;
+      if (!apres || !vusRef.current.has(apres)) return;
       ev.preventDefault();
       aller(apres);
     };

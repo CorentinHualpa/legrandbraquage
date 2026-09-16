@@ -58,7 +58,6 @@ export default function Methode() {
    * « on reçoit plus qu’on ne vous prend ». Les deux plateaux, eux,
    * s’égalisent à 2 297 €.
    */
-  const fondsEuros = CRANS_RENDEMENT.find((c) => c.id === "fonds-euros") ?? CRANS_RENDEMENT[0];
   const equilibre = salaireEquilibre({
     perimetre: PERIMETRE_COMPLET,
     paliers: PALIERS_DEFAUT,

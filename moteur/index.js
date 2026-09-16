@@ -14,7 +14,6 @@ import {
   capitaliser,
   capitalPourRente,
   fourchetteCapitalPourRente,
-  PALIERS_ALIBI,
   placerSoiMeme,
   PLACEMENT_DEFAUT,
 } from './capitalisation.js';
@@ -22,7 +21,8 @@ import { RETRAITE, SALAIRES_REFERENCE } from './baremes-2026.js';
 import * as fp from './fonction-publique.js';
 import * as tns from './tns.js';
 import * as cipav from './cipav.js';
-import * as micro from './micro.js';
+/* Le micro est calculé dans `carriere.js`, qui importe `micro.js` lui-même :
+   ce fichier n'en a plus besoin depuis que `netsDepuisBrut` a bougé. */
 import { TAUX_REMPLACEMENT, VERSANTS } from './baremes-fonction-publique.js';
 import { lignesChoisies } from './paliers.js';
 import { accisesAnnuelles } from './consommation.js';

@@ -14,8 +14,9 @@
  * Comme l'artisan, il n'a AUCUNE part employeur.
  */
 
+/* ⚠ Pas d'allocations familiales ici : un libéral réglementé les paie au barème
+   commun des indépendants, calculé dans `tns.js`, pas au barème CIPAV. */
 import {
-  ALLOCATIONS_FAMILIALES,
   CFP,
   CSG_CRDS,
   IJ,

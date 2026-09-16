@@ -13,6 +13,7 @@ import { euros, eurosSigne } from "@/lib/format";
 import { requeteDuCas, type Cas } from "@/lib/lien";
 import { CRANS_FRAIS, CRANS_RENDEMENT, simuler, type Simulation } from "@/lib/moteur";
 import { objetDuSolde } from "@/lib/une";
+import { mesurer } from "@/lib/mesure";
 import { partsFiscales } from "@/lib/statuts";
 
 /**
@@ -51,7 +52,7 @@ export function Avis({
   recommencer: () => void;
 }) {
   const [copie, setCopie] = useState(false);
-  const { plateauGauche, plateauDroit, verdict, opportunite } = simulation;
+  const { plateauGauche, plateauDroit, verdict } = simulation;
   const cran = CRANS_RENDEMENT.find((c) => c.id === cas.placementId) ?? CRANS_RENDEMENT[0];
 
   const objet = objetDuSolde(verdict.solde, simulation.netApresImpotActuel, verdict.issue);
@@ -273,6 +274,43 @@ export function Avis({
           <Audition pieces={pieces} simulation={simulation} ouvrirAudition={() => {}} />
         </div>
       </Volet>
+
+      {/*
+        ⚠ LA SIGNATURE, ENFIN. Le parcours entier ne nommait ni Revolution
+        Agency ni Dale Voz, et aucun écran ne menait aux coulisses : sur sept
+        jours, la page a été vue 198 fois et /coulisses UNE fois, par le seul
+        chemin qui existait, une réponse du commissaire. Un dossier qui sert de
+        démonstration doit dire de quoi il est la démonstration, à l'endroit où
+        la personne vient de voir ce qu'il sait faire.
+      */}
+      <div className="border-t border-ligne/30 pt-4">
+        <p className="font-mono text-[10px] tracking-[0.12em] text-ligne uppercase">
+          Ce dossier est une démonstration
+        </p>
+        <p className="mt-1.5 text-[14px] leading-relaxed text-papier-2">
+          Le commissaire qui vous répond, ce parcours, sa bande son, ses images et sa voix ont été
+          fabriqués par <span className="font-semibold text-papier">Revolution Agency</span>. C’est
+          ce que nous montons pour nos clients, sur leur site et sur leurs messageries.
+        </p>
+        <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+          <a
+            href="/coulisses"
+            onClick={() => mesurer("vers-coulisses")}
+            className="flex-1 border border-papier/30 px-4 py-2.5 text-center text-[14.5px] text-papier-2 transition-colors hover:bg-papier/10"
+          >
+            Comment c’est fait
+          </a>
+          <a
+            href="https://dalevoz.revolutionagency.ai/precios?utm_source=braquage&utm_medium=une&utm_campaign=coulisses"
+            target="_blank"
+            rel="noopener"
+            onClick={() => mesurer("vers-coulisses")}
+            className="flex-1 border border-papier/30 px-4 py-2.5 text-center text-[14.5px] text-papier-2 transition-colors hover:bg-papier/10"
+          >
+            Le même sur votre site
+          </a>
+        </div>
+      </div>
     </Carte>
   );
 }

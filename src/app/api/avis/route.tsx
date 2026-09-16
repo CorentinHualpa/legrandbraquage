@@ -43,7 +43,8 @@ const ENCRE_2 = "#3d4b5a";
 const ENCRE_3 = "#6b7885";
 const PAPIER = "#ece5d5";
 const ROUGE = "#b3341f";
-const BLEU = "#2c4a6e";
+/* Le bleu de la relaxe a laissé la place au vert du rendu : les deux lignes qui
+   jouent pour la personne (le rendu, la relaxe) portent la même couleur. */
 const VERT = "#24663f";
 const CARTON = "#3f3a32";
 

@@ -10,7 +10,12 @@ export const metadata: Metadata = {
     "Le commissaire est un agent conversationnel. Ce qu'il est, ce qui l'empêche d'inventer, et comment en avoir un qui parle de votre métier.",
 };
 
-const DALEVOZ = "https://dalevoz.revolutionagency.ai";
+/*
+ * ⚠ Les liens sortants portent leur marquage : sans lui, personne ne saura
+ * jamais que la visite vient d'ici. Le seul lien de cette page était en
+ * `rel=noreferrer`, donc invisible même dans les journaux de l'autre site.
+ */
+const DALEVOZ = "https://dalevoz.revolutionagency.ai/precios?utm_source=braquage&utm_medium=coulisses&utm_campaign=commissaire";
 
 /**
  * LA PAGE OÙ LE COMMISSAIRE DIT CE QU'IL EST.
@@ -78,11 +83,14 @@ export default function Coulisses() {
               </span>{" "}
               {savoir.fiches > 0 ? (
                 <>
-                  Ses {savoir.fiches} fiches sont versées au dossier, écrites à
-                  la main et relues.
+                  Ses {savoir.fiches} fiches sont versées au dossier, écrites à la main, et
+                  corrigées quand un chiffre du moteur bouge.
                 </>
               ) : (
-                <>Ses fiches sont versées au dossier, écrites à la main et relues.</>
+                <>
+                  Ses fiches sont versées au dossier, écrites à la main, et corrigées quand un
+                  chiffre du moteur bouge.
+                </>
               )}{" "}
               Une question de fond déclenche une recherche dedans, pas une
               improvisation.
@@ -135,16 +143,56 @@ export default function Coulisses() {
           <a
             href={DALEVOZ}
             target="_blank"
-            rel="noreferrer"
+            rel="noopener"
             className="mt-1 inline-flex items-center justify-center gap-2 self-start rounded-[3px] border-2 border-rouge px-4 py-2.5 font-mono text-[12px] font-semibold tracking-[0.08em] text-rouge-texte transition-colors hover:bg-rouge hover:text-papier"
           >
             VOIR DALE VOZ →
           </a>
+          {/*
+            ⚠ Cette ligne annonçait « 100 conversations offertes chaque mois,
+            sans carte », une offre qui n'existe plus : le commissaire servait
+            la même promesse périmée, et elle a été corrigée chez lui le
+            12/09/2026 sans que personne ne pense à cette page. Le tarif se lit
+            sur /precios, qui fait foi.
+          */}
           <p className="font-mono text-[10px] leading-relaxed text-encre-3">
-            DALEVOZ.REVOLUTIONAGENCY.AI · 100 CONVERSATIONS OFFERTES CHAQUE MOIS,
-            SANS CARTE. S&rsquo;OUVRE DANS UN NOUVEL ONGLET, VOTRE DÉPOSITION
-            RESTE OUVERTE DERRIÈRE.
+            DALEVOZ.REVOLUTIONAGENCY.AI/PRECIOS · 49 € PAR MOIS, SANS ENGAGEMENT,
+            ESSAI GRATUIT SANS CARTE. S&rsquo;OUVRE DANS UN NOUVEL ONGLET, VOTRE
+            DÉPOSITION RESTE OUVERTE DERRIÈRE.
           </p>
+        </section>
+
+        {/*
+          ⚠ Cette page ne parlait QUE de l'agent, alors que le dossier est aussi
+          une démonstration de tout ce qui l'entoure : c'est ce qu'un prospect
+          vient chercher quand il clique « comment c'est fait ».
+        */}
+        <section className="flex flex-col gap-3">
+          <h2 className="font-mono text-[10px] tracking-[0.13em] text-rouge-texte">
+            ET TOUT CE QU&rsquo;IL Y A AUTOUR
+          </h2>
+          <ul className="flex flex-col gap-2.5 text-[14.5px] leading-relaxed">
+            <li className="border-l-[3px] border-cadre-bord pl-3">
+              <span className="font-semibold">Le site lui-même.</span> Dix-sept écrans qui se
+              recalculent à chaque réponse, un moteur de barèmes public, une une de journal
+              fabriquée à la volée pour chaque dossier partagé.
+            </li>
+            <li className="border-l-[3px] border-cadre-bord pl-3">
+              <span className="font-semibold">La bande son.</span> Trois couches (les gestes, une
+              ambiance par acte, des bruits de vie tirés au sort), et seize répliques du
+              commissaire enregistrées, une par écran. Aucune ne dit un chiffre : ils changent avec
+              votre salaire.
+            </li>
+            <li className="border-l-[3px] border-cadre-bord pl-3">
+              <span className="font-semibold">Les images.</span> Les vingt-huit clichés du dossier,
+              le portrait du suspect et les objets du butin sont générés, au trait, sans aucun
+              visage identifiable.
+            </li>
+            <li className="border-l-[3px] border-cadre-bord pl-3">
+              <span className="font-semibold">La voix.</span> Le commissaire parle aussi : c&rsquo;est
+              la même mécanique qu&rsquo;un standard téléphonique qui décroche chez un client.
+            </li>
+          </ul>
         </section>
 
         <Renvoi>
