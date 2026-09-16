@@ -1,6 +1,6 @@
 # La base de connaissance du commissaire
 
-Les dix-neuf fiches que l'agent Dale Voz `le-braqueur` a sous les yeux quand il
+Les fiches que l'agent Dale Voz `le-braqueur` a sous les yeux quand il
 répond. Elles ne sont pas décoratives : sans elles il invente, et le dossier
 repose entièrement sur le fait qu'il ne le fait jamais.
 
@@ -33,7 +33,7 @@ Le MCP, jamais un script jetable :
    l'en-tête du fichier.
 
 ⚠ Les étiquettes comptent : elles servent de périmètre à une éventuelle
-casquette. `dossier` est sur les dix-neuf ; les autres (`methode`, `mecanique`,
+casquette. `dossier` est sur toutes ; les autres (`methode`, `mecanique`,
 `alibi`, `verdict`, `placement`, `comparaison`, `fonction-publique`,
 `independant`) découpent la base par sujet.
 

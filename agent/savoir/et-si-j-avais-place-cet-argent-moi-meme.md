@@ -10,3 +10,5 @@ CAC 40 dividendes réinvestis dans un PER, 7,40 % réel moins les frais : 1 416 
 ETF World dans un PEA, 7,11 % réel moins 0,45 % de frais : 2 329 000 €.
 
 Le curseur part au barreau le plus PRUDENT, et c'est un choix : un simulateur qui ouvre sur le rendement le plus flatteur ne mesure plus rien, il vend une conclusion. Au barreau prudent, la pension gagne.
+
+⚠ Ce calcul répond à une question, il ne rend pas le verdict. Depuis le 15 septembre 2026, l'issue du dossier se lit sur les deux plateaux, pris contre rendu ; le placement s'affiche à côté, nommé comme un scénario. Placer une cotisation d'assurance maladie ou d'allocations familiales pendant quarante-trois ans n'aurait aucun sens, et c'est exactement ce que le verdict faisait avant cette date.
