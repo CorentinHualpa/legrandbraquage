@@ -28,6 +28,7 @@ export type Etape =
   | "partage-linkedin"
   | "partage-image"
   | "vers-coulisses"
+  | "vers-offre"
   | "vers-methode";
 
 /** Une étape n'est comptée qu'UNE fois par visite : on mesure un parcours, pas des rendus React. */

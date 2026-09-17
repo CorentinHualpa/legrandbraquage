@@ -39,6 +39,7 @@ const ETAPES = new Set([
   "partage-linkedin",
   "partage-image",
   "vers-coulisses",
+  "vers-offre",
   "vers-methode",
 ]);
 

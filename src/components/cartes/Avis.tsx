@@ -292,22 +292,29 @@ export function Avis({
           fabriqués par <span className="font-semibold text-papier">Revolution Agency</span>. C’est
           ce que nous montons pour nos clients, sur leur site et sur leurs messageries.
         </p>
+        {/*
+          Le contact passe AVANT la curiosité (Coq, 17/09/2026) : le site est une
+          vitrine, et le bouton qui mène à l'offre est le seul qui rapporte. Il
+          est plein, en premier, et compté à part : les deux clics portaient le
+          même nom d'étape, donc personne ne savait combien partaient vers l'offre.
+          Lien direct vers /offre : /precios n'est plus qu'une redirection.
+        */}
         <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+          <a
+            href="https://dalevoz.revolutionagency.ai/offre?utm_source=braquage&utm_medium=une&utm_campaign=offre"
+            target="_blank"
+            rel="noopener"
+            onClick={() => mesurer("vers-offre")}
+            className="flex-1 bg-papier px-4 py-2.5 text-center text-[14.5px] font-semibold text-encre transition-colors hover:bg-papier-2"
+          >
+            Construire mon agent →
+          </a>
           <a
             href="/coulisses"
             onClick={() => mesurer("vers-coulisses")}
             className="flex-1 border border-papier/30 px-4 py-2.5 text-center text-[14.5px] text-papier-2 transition-colors hover:bg-papier/10"
           >
             Comment c’est fait
-          </a>
-          <a
-            href="https://dalevoz.revolutionagency.ai/precios?utm_source=braquage&utm_medium=une&utm_campaign=coulisses"
-            target="_blank"
-            rel="noopener"
-            onClick={() => mesurer("vers-coulisses")}
-            className="flex-1 border border-papier/30 px-4 py-2.5 text-center text-[14.5px] text-papier-2 transition-colors hover:bg-papier/10"
-          >
-            Le même sur votre site
           </a>
         </div>
       </div>

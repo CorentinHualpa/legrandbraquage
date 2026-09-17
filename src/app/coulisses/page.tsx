@@ -15,7 +15,7 @@ export const metadata: Metadata = {
  * jamais que la visite vient d'ici. Le seul lien de cette page était en
  * `rel=noreferrer`, donc invisible même dans les journaux de l'autre site.
  */
-const DALEVOZ = "https://dalevoz.revolutionagency.ai/precios?utm_source=braquage&utm_medium=coulisses&utm_campaign=commissaire";
+const DALEVOZ = "https://dalevoz.revolutionagency.ai/offre?utm_source=braquage&utm_medium=coulisses&utm_campaign=offre";
 
 /**
  * LA PAGE OÙ LE COMMISSAIRE DIT CE QU'IL EST.
@@ -144,19 +144,19 @@ export default function Coulisses() {
             href={DALEVOZ}
             target="_blank"
             rel="noopener"
-            className="mt-1 inline-flex items-center justify-center gap-2 self-start rounded-[3px] border-2 border-rouge px-4 py-2.5 font-mono text-[12px] font-semibold tracking-[0.08em] text-rouge-texte transition-colors hover:bg-rouge hover:text-papier"
+            className="mt-1 inline-flex items-center justify-center gap-2 self-start rounded-[3px] border-2 border-rouge bg-rouge px-4 py-2.5 font-mono text-[12px] font-semibold tracking-[0.08em] text-papier transition-colors hover:bg-rouge-texte"
           >
-            VOIR DALE VOZ →
+            CONSTRUIRE MON AGENT →
           </a>
           {/*
             ⚠ Cette ligne annonçait « 100 conversations offertes chaque mois,
             sans carte », une offre qui n'existe plus : le commissaire servait
             la même promesse périmée, et elle a été corrigée chez lui le
             12/09/2026 sans que personne ne pense à cette page. Le tarif se lit
-            sur /precios, qui fait foi.
+            sur /offre, qui fait foi.
           */}
           <p className="font-mono text-[10px] leading-relaxed text-encre-3">
-            DALEVOZ.REVOLUTIONAGENCY.AI/PRECIOS · 49 € PAR MOIS, SANS ENGAGEMENT,
+            DALEVOZ.REVOLUTIONAGENCY.AI/OFFRE · 49 € PAR MOIS, SANS ENGAGEMENT,
             ESSAI GRATUIT SANS CARTE. S&rsquo;OUVRE DANS UN NOUVEL ONGLET, VOTRE
             DÉPOSITION RESTE OUVERTE DERRIÈRE.
           </p>
